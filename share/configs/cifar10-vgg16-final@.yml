@@ -1,0 +1,35 @@
+# resource config
+exp_name: cifar10-vgg16-ult-shards
+
+# checkpoint config
+model: vgg16
+alg: calimfl
+gpu_ids: [0, 1]
+# pre_train: True
+
+# dataset config
+dataset: cifar10
+batch_size: 32
+
+# optimizer config
+# optim: sgd
+optim: sgd
+learning_rate: 0.01
+
+# scheduler config
+scheduler: warmup_cos_lr
+warm_steps: 80
+min_lr: 0.0
+
+# federal config
+federal: True
+non_iid: shards
+workers: 100
+active_workers: 10
+federal_round: 500
+
+local_epoch: 10
+test_batch_limit: 5
+
+check_inter: 100
+random_data: True

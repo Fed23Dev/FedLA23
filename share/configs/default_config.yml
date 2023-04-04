@@ -1,0 +1,52 @@
+# test_rankfl.yaml
+
+# resource config
+exp_name: test
+alg: single
+
+# checkpoint config
+model: vgg16
+use_gpu: False
+gpu_ids: [0]
+pre_train: False
+
+# dataset config
+dataset: cifar10
+batch_size: 16
+
+# optimizer config
+# optim: sgd
+optim: sgd_pfl
+learning_rate: 0.1
+momentum: 0.9
+weight_decay: 0.00001
+loss_func: cross_entropy
+
+# scheduler config
+scheduler: step_lr
+step_size: 1
+gamma: 0.99309
+
+# prune config
+rank_path: none
+info_norm: 3
+backward: 1
+en_alpha: 0.5
+en_shrink: 0.95
+
+interval: True
+rank_plus: True
+
+# federal config
+non_iid: hetero
+workers: 100
+active_workers: 10
+federal_round: 100
+check_inter: 1
+
+local_epoch: 5
+batch_limit: 99999
+test_batch_limit: 5
+coff: 3
+mu: 0.1
+

@@ -1,0 +1,86 @@
+from enum import Enum, unique
+
+from utils.VContainer import VContainer
+from utils.Vlogger import VLogger
+
+# Uniform const
+CPU = -6
+GPU = -66
+CPU_STR_LEN = 3
+
+ORIGIN_CP_RATE = [0.] * 100
+
+# simulation
+MAX_ROUND = 10001
+MAX_DEC_DIFF = 0.3
+ADJ_INTERVAL = 50
+ADJ_HALF_LIFE = 10000
+
+
+# CIFAR10 const config
+CIFAR10_NAME = "CIFAR10"
+CIFAR10_CLASSES = 10
+CIFAR10_NUM_TRAIN_DATA = 50000
+CIFAR10_NUM_TEST_DATA = 10000
+CIFAR10_MEAN = [0.4914, 0.4822, 0.4465]
+CIFAR10_STD = [0.2023, 0.1994, 0.2010]
+
+# CIFAR100 const config
+CIFAR100_CLASSES = 100
+CIFAR100_MEAN = [0.5070751592371323, 0.48654887331495095, 0.4409178433670343]
+CIFAR100_STD = [0.2673342858792401, 0.2564384629170883, 0.27615047132568404]
+
+# UCM const config
+UCM_CLASSES = 21
+UCM_MEAN = [0.485, 0.456, 0.406]
+UCM_STD = [0.229, 0.224, 0.225]
+
+# FMNIST const config
+FMNIST_CLASSES = 10
+
+# VGG const config
+
+# vgg11_bn
+vgg11_candidate_rate = [0.45]*7 + [0.78]*3 + [0.83]*2
+
+# vgg16_bn
+vgg16_candidate_rate = [0.45]*7 + [0.78]*3 + [0.83]*2
+# vgg16_candidate_rate = [0.45]*7 + [0.78]*5
+
+# resnet56
+# resnet56_candidate_rate = [0.] + [0.18]*29
+resnet56_candidate_rate = [0.1] + [0.60]*35 + [0.0]*2 + [0.6]*6 + [0.4]*3 + \
+                          [0.1] + [0.4] + [0.1] + [0.4] + [0.1] + [0.4] + [0.1] + [0.4]
+
+# resnet110
+# resnet110_candidate_rate = [0.] + [0.2]*2 + [0.3]*18 + [0.35]*36
+resnet110_candidate_rate = [0.1] + [0.40]*36 + [0.40]*36 + [0.4]*36
+
+# mobilenetv2
+mobile_candidate_rate = [0.] + [0.3]*7
+# mobile_candidate_rate = [0.] + [0.4]*51
+
+# Conv2
+conv2_candidate_rate = [0.5]
+
+# Others
+MAX_HOOK_LAYER = 50
+valid_limit = 5
+rank_limit = 10
+
+# Default_config
+YAML_PATH = r'share/default_config.yml'
+
+# Warm-up config
+# wu_epoch = 50
+# wu_batch = 32
+wu_epoch = 1
+wu_batch = 32
+
+# acc_info
+print_interval = 10
+
+# pruning hyper
+pruning_inter = 10
+
+
