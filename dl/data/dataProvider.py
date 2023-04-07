@@ -1,6 +1,6 @@
 import torch
 
-from dl.data.datasets import get_data, get_fake_data
+from dl.data.datasets import get_data
 from env.support_config import VDataSet
 
 
@@ -58,17 +58,3 @@ def get_data_loaders(name: VDataSet, data_type: str, batch_size: int, users_indi
                                 num_workers=num_workers, pin_memory=pin_memory,
                                 drop_last=True)
     return loaders
-
-
-def get_data_aug_loaders(name: VDataSet, batch_size: int, users_indices: dict,
-                         shuffle: bool = True, transform=None, target_transform=None,
-                         num_workers=4, pin_memory=False):
-    dataset = get_fake_data(name, transform=transform, target_transform=target_transform)
-    loaders = dict()
-    for k, v in users_indices.items():
-        sub_set = torch.utils.data.Subset(dataset, v)
-        loaders[k] = DataLoader(sub_set, batch_size=batch_size, shuffle=shuffle,
-                                num_workers=num_workers, pin_memory=pin_memory,
-                                drop_last=True)
-    return loaders
-

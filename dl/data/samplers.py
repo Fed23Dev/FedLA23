@@ -5,9 +5,8 @@ from fedlab.utils.dataset.partition import CIFAR10Partitioner, CIFAR100Partition
 import math
 import functools
 
+from dl.data.datasets import get_data
 from env.running_env import global_logger
-from dl.data.dataProvider import get_data
-from env.static_env import UCM_CLASSES
 from env.support_config import VDataSet
 
 
@@ -61,13 +60,6 @@ def dataset_user_indices(dataset_type: VDataSet, num_slices, non_iid: str, seed:
                 client_dict = CIFAR100Partitioner(dataset.targets, num_slices,
                                                   balance=None, partition="shards",
                                                   num_shards=200, seed=seed).client_dict
-        elif dataset_type == VDataSet.UCM:
-            if non_iid == 'hetero':
-                client_dict = _ucm_hetero_non_iid(dataset.targets, UCM_CLASSES, num_slices,
-                                                  non_iid_alpha=0.3, seed=seed)
-            else:
-                client_dict = _ucm_shards_non_iid(dataset.targets, 6 * num_slices, num_slices,
-                                                  seed=seed)
         elif dataset_type == VDataSet.FMNIST:
             if non_iid == 'hetero':
                 client_dict = FMNISTPartitioner(dataset.targets, num_slices,
@@ -85,17 +77,19 @@ def dataset_user_indices(dataset_type: VDataSet, num_slices, non_iid: str, seed:
 
 
 # dict {int: ndarray[dtype(int64)]}
-def _ucm_shards_non_iid(targets: list, nums_shards: int, num_clients: int, seed: int) -> dict:
+def _shards_non_iid(targets: list, nums_shards: int, num_clients: int,
+                    seed: int, num_classes: int) -> dict:
     client_dict = dict()
     random.seed(seed)
-    assert nums_shards % UCM_CLASSES == 0, "num_shards must be times of num_classes."
+    assert nums_shards % num_classes == 0, "num_shards must be times of num_classes."
+
     total_nums = len(targets)
     shard_nums = total_nums // nums_shards
     client_shard_nums = shard_nums // num_clients
     for i in range(num_clients):
         indices = []
         for j in range(client_shard_nums):
-            class_idx = random.randint(0, UCM_CLASSES - 1)
+            class_idx = random.randint(0, num_classes - 1)
             indices.extend(specify_class_simple(targets, class_idx, shard_nums))
         client_dict[i] = indices
     return client_dict
@@ -103,7 +97,7 @@ def _ucm_shards_non_iid(targets: list, nums_shards: int, num_clients: int, seed:
 
 # from Wang Huan
 # [[1,2,3,411,534..],[]]
-def _ucm_hetero_non_iid(targets: list, num_classes: int, num_clients: int, non_iid_alpha: float, seed=None):
+def _hetero_non_iid(targets: list, num_classes: int, num_clients: int, non_iid_alpha: float, seed=None):
     all_class_index = []
     for i in range(num_classes):
         curt_idx = []
@@ -182,9 +176,7 @@ def _build_non_iid_by_dirichlet(seed, indices2targets, non_iid_alpha, num_classe
         to_index = from_index + int(n_auxi_workers / n_workers * num_indices)
         splitted_targets.append(
             # 最后一组就是把剩下的全部数据放进去
-            indices2targets[
-            from_index: (num_indices if idx == num_splits - 1 else to_index)
-            ]
+            indices2targets[from_index: (num_indices if idx == num_splits - 1 else to_index)]
         )
         from_index = to_index
 

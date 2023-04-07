@@ -5,7 +5,7 @@ import torch
 from thop import profile
 
 from dl.SingleCell import SingleCell
-from dl.compress.HyperProvider import RateProvider
+from dl.compress.DKD import _dkd_loss1
 from dl.data.dataProvider import get_data_loader
 from dl.model.ModelExt import Extender
 from dl.model.model_util import create_model, dict_diff
@@ -91,28 +91,6 @@ def coo_recover():
     pickle_mkdir_save(coo_dict, 'coo')
 
 
-def test_progress_coo():
-    args.federal_round = 150
-    args.check_inter = 10
-    files_size = []
-    test_loader = get_data_loader(args.dataset, data_type="test", batch_size=args.batch_size,
-                                  shuffle=True, num_workers=0, pin_memory=False)
-    master_cell = SingleCell(test_loader, True)
-    hyper_rate = RateProvider(args.prune_rate, args.federal_round, args.check_inter)
-    coo_path = r'coo'
-
-    for i in range(150//10):
-        master_cell.prune_ext.get_rank()
-        rate = hyper_rate.get_curt_rate()
-        master_cell.prune_ext.mask_prune(rate)
-        model_dict = master_cell.access_model().cpu().state_dict()
-        coo_dict = util.dict_coo_express(model_dict)
-        pickle_mkdir_save(coo_dict, coo_path)
-        files_size.append(os.stat(coo_path).st_size / (1024 * 1024))
-        master_cell.access_model().cuda()
-
-    path, _ = file_repo.new_seq('vgg16_file_size')
-    pickle_mkdir_save(files_size, path)
 
 
 def test_flops():
@@ -157,5 +135,17 @@ def test_self_flops():
     print(f"ORI-FLOPs:{flops}, params:{params}")
 
 
+def dkd(alpha: float, beta: float, temperature: int,
+        batch_size: int, num_classes: int):
+    from dl.compress.DKD import _dkd_loss
+
+    logits_tea = torch.randn(batch_size, num_classes)
+    logits_stu = torch.randn(batch_size, num_classes)
+    target = torch.randint(0, num_classes, (batch_size, 1))
+
+    loss = _dkd_loss(logits_stu, logits_tea, target, alpha, beta, temperature)
+    print(loss)
+
+
 def main():
-    test_progress_coo()
+    dkd(0.1, 0.1, 1, 64, 10)

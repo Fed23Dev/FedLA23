@@ -1,13 +1,11 @@
 import os.path
 from abc import ABC
-from copy import deepcopy
-from typing import List
 import numpy as np
 import torch
 import torch.nn as nn
 import torch.utils.data as tdata
+from torch import Tensor
 
-from dl.compress.HyperProvider import IntervalProvider
 from dl.compress.compress_util import arrays_normalization, calculate_average_value
 from dl.model.ModelExt import Extender
 from dl.model.model_util import create_model
@@ -17,7 +15,7 @@ from env.static_env import rank_limit
 from utils.objectIO import pickle_mkdir_save, pickle_load
 
 
-def get_same_weight(conv2d: nn.Conv2d) -> dict:
+def get_same_weight(conv2d: nn.Conv2d) -> Tensor:
     times = conv2d.groups
     lis = [conv2d.weight for _ in range(times)]
     return torch.cat(lis, dim=1)

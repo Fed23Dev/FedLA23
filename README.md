@@ -3,8 +3,12 @@
 ## 开始之前
 **python3.8**环境下运行代码前需要提前安装实现基于的第三方库，通过pip安装的命令如下：
 ```shell
-pip install torch torchvision torchaudio torchgeo torchsummary
+pip install torch torchvision fedlab torchsummary thop
 
+## 待定
+pip install yacs-or-ruamel.yaml
+
+## 之前
 pip install thop onnx fedlab PyHessian scikit-learn seaborn ruamel.yaml
 ```
 

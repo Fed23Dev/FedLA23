@@ -28,22 +28,6 @@ class DataToTensor:
         return torch.tensor(data, dtype=self.dtype)
 
 
-# compatible for torchgeo
-def _dic2img(dic, num_classes: int):
-    img = transforms.ToPILImage()(dic["image"])
-    label = dic["label"]
-
-    img = transforms.Resize((256, 256))(img)
-    img = transforms.RandomHorizontalFlip()(img)
-    img = transforms.RandomCrop(224)(img)
-    img = torchvision.transforms.ToTensor()(img)
-    img = transforms.Normalize(mean=(0.485, 0.456, 0.406),
-                               std=(0.229, 0.224, 0.225))(img)
-
-    label = OneHot(num_classes, to_float=True)(label)
-    return img, label
-
-
 def init_transform(data_type: str, mean: list, std: list):
     if data_type == "train":
         return transforms.Compose([
@@ -62,7 +46,7 @@ def init_target_transform(num_classes: int):
                                OneHot(num_classes, to_float=True)])
 
 
-def init_imgfolder_transform(mean: list, std: list):
+def init_img_folder_transform(mean: list, std: list):
     return transforms.Compose([
         transforms.RandomCrop(32, padding=4),
         transforms.RandomHorizontalFlip(),
@@ -71,7 +55,7 @@ def init_imgfolder_transform(mean: list, std: list):
     ])
 
 
-def init_imgfolder_ucm_transform():
+def init_img_folder_ucm_transform():
     return transforms.Compose([
         transforms.Resize((256, 256)),
         transforms.RandomHorizontalFlip(),

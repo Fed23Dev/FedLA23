@@ -6,8 +6,7 @@ import torch
 import torch.nn as nn
 import torch.utils.data as tdata
 
-from dl.compress.HyperProvider import IntervalProvider, RateProvider
-from dl.compress.VHRank import HRank
+from dl.compress.Calim import HRank
 from dl.model.model_util import create_model
 from dl.wrapper.ExitDriver import ExitManager
 from dl.wrapper.Wrapper import VWrapper
@@ -53,8 +52,6 @@ class SingleCell:
         # Pruning init
         if prune:
             self.prune_ext = HRank(self.wrapper)
-            self.hyper_inter = IntervalProvider()
-            self.hyper_rate = RateProvider(args.prune_rate, args.federal_round, args.check_inter)
         # Pruning init
 
         if args.pre_train:

@@ -1,5 +1,5 @@
 from typing import List
-from dl.compress.VHRank import HRank
+from dl.compress.Calim import HRank
 from env.running_env import global_logger
 from dl.data.dataProvider import DataLoader
 

@@ -1,20 +1,17 @@
 from os.path import join
 
 import torchvision.datasets
-from torchgeo.datasets import UCMerced
-import torchvision.transforms as transforms
-from torchvision.datasets import ImageFolder
 
-from dl.data.transform import init_transform, init_target_transform, _dic2img, init_imgfolder_transform, \
-    init_imgfolder_ucm_transform
-from env.static_env import CIFAR10_MEAN, CIFAR10_STD, CIFAR10_CLASSES, CIFAR100_MEAN, CIFAR100_STD, CIFAR100_CLASSES, \
-    UCM_CLASSES, FMNIST_CLASSES
+
+from dl.data.transform import init_transform, init_target_transform
+from env.static_env import CIFAR10_MEAN, CIFAR10_STD, CIFAR10_CLASSES, \
+    CIFAR100_MEAN, CIFAR100_STD, CIFAR100_CLASSES, FMNIST_CLASSES
 from env.support_config import VDataSet
 from env.running_env import file_repo
 
-from torch.utils.data import Dataset, DataLoader
-from torchvision import models, utils, datasets, transforms
-import numpy as np
+from torch.utils.data import Dataset
+from torchvision import transforms
+
 import sys
 import os
 from PIL import Image
@@ -153,16 +150,6 @@ def get_data(dataset: VDataSet, data_type, transform=None, target_transform=None
                                              train=data_type == "train", download=True,
                                              transform=transform,
                                              target_transform=target_transform)
-    elif dataset == VDataSet.UCM:
-        assert data_type in ["train", "test", "val"]
-        data_transform = transforms.Compose([
-            transforms.Lambda(lambda dic: _dic2img(dic, 21)),
-        ])
-        ucm = UCMerced(root=join("/home/xd/la/datasets", "UCM"),
-                       split=data_type, download=True,
-                       transforms=data_transform,
-                       checksum=False)
-        return ucm
     elif dataset == VDataSet.FMNIST:
         assert data_type in ["train", "test"]
         if transform is None:
@@ -183,28 +170,9 @@ def get_data(dataset: VDataSet, data_type, transform=None, target_transform=None
         raise ValueError("{} dataset is not supported.".format(dataset))
 
 
-def get_fake_data(dataset: VDataSet, transform=None, target_transform=None):
-    if dataset == VDataSet.CIFAR10:
-        transform = init_imgfolder_transform(CIFAR10_MEAN, CIFAR10_STD)
-        target_transform = init_target_transform(CIFAR10_CLASSES)
-        return torchvision.datasets.ImageFolder(root=join(file_repo.dataset_path, "CIFAR10-GAN"),
-                                                transform=transform,
-                                                target_transform=target_transform)
-    elif dataset == VDataSet.UCM:
-        transform = init_imgfolder_ucm_transform()
-        target_transform = init_target_transform(UCM_CLASSES)
-        return torchvision.datasets.ImageFolder(root=join(file_repo.dataset_path, "UCM-GAN"),
-                                                transform=transform,
-                                                target_transform=target_transform)
-    else:
-        raise ValueError("{} dataset is not supported.".format(dataset))
-
-
 def download_datasets():
     torchvision.datasets.CIFAR10(root='res/datasets/CIFAR10',
                                  train=True, download=True)
-    UCMerced(root='res/datasets/UCM', split='train', transforms=None,
-             download=True, checksum=False)
     torchvision.datasets.FashionMNIST(root="~/la/datasets/FMNIST", train=True,
                                       download=True)
     torchvision.datasets.CIFAR100(root="~/la/datasets/CIFAR100", train=True,

@@ -2,9 +2,8 @@ import pickle
 from fedlab.utils.dataset import CIFAR10Partitioner
 from fedlab.utils.functional import partition_report
 
-from dl.data.datasets import get_fake_data
 from dl.data.samplers import dataset_user_indices
-from dl.data.dataProvider import get_data_loader, get_data_loaders, get_data, DataLoader
+from dl.data.dataProvider import get_data_loader, get_data_loaders, DataLoader
 from env.running_env import args
 from env.support_config import VDataSet
 
@@ -118,3 +117,6 @@ def client_dict2csv():
     csv_file = "shards.csv"
     partition_report(dataset.targets, client_dict2,
                      class_num=10, verbose=False, file=csv_file)
+
+
+# 各个阶段返回的数据类型
