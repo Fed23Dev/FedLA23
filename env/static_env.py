@@ -35,6 +35,14 @@ UCM_CLASSES = 21
 UCM_MEAN = [0.485, 0.456, 0.406]
 UCM_STD = [0.229, 0.224, 0.225]
 
+# Tiny const config
+TinyImageNet_CLASSES = 200
+Train_Each_CLASS = 500
+Test_Each_CLASS = 50
+Val_Each_CLASS = 50
+ImageNet_MEAN = [0.485, 0.456, 0.406]
+ImageNet_STD = [0.229, 0.224, 0.225]
+
 # FMNIST const config
 FMNIST_CLASSES = 10
 

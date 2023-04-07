@@ -37,4 +37,10 @@
 #### 架构
 
 
-
++ 快速删除数据集
+1. 移除dl.data.datasets.py中get_data方法的对应的数据集选项
+2. 移除env.support_config.py中VDateSet中对应的枚举变量
+3. 移除env.yaml2args.py中dataset_str2enum方法中对应的数据集映射
+4. 移除env.yaml2args.py中supplement_args方法中对应的数据集类数量映射
+5. 移除env.static_env.py中的数据集的基本信息
+6. 移除数据集的实现和初始化接口（非torchvision官方提供的数据集）

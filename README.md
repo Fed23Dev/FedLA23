@@ -19,6 +19,7 @@ pip install thop onnx fedlab PyHessian scikit-learn seaborn ruamel.yaml
 
 2. 修改custom_path.py文件下对应路径参数，考虑到模型参数和数据集占用存储较大，
 这两块内容应由使用者预先准备好，并指定出对应位置。
+tiny-imagenet下载链接：http://cs231n.stanford.edu/tiny-imagenet-200.zip 
 
 3. 支持配置的参数类型及参数值
 

@@ -3,9 +3,9 @@ from os.path import join
 import torchvision.datasets
 
 
-from dl.data.transform import init_transform, init_target_transform
+from dl.data.transform import init_transform, init_target_transform, init_tiny_imagenet_transform
 from env.static_env import CIFAR10_MEAN, CIFAR10_STD, CIFAR10_CLASSES, \
-    CIFAR100_MEAN, CIFAR100_STD, CIFAR100_CLASSES, FMNIST_CLASSES
+    CIFAR100_MEAN, CIFAR100_STD, CIFAR100_CLASSES, FMNIST_CLASSES, TinyImageNet_CLASSES
 from env.support_config import VDataSet
 from env.running_env import file_repo
 
@@ -18,10 +18,12 @@ from PIL import Image
 
 
 class TinyImageNet(Dataset):
-    def __init__(self, root, train=True, transform=None):
+    def __init__(self, root, train=True,
+                 transform=None, target_transform=None):
         self.Train = train
         self.root_dir = root
         self.transform = transform
+        self.target_transform = target_transform
         self.train_dir = os.path.join(self.root_dir, "train")
         self.val_dir = os.path.join(self.root_dir, "val")
 
@@ -126,6 +128,8 @@ class TinyImageNet(Dataset):
             sample = sample.convert('RGB')
         if self.transform is not None:
             sample = self.transform(sample)
+        if self.target_transform is not None:
+            tgt = self.target_transform(tgt)
         return sample, tgt
 
 
@@ -162,10 +166,17 @@ def get_data(dataset: VDataSet, data_type, transform=None, target_transform=None
                                                  train=data_type == "train",
                                                  transform=transform, target_transform=target_transform,
                                                  download=True)
-    elif dataset == VDataSet.ImageNet:
+    elif dataset == VDataSet.TinyImageNet:
         assert data_type in ["train", "test", "val"]
-        imagenet_data = torchvision.datasets.ImageNet(root=join(file_repo.dataset_path, "ImageNet"))
-        return imagenet_data
+        if transform is None:
+            transform = init_tiny_imagenet_transform()
+        if target_transform is None:
+            target_transform = init_target_transform(TinyImageNet_CLASSES)
+        # r"C:\\Users\<your_name>\la\datasets\tiny-imagenet-200"
+        return TinyImageNet(root=join(file_repo.dataset_path, "tiny-imagenet-200"),
+                            train=data_type == "train",
+                            transform=transform,
+                            target_transform=target_transform)
     else:
         raise ValueError("{} dataset is not supported.".format(dataset))
 

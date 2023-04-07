@@ -55,19 +55,10 @@ def init_img_folder_transform(mean: list, std: list):
     ])
 
 
-def init_img_folder_ucm_transform():
-    return transforms.Compose([
-        transforms.Resize((256, 256)),
-        transforms.RandomHorizontalFlip(),
-        transforms.RandomCrop(224),
-        torchvision.transforms.ToTensor(),
-        transforms.Normalize(mean=(0.485, 0.456, 0.406),
-                             std=(0.229, 0.224, 0.225))
-    ])
-
-
 def init_tiny_imagenet_transform():
     return transforms.Compose([
+        transforms.Resize(32),
+        transforms.CenterCrop(32),
         transforms.ToTensor(),
-        transforms.Normalize(mean=(0.48024505, 0.4480726, 0.39754787),
-                             std=(0.2717199, 0.26526922, 0.27396977))])
+        transforms.Normalize(mean=(0.485, 0.456, 0.406),
+                             std=(0.229, 0.224, 0.225))])

@@ -29,8 +29,8 @@ def dataset_str2enum(value: str) -> VDataSet:
         ret = VDataSet.CIFAR10
     elif value == 'cifar100':
         ret = VDataSet.CIFAR100
-    elif value == 'ucm':
-        ret = VDataSet.UCM
+    elif value == 'tinyimagenet':
+        ret = VDataSet.TinyImageNet
     elif value == 'fmnist':
         ret = VDataSet.FMNIST
     else:
@@ -205,8 +205,8 @@ class ArgRepo:
             self.num_classes = 10
         elif self.dataset == VDataSet.CIFAR100:
             self.num_classes = 100
-        elif self.dataset == VDataSet.UCM:
-            self.num_classes = 21
+        elif self.dataset == VDataSet.TinyImageNet:
+            self.num_classes = 200
         elif self.dataset == VDataSet.FMNIST:
             self.num_classes = 10
         else:
