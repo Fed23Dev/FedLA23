@@ -189,3 +189,5 @@ def download_datasets():
     torchvision.datasets.CIFAR100(root="~/la/datasets/CIFAR100", train=True,
                                   download=True)
 
+    # tiny imagenet
+    # http://cs231n.stanford.edu/tiny-imagenet-200.zip

@@ -124,7 +124,7 @@ class VWrapper:
                 pred = self.model(inputs)
         self.seed += 1
 
-    def base_step_run(self, batch_limit: int, train: bool = False,
+    def step_run(self, batch_limit: int, train: bool = False,
                       loader: tdata.dataloader = None) -> (int, int, float):
         """
         单个Epoch的训练或测试过程
@@ -151,7 +151,11 @@ class VWrapper:
 
             inputs, labels = self.device.on_tensor(inputs, targets)
             pred = self.model(inputs)
+
+            # to modify
             loss = self.loss_func(pred, labels)
+            # loss = self.loss_compute()
+            # to modify
 
             if train:
                 self.optim_step(loss)
@@ -179,69 +183,70 @@ class VWrapper:
         return correct, total, self.latest_loss
 
     # 传入真实数据的dataloader对模型进行测试或训练
-    def step_run(self, batch_limit: int, train: bool = False,
-                 pre_params: Iterator = None, loader: tdata.dataloader = None,
-                 loss_weight: torch.Tensor = None) -> (int, float, int):
-        if train:
-            self.model.train()
-        else:
-            self.model.eval()
-
-        train_loss = 0
-        correct = 0
-        total = 0
-        process = "Train" if train else "Test"
-
-        curt_loader = loader if loader is not None else self.loader
-
-        for batch_idx, (inputs, targets) in enumerate(curt_loader):
-            if batch_idx > batch_limit:
-                break
-
-            inputs, labels = self.device.on_tensor(inputs, targets)
-            with autocast():
-                pred = self.model(inputs)
-
-                if loss_weight is None:
-                    loss = self.loss_func(pred, labels)
-                else:
-                    loss_weight = self.sync_tensor(loss_weight)
-                    loss = self.loss_func(pred, labels, loss_weight)
-
-            if train:
-                if pre_params is not None:
-                    # fedprox
-                    proximal_term = 0.0
-                    for w, w_t in zip(self.model.parameters(), pre_params):
-                        proximal_term += (w - w_t).norm(2)
-                    loss += (args.mu / 2) * proximal_term
-                    # fedprox
-
-                self.optim_step(loss, True)
-
-            _, predicted = pred.max(1)
-            _, targets = labels.max(1)
-            correct += predicted.eq(targets).sum().item()
-            train_loss += loss.item()
-            total += targets.size(0)
-
-            self.latest_acc = 100. * correct / total
-            self.latest_loss = train_loss / (batch_idx + 1)
-
-            if batch_idx % print_interval == 0 and batch_idx != 0:
-                global_logger.info('%s:batch_idx:%d | Loss: %.6f | Acc: %.3f%% (%d/%d)'
-                                   % (process, batch_idx, self.latest_loss, self.latest_acc, correct, total))
-            self.curt_batch += 1
-
-        if train:
-            # gc.collect()
-            # torch.cuda.empty_cache()
-            self.curt_epoch += 1
-            global_container.flash(f"{args.exp_name}_acc", round(self.latest_acc, 3))
-            if loader is None:
-                self.scheduler_step()
-
-        return correct, total, self.latest_loss
+    # def step_run(self, batch_limit: int, train: bool = False,
+    #              pre_params: Iterator = None, loader: tdata.dataloader = None,
+    #              loss_weight: torch.Tensor = None) -> (int, float, int):
+    #     if train:
+    #         self.model.train()
+    #     else:
+    #         self.model.eval()
+    #
+    #     train_loss = 0
+    #     correct = 0
+    #     total = 0
+    #     process = "Train" if train else "Test"
+    #
+    #     curt_loader = loader if loader is not None else self.loader
+    #
+    #     for batch_idx, (inputs, targets) in enumerate(curt_loader):
+    #         if batch_idx > batch_limit:
+    #             break
+    #
+    #         inputs, labels = self.device.on_tensor(inputs, targets)
+    #
+    #         with autocast():
+    #             pred = self.model(inputs)
+    #
+    #             if loss_weight is None:
+    #                 loss = self.loss_func(pred, labels)
+    #             else:
+    #                 loss_weight = self.sync_tensor(loss_weight)
+    #                 loss = self.loss_func(pred, labels, loss_weight)
+    #
+    #         if train:
+    #             if pre_params is not None:
+    #                 # fedprox
+    #                 proximal_term = 0.0
+    #                 for w, w_t in zip(self.model.parameters(), pre_params):
+    #                     proximal_term += (w - w_t).norm(2)
+    #                 loss += (args.mu / 2) * proximal_term
+    #                 # fedprox
+    #
+    #             self.optim_step(loss, True)
+    #
+    #         _, predicted = pred.max(1)
+    #         _, targets = labels.max(1)
+    #         correct += predicted.eq(targets).sum().item()
+    #         train_loss += loss.item()
+    #         total += targets.size(0)
+    #
+    #         self.latest_acc = 100. * correct / total
+    #         self.latest_loss = train_loss / (batch_idx + 1)
+    #
+    #         if batch_idx % print_interval == 0 and batch_idx != 0:
+    #             global_logger.info('%s:batch_idx:%d | Loss: %.6f | Acc: %.3f%% (%d/%d)'
+    #                                % (process, batch_idx, self.latest_loss, self.latest_acc, correct, total))
+    #         self.curt_batch += 1
+    #
+    #     if train:
+    #         # gc.collect()
+    #         # torch.cuda.empty_cache()
+    #         self.curt_epoch += 1
+    #         global_container.flash(f"{args.exp_name}_acc", round(self.latest_acc, 3))
+    #         if loader is None:
+    #             self.scheduler_step()
+    #
+    #     return correct, total, self.latest_loss
 
     # 优化器步进过程
     def optim_step(self, loss: torch.Tensor, speedup: bool = False):
@@ -321,9 +326,6 @@ class VWrapper:
         global_logger.info('Total params: %d | Trainable params: %d'
                            % (total_params, total_trainable_params))
 
-    # # 获取最新的学习率
-    # def get_last_lr(self):
-    #     if self.lr_scheduler is None:
-    #         return self.optimizer.defaults["lr"]
-    #     else:
-    #         return self.lr_scheduler.get_last_lr()[0]
+    # 自定义损失函数计算
+    def loss_compute(self):
+        pass
