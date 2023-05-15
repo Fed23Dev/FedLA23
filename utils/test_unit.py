@@ -1,7 +1,6 @@
 from random import random
 
 from utils.Cleaner import FileCleaner
-from utils.Visualizer import HRankBoard
 from env.running_env import args, file_repo, global_container
 
 
@@ -15,17 +14,6 @@ def random_list(length=100):
 def get_lists():
     lists = [[range(100), random_list(), random_list()]]
     return lists
-
-
-def test_hrank_visual():
-    sim = HRankBoard()
-    sim.simp_acc_compare_img()
-
-
-def test_rank_img():
-    board = HRankBoard()
-    board.simp_rank_img(args.rank_norm_path)
-    board.simp_rank_img(args.rank_plus_path)
 
 
 def cleaner_test():

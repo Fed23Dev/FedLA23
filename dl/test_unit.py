@@ -1,8 +1,7 @@
 from dl.SingleCell import SingleCell
 from dl.compress.compress_util import dict_coo_express
 from env.running_env import args
-from env.static_env import mobile_candidate_rate, vgg16_candidate_rate
-from utils.Visualizer import HRankBoard
+from env.static_env import vgg16_candidate_rate
 from utils.objectIO import pickle_mkdir_save
 
 
@@ -21,7 +20,7 @@ def test_valid():
 # vgg16 resnet56 - cifar10
 def test_prune_model():
     cell = SingleCell(prune=True)
-    cell.prune_model(plus=False)
+    cell.prune_model()
     cell.test_performance()
     cell.exit_proc()
 
@@ -38,31 +37,11 @@ def test_prune_model_plus():
     # # board.simp_rank_img(args.rank_plus_path)
 
 
-def plus_ori_compare():
-    args.curt_base = True
-    test_prune_model()
-    args.curt_base = False
-    test_prune_model_plus()
-
-    board = HRankBoard()
-    board.simp_acc_compare_img(baseline=args.running_base_path, vrank=args.running_plus_path)
-
-
 def test_prune_model_random():
     cell = SingleCell(prune=True)
     cell.prune_model(random=True)
     cell.test_performance()
     cell.exit_proc()
-
-
-def plus_random_compare():
-    args.curt_base = True
-    test_prune_model_plus()
-    args.curt_base = False
-    test_prune_model_random()
-
-    board = HRankBoard()
-    board.simp_acc_compare_img(vrank=args.running_base_path, random=args.running_plus_path)
 
 
 def test_prune_model_interval():
@@ -101,4 +80,4 @@ def coo_size():
 
 
 def main():
-    plus_random_compare()
+    coo_size()

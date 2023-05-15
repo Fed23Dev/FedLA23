@@ -7,8 +7,8 @@ class VDataSet(Enum):
     Init = 0
     CIFAR10 = 1
     CIFAR100 = 2
-    FMNIST = 4
-    TinyImageNet = 5
+    FMNIST = 3
+    TinyImageNet = 4
 
 
 # Model Type
@@ -57,6 +57,8 @@ class VState(Enum):
     FedAvg = 1
     FedProx = 2
     HRankFL = 3
-    CALIMFL = 5
-    SCAFFOLD = 6
-    Single = 7
+    CALIMFL = 4
+    SCAFFOLD = 5
+    FedLA = 6
+    MOON = 7
+    Single = 8

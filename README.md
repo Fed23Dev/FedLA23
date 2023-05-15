@@ -10,6 +10,9 @@ pip install yacs-or-ruamel.yaml
 
 ## 之前
 pip install thop onnx fedlab PyHessian scikit-learn seaborn ruamel.yaml
+
+## 可选
+pip install matplotlib seaborn
 ```
 
 ## 使用说明

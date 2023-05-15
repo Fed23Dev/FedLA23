@@ -1,6 +1,9 @@
 import pickle
+
+import pandas as pd
 from fedlab.utils.dataset import CIFAR10Partitioner
 from fedlab.utils.functional import partition_report
+import matplotlib.pyplot as plt
 
 from dl.data.datasets import get_data
 from dl.data.samplers import dataset_user_indices
@@ -34,7 +37,7 @@ def test_loaders():
     print("here")
 
 
-def client_dict2csv():
+def null2client_dict2csv():
     dataset = get_data(VDataSet.CIFAR10, data_type="train")
     client_dict = CIFAR10Partitioner(dataset.targets, 100,
                                      balance=None, partition="dirichlet",
@@ -49,6 +52,26 @@ def client_dict2csv():
     csv_file = "shards.csv"
     partition_report(dataset.targets, client_dict2,
                      class_num=10, verbose=False, file=csv_file)
+
+
+def client_dict2png(trainset, client_dict, num_classes: int):
+    csv_file = f"res/non-iid.csv"
+    out_file = f"res/non-iid.png"
+
+    partition_report(trainset.targets, client_dict,
+                     class_num=num_classes,
+                     verbose=False, file=csv_file)
+
+    hetero_dir_part_df = pd.read_csv(csv_file, header=1)
+    hetero_dir_part_df = hetero_dir_part_df.set_index('client')
+    col_names = [f"class{i}" for i in range(num_classes)]
+    for col in col_names:
+        hetero_dir_part_df[col] = (hetero_dir_part_df[col] * hetero_dir_part_df['Amount']).astype(int)
+
+    hetero_dir_part_df[col_names].iloc[:10].plot.barh(stacked=True)
+    plt.tight_layout()
+    plt.xlabel('sample num')
+    plt.savefig(out_file, dpi=400)
 
 
 def test_tiny_imagenet():
