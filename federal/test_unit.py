@@ -1,10 +1,12 @@
+import numpy as np
 import torch.cuda
 
 from env.running_env import args, global_logger
 from env.support_config import VState
-from federal.federal_util import simulation_federal_process, get_data_ratio, simulation_federal_process_gan
+from federal.federal_util import simulation_federal_process, get_data_ratio
 from federal.simulation.Master import FedAvgMaster, FedProxMaster, FedIRMaster, CALIMFLMaster, HRankFLMaster, \
     FedLAMaster
+from utils.MathTools import js_divergence
 
 
 def test_fedavg():
@@ -50,15 +52,13 @@ def test_hrankfl():
 
 def test_calimfl(gan: bool = False):
     loader, loaders, user_dict = simulation_federal_process()
-    if gan:
-        aug_loaders = simulation_federal_process_gan(user_dict)
-    else:
+    if not gan:
         aug_loaders = dict()
         for i in range(args.workers):
             aug_loaders[i] = None
     master_node = CALIMFLMaster(workers=args.workers, activists=args.active_workers,
                                 local_epoch=args.local_epoch, loader=loader,
-                                workers_loaders=loaders, aug_loaders=aug_loaders)
+                                workers_loaders=loaders)
     master_node.prune_init(args.prune_rate, args.check_inter, args.random_data)
     master_node.union_run(args.federal_round)
     master_node.cell.exit_proc(one_key=f'{args.exp_name}-test_acc')
@@ -92,3 +92,20 @@ def main():
     else:
         global_logger.info(f"#####Default#####")
         simulation_federal_process()
+
+
+def test_master():
+    curt_dist = torch.tensor([0., 0.])
+    dataset_dist = [torch.tensor([0.5, 0.5]),
+                    torch.tensor([0.9, 0.1]),
+                    torch.tensor([0.7, 0.3])]
+
+    js_distance = []
+    for dist in dataset_dist:
+        js_distance.append(js_divergence(curt_dist, dist))
+
+    sort_rank = np.argsort(np.array(js_distance))
+    curt_selected = sort_rank[:2]
+
+    for ind in curt_selected:
+        curt_dist += dataset_dist[ind]

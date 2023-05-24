@@ -1,5 +1,7 @@
 import copy
 
+import numpy as np
+import torch
 import torch.utils.data as tdata
 from timeit import default_timer as timer
 
@@ -7,6 +9,7 @@ from dl.SingleCell import SingleCell
 from env.running_env import global_logger, file_repo
 from federal.simulation.FLnodes import FLMaster
 from federal.simulation.Worker import FedAvgWorker, FedProxWorker, HRankFLWorker, CALIMFLWorker, FedIRWorker
+from utils.MathTools import js_divergence
 from utils.objectIO import pickle_mkdir_save
 from typing import List
 
@@ -226,9 +229,8 @@ class CALIMFLMaster(FLMaster):
 
 
 class FedLAMaster(FLMaster):
-    def __init__(self, workers: int, activists: int, local_epoch: int, master_cell: SingleCell,
+    def __init__(self, workers: int, activists: int, local_epoch: int,
                  loader: tdata.dataloader, workers_loaders: dict, data_dist: list):
-        super().__init__(workers, activists, local_epoch, master_cell)
 
         master_cell = SingleCell(loader, True)
         super().__init__(workers, activists, local_epoch, master_cell)
@@ -239,16 +241,18 @@ class FedLAMaster(FLMaster):
                               for index, (cell, loader) in enumerate(zip(workers_cells))]
 
         self.dataset_dist = data_dist
-        self.curt_dist = [0.] * len(data_dist[0])
+        self.curt_dist = torch.tensor([0.] * len(data_dist[0]))
 
     def schedule_strategy(self):
-        pass
+        js_distance = []
+        for dist in self.dataset_dist:
+            js_distance.append(js_divergence(self.curt_dist, dist))
 
+        sort_rank = np.argsort(np.array(js_distance))
+        self.curt_selected = sort_rank[:self.plan]
 
+        for ind in self.curt_selected:
+            self.curt_dist += self.dataset_dist[ind]
 
     def drive_workers(self, *_args, **kwargs):
         pass
-
-
-
-

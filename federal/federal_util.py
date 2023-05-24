@@ -4,8 +4,8 @@ from collections import Counter
 
 import torch
 
-from dl.data.dataProvider import get_data_loaders, get_data_loader, get_data_aug_loaders
-from dl.data.datasets import get_data, get_fake_data
+from dl.data.dataProvider import get_data_loaders, get_data_loader
+from dl.data.datasets import get_data
 from dl.data.samplers import dataset_user_indices, specify_class_simple
 from env.running_env import args
 
@@ -76,39 +76,3 @@ def get_data_ratio(user_dict: dict):
                               for cls in range(args.num_classes)])
         ratios_list.append(ratio)
     return global_dist, ratios_list
-
-
-# 假设总数据集各类数据比例相同，目前仅实现增加数据
-# 待实现减少数据
-def simulation_federal_process_gan(user_dict: dict):
-    targets, global_dist = dataset_dist()
-    fake_targets = get_fake_data(args.dataset).targets
-
-    sorted_cid = sorted(user_dict.keys())
-    users_indices = dict()
-
-    for client_id in sorted_cid:
-        enhance_indices = []
-        indices = user_dict[client_id]
-        client_targets = targets[indices]
-        client_cnt = Counter(client_targets)
-        base_class = max_class(client_cnt)
-
-        for class_idx in range(args.num_classes):
-            if class_idx == base_class:
-                continue
-            adjust_num = int(client_cnt[base_class] * (global_dist[class_idx] / global_dist[class_idx]))
-
-            # to refine
-            if client_cnt[class_idx] >= adjust_num:
-                continue
-            enhance_indices.extend(specify_class_simple(fake_targets, class_idx, adjust_num-client_cnt[class_idx]))
-
-        # 非空才添加
-        if enhance_indices:
-            users_indices[client_id] = np.array(enhance_indices)
-
-    workers_aug_loader = get_data_aug_loaders(args.dataset, batch_size=args.batch_size,
-                                              users_indices=users_indices, shuffle=True,
-                                              num_workers=0, pin_memory=False)
-    return workers_aug_loader
