@@ -6,7 +6,8 @@
 pip install torch torchvision fedlab torchsummary thop
 
 ## 待定
-pip install yacs-or-ruamel.yaml
+## pip install yacs-or-ruamel.yaml matplotlib
+pip install yacs ruamel.yaml matplotlib
 
 ## 之前
 pip install thop onnx fedlab PyHessian scikit-learn seaborn ruamel.yaml

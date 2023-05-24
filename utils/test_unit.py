@@ -1,7 +1,10 @@
 from random import random
 
+import torch
+
 from utils.Cleaner import FileCleaner
 from env.running_env import args, file_repo, global_container
+from utils.MathTools import kl_divergence, js_divergence, _kl_divergence
 
 
 def random_list(length=100):
@@ -44,6 +47,20 @@ def test_container():
     print(f"=====")
 
 
+def kl_and_js():
+    a = torch.tensor([1, 2, 3, 4, 5]).float()
+    b = torch.tensor([5, 4, 3, 2, 1]).float()
+    print(f"KL:{kl_divergence(a, b)}")
+    print(f"JS:{js_divergence(a, b)}")
+    print(f"JS:{js_divergence(b, a)}")
+    print(f"JS:{js_divergence(a, a)}")
+
+    a = torch.tensor([0.4, 0.6]).float()
+    b = torch.tensor([0.3, 0.7]).float()
+    print(f"KL:{_kl_divergence(a, b)}")
+    print(f"KL:{kl_divergence(b, a)}")
+
+
 def main():
-    test_container()
+    kl_and_js()
 

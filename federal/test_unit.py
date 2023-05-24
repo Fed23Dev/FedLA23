@@ -3,7 +3,8 @@ import torch.cuda
 from env.running_env import args, global_logger
 from env.support_config import VState
 from federal.federal_util import simulation_federal_process, get_data_ratio, simulation_federal_process_gan
-from federal.simulation.Master import FedAvgMaster, FedProxMaster, FedIRMaster, CALIMFLMaster, HRankFLMaster
+from federal.simulation.Master import FedAvgMaster, FedProxMaster, FedIRMaster, CALIMFLMaster, HRankFLMaster, \
+    FedLAMaster
 
 
 def test_fedavg():
@@ -63,6 +64,16 @@ def test_calimfl(gan: bool = False):
     master_node.cell.exit_proc(one_key=f'{args.exp_name}-test_acc')
 
 
+def test_fedla():
+    loader, loaders, user_dict = simulation_federal_process()
+    global_dist, device_ratios = get_data_ratio(user_dict)
+
+    master_node = FedLAMaster(workers=args.workers, activists=args.active_workers, local_epoch=args.local_epoch,
+                              loader=loader, workers_loaders=loaders, data_dist=device_ratios)
+    master_node.union_run(args.federal_round)
+    master_node.cell.exit_proc(one_key=f'{args.exp_name}-test_acc')
+
+
 def main():
     global_logger.info(f"#####{args.exp_name}#####")
 
@@ -76,6 +87,8 @@ def main():
         test_hrankfl()
     elif args.curt_mode == VState.CALIMFL:
         test_calimfl(gan=False)
+    elif args.curt_mode == VState.FedLA:
+        test_fedla()
     else:
         global_logger.info(f"#####Default#####")
         simulation_federal_process()

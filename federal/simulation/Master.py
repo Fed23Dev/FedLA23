@@ -4,12 +4,11 @@ import torch.utils.data as tdata
 from timeit import default_timer as timer
 
 from dl.SingleCell import SingleCell
-from env.running_env import global_logger, args, file_repo
-from env.support_config import VState
+from env.running_env import global_logger, file_repo
 from federal.simulation.FLnodes import FLMaster
 from federal.simulation.Worker import FedAvgWorker, FedProxWorker, HRankFLWorker, CALIMFLWorker, FedIRWorker
 from utils.objectIO import pickle_mkdir_save
-from typing import List, Iterator
+from typing import List
 
 
 class FedAvgMaster(FLMaster):
@@ -224,5 +223,32 @@ class CALIMFLMaster(FLMaster):
         self.merge.sync_dict(cp_model.state_dict())
         for node in self.workers_nodes:
             node.cell.sync_model(copy.deepcopy(cp_model))
+
+
+class FedLAMaster(FLMaster):
+    def __init__(self, workers: int, activists: int, local_epoch: int, master_cell: SingleCell,
+                 loader: tdata.dataloader, workers_loaders: dict, data_dist: list):
+        super().__init__(workers, activists, local_epoch, master_cell)
+
+        master_cell = SingleCell(loader, True)
+        super().__init__(workers, activists, local_epoch, master_cell)
+
+        workers_cells = [SingleCell(loader, True) for loader in list(workers_loaders.values())]
+
+        self.workers_nodes = [CALIMFLWorker(index, cell, loader)
+                              for index, (cell, loader) in enumerate(zip(workers_cells))]
+
+        self.dataset_dist = data_dist
+        self.curt_dist = [0.] * len(data_dist[0])
+
+    def schedule_strategy(self):
+        pass
+
+
+
+    def drive_workers(self, *_args, **kwargs):
+        pass
+
+
 
 
