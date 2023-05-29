@@ -55,10 +55,11 @@ def kl_and_js():
     print(f"JS:{js_divergence(b, a)}")
     print(f"JS:{js_divergence(a, a)}")
 
-    a = torch.tensor([0.4, 0.6]).float()
-    b = torch.tensor([0.3, 0.7]).float()
-    print(f"KL:{_kl_divergence(a, b)}")
+    a = torch.tensor([0.5, 0.5]).float()
+    b = torch.tensor([1., 0.]).float()
+    c = torch.tensor([0., 1.]).float()
     print(f"KL:{kl_divergence(b, a)}")
+    print(f"KL:{kl_divergence(b, c)}")
 
 
 def main():

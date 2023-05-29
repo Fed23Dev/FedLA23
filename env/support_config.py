@@ -56,9 +56,7 @@ class VState(Enum):
     Init = 0
     FedAvg = 1
     FedProx = 2
-    HRankFL = 3
-    CALIMFL = 4
-    SCAFFOLD = 5
-    FedLA = 6
-    MOON = 7
-    Single = 8
+    SCAFFOLD = 3
+    FedLA = 4
+    MOON = 5
+    Single = 6
