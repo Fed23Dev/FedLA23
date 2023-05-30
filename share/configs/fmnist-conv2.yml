@@ -3,7 +3,7 @@ exp_name: fmnist-conv2
 
 # checkpoint config
 model: conv2
-alg: calimfl
+alg: fedla
 gpu_ids: [0, 1]
 # pre_train: True
 

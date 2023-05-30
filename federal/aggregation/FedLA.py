@@ -1,5 +1,5 @@
 import copy
-from typing import List
+from typing import List, Tuple
 
 import torch
 from torch import optim
@@ -12,24 +12,25 @@ class FedLA(FedAvg):
     ERROR_MESS2 = "clients_ids must be not null."
 
     def __init__(self, init_model: torch.nn.Module, workers: int,
-                 data_specification: torch.Size, num_classes: int,
+                 specification: Tuple[torch.Size], num_classes: int,
                  epoch: int = 10, batch_limit: int = 5):
         super().__init__(init_model.state_dict())
         self.merge_weight = torch.ones(workers)
-        self.specification = data_specification
+        self.specification = specification
         self.classes = num_classes
 
         self.epoch = epoch
         self.batch_limit = batch_limit
 
         self.model = init_model
-        self.optim = optim.SGD(self.merge_weight, lr=0.01, momentum=0.9, weight_decay=1e-4)
+        self.optim = optim.SGD([self.merge_weight], lr=0.01, momentum=0.9, weight_decay=1e-4)
         self.loss_func = binary_cross_entropy_with_logits
 
     def merge_dict(self, clients_dicts: List[dict], clients_ids: List[int] = None) -> dict:
-        assert clients_ids, self.ERROR_MESS2
+        assert clients_ids is not None, self.ERROR_MESS2
         curt_weight = self.merge_weight.index_select(0, torch.tensor(clients_ids))
         for i in range(self.epoch):
+            self.union_dict.clear()
             batch_cnt = 0
             while batch_cnt < self.batch_limit:
                 # right现为一个标量，后可以改为张量
@@ -40,8 +41,10 @@ class FedLA(FedAvg):
                         else:
                             self.union_dict[k] = v * right
 
-                inputs = torch.randn(self.specification)
-                logits = torch.ones(self.classes) / self.classes
+                device = next(self.model.parameters()).device
+                inputs = torch.randn(self.specification[0]).to(device)
+                logits = (torch.ones(self.specification[1]) / torch.tensor(self.classes)).to(device)
+
                 pred = self.model(inputs)
                 loss = self.loss_func(pred, logits)
                 self.optim.zero_grad()
@@ -49,7 +52,6 @@ class FedLA(FedAvg):
                 self.optim.step()
 
                 self.model.load_state_dict(self.union_dict)
-                self.union_dict.clear()
                 batch_cnt += 1
 
         clients_dicts.clear()

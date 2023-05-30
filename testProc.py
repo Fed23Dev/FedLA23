@@ -26,7 +26,7 @@ if __name__ == "__main__":
     # from utils.test_unit import kl_and_js
     # kl_and_js()
     # tensor()
-    a = [10, 1, 2, 3]
+    a = [10, 1, 2, 4, 5]
     print(a[:2])
-    print(a[2:])
+    print(torch.tensor(1))
     print("----------------------")

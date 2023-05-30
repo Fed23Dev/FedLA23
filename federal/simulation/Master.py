@@ -68,8 +68,8 @@ class FedLAMaster(FLMaster):
         master_cell = SingleCell(loader)
         super().__init__(workers, activists, local_epoch, master_cell)
 
-        data_specification = master_cell.wrapper.running_scale()[0]
-        self.merge = FedLA(master_cell.access_model(), workers, data_specification, num_classes)
+        specification = master_cell.wrapper.running_scale()
+        self.merge = FedLA(master_cell.access_model(), workers, specification, num_classes)
 
         workers_cells = [SingleCell(loader, Wrapper=LAWrapper) for loader in list(workers_loaders.values())]
         self.workers_nodes = [FedLAWorker(index, cell) for index, cell in enumerate(workers_cells)]

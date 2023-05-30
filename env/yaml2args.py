@@ -79,12 +79,8 @@ def alg_str2enum(value: str) -> VState:
         ret = VState.FedAvg
     elif value == 'fedprox':
         ret = VState.FedProx
-    elif value == 'fedir':
-        ret = VState.FedIR
-    elif value == 'hrankfl':
-        ret = VState.HRankFL
-    elif value == 'calimfl':
-        ret = VState.CALIMFL
+    elif value == 'fedla':
+        ret = VState.FedLA
     elif value == 'single':
         ret = VState.Single
     else:
