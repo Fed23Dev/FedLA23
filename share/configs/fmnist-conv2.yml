@@ -1,0 +1,39 @@
+# resource config
+exp_name: fmnist-conv2
+
+# checkpoint config
+model: conv2
+alg: calimfl
+gpu_ids: [0, 1]
+# pre_train: True
+
+# dataset config
+dataset: fmnist
+batch_size: 32
+
+# optimizer config
+# optim: sgd
+optim: sgd
+learning_rate: 0.1
+
+# scheduler config
+scheduler: warmup_cos_lr
+warm_steps: 10
+min_lr: 0.0
+
+# federal config
+federal: True
+non_iid: shards
+workers: 100
+active_workers: 10
+federal_round: 50
+local_epoch: 5
+
+# federal_round: 11
+# local_epoch: 1
+test_batch_limit: 5
+
+merge_batch: 5
+merge_epoch: 10
+KD_BATCH: 10
+KD_EPOCH: 5

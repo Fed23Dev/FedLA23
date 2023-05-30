@@ -3,8 +3,12 @@ import random
 import numpy as np
 import torch
 import torch.utils.data as tdata
+from timeit import default_timer as timer
 
 from dl.SingleCell import SingleCell
+from dl.wrapper.Wrapper import ProxWrapper, LAWrapper
+from env.running_env import global_logger
+from federal.aggregation.FedLA import FedLA
 
 from federal.simulation.FLnodes import FLMaster
 from federal.simulation.Worker import FedAvgWorker, FedProxWorker, FedLAWorker
@@ -45,7 +49,7 @@ class FedProxMaster(FLMaster):
         :param loader: *only in simulation*
         :param workers_loaders: *only in simulation*
         """
-        master_cell = SingleCell(loader)
+        master_cell = SingleCell(loader, Wrapper=ProxWrapper)
         super().__init__(workers, activists, local_epoch, master_cell)
 
         workers_cells = [SingleCell(loader) for loader in list(workers_loaders.values())]
@@ -58,18 +62,30 @@ class FedProxMaster(FLMaster):
 
 class FedLAMaster(FLMaster):
     def __init__(self, workers: int, activists: int, local_epoch: int,
-                 loader: tdata.dataloader, workers_loaders: dict, data_dist: list):
+                 loader: tdata.dataloader, workers_loaders: dict, data_dist: list,
+                 num_classes: int):
 
         master_cell = SingleCell(loader)
         super().__init__(workers, activists, local_epoch, master_cell)
 
-        workers_cells = [SingleCell(loader) for loader in list(workers_loaders.values())]
+        data_specification = master_cell.wrapper.running_scale()[0]
+        self.merge = FedLA(master_cell.access_model(), workers, data_specification, num_classes)
 
+        workers_cells = [SingleCell(loader, Wrapper=LAWrapper) for loader in list(workers_loaders.values())]
         self.workers_nodes = [FedLAWorker(index, cell) for index, cell in enumerate(workers_cells)]
 
         self.dataset_dist = data_dist
         self.curt_dist = torch.tensor([0.] * len(data_dist[0]))
         self.curt_dist[random.randrange(len(self.curt_dist))] = 1.
+
+    def info_aggregation(self):
+        workers_dict = []
+        part_selected = self.curt_selected[:len(self.curt_selected)]
+        for index in part_selected:
+            workers_dict.append(self.workers_nodes[index].cell.access_model().state_dict())
+        self.merge.merge_dict(workers_dict, part_selected)
+        for index in self.curt_selected:
+            self.workers_nodes[index].cell.decay_lr(self.pace)
 
     def schedule_strategy(self):
         js_distance = []
@@ -83,9 +99,11 @@ class FedLAMaster(FLMaster):
             self.curt_dist += self.dataset_dist[ind]
 
     def drive_workers(self, *_args, **kwargs):
-        for index in self.curt_selected:
-            self.workers_nodes[index].local_train(self.cell.access_model().parameters())
-        self.asymmetric_distillation()
+        stu_indices = self.curt_selected[:len(self.curt_selected)]
+        tea_indices = self.curt_selected[len(self.curt_selected):]
 
-    def asymmetric_distillation(self):
-        pass
+        for index in self.curt_selected:
+            self.workers_nodes[index].local_train()
+
+        for s_index, t_index in zip(stu_indices, tea_indices):
+            self.workers_nodes[s_index].local_distill(self.workers_nodes[t_index].cell.access_model())

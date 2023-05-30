@@ -26,5 +26,7 @@ if __name__ == "__main__":
     # from utils.test_unit import kl_and_js
     # kl_and_js()
     # tensor()
-    outter(a=1, b=2)
+    a = [10, 1, 2, 3]
+    print(a[:2])
+    print(a[2:])
     print("----------------------")

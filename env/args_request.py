@@ -20,27 +20,38 @@ DATA_HELP = ["", ""]
 ARGS_STANDARD = dict(zip(MUST_KEYS, zip(DATA_TYPE, DATA_DOMAIN, DATA_HELP)))
 
 DEFAULT_ARGS = {
-                "use_gpu": True,
-                "gpu_ids": [0],
+    "use_gpu": True,
+    "gpu_ids": [0],
 
-                "learning_rate": 0.1,
-                "min_lr": 1e-9,
-                "momentum": 0.9,
-                "weight_decay": 1e-4,
-                "nesterov": True,
+    "learning_rate": 0.1,
+    "min_lr": 1e-9,
+    "momentum": 0.9,
+    "weight_decay": 1e-4,
+    "nesterov": True,
 
-                "step_size": 1,
-                "gamma": 0.5 ** (1 / 10000),
-                "en_alpha": 0.5,
+    "step_size": 1,
+    "gamma": 0.5 ** (1 / 10000),
+    "en_alpha": 0.5,
 
-                "loss_func": 'cross_entropy',
+    "loss_func": 'cross_entropy',
 
-                "batch_limit": 99999,
-                "test_batch_limit": 10,
-                "loss_back": 3,
-                "mu": 0.01,
-                "info_norm": 3,
-                "backward": 1,
-                "random_data": False,
-                "auto_inter": False
+    "batch_limit": 99999,
+    "test_batch_limit": 10,
+    "loss_back": 3,
+    "mu": 0.01,
+    "info_norm": 3,
+    "backward": 1,
+    "random_data": False,
+    "auto_inter": False,
+
+    "merge_batch": 5,
+    "merge_epoch": 10,
+
+    "CE_WEIGHT": 1.0,
+    "ALPHA": 1.0,
+    "BETA": 8.0,
+    "T": 4.0,
+    "WARMUP": 20,
+    "KD_BATCH": 20,
+    "KD_EPOCH": 5,
 }

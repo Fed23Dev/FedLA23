@@ -130,35 +130,21 @@ class ArgRepo:
         self.loss_back = None
         self.test_batch_limit = None
 
-        self.info_norm = None
-        self.backward = None
-        self.random_data = None
-        self.check_inter = None
-
-        # only exp valid
-        self.random_test = None
-        self.fedavg_test = None
-        self.fedprox_test = None
-
-        self.rank_plus = None
-        self.is_prune = None
-        self.fedprox = None
-
         self.alg = None
         self.en_alpha = None
+        self.merge_batch = None
+        self.merge_epoch = None
+
+        self.CE_WEIGHT = None
+        self.ALPHA = None
+        self.BETA = None
+        self.T = None
+        self.WARMUP = None
+        self.KD_BATCH = None
+        self.KD_EPOCH = None
 
     def runtime_attr_placeholder(self):
-        self.curt_base = None
-        self.curt_final = None
-        self.rank_path = None
-        self.rank_norm_path = None
-        self.rank_plus_path = None
         self.num_classes = None
-        self.running_base_path = None
-        self.running_plus_path = None
-        self.running_final_path = None
-        self.prune_rate = None
-
         self.curt_mode = None
 
     @property

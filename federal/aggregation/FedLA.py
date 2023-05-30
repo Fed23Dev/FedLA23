@@ -13,7 +13,7 @@ class FedLA(FedAvg):
 
     def __init__(self, init_model: torch.nn.Module, workers: int,
                  data_specification: torch.Size, num_classes: int,
-                 epoch: int = 10, batch_limit: int = 3):
+                 epoch: int = 10, batch_limit: int = 5):
         super().__init__(init_model.state_dict())
         self.merge_weight = torch.ones(workers)
         self.specification = data_specification

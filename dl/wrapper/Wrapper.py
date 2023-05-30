@@ -11,7 +11,9 @@ from torch.cuda.amp import GradScaler
 from torch.nn.functional import binary_cross_entropy_with_logits
 from torch.optim import lr_scheduler
 from torch.optim.lr_scheduler import ReduceLROnPlateau
+from yacs.config import CfgNode
 
+from dl.compress.DKD import DKD
 from dl.wrapper import DeviceManager
 from dl.wrapper.optimizer import SGD_PruneFL
 from dl.wrapper.optimizer.WarmUpCosinLR import WarmUPCosineLR
@@ -247,12 +249,60 @@ class VWrapper:
 
 
 class ProxWrapper(VWrapper):
+    ERROR_MESS6 = "FedProx must provide pre_params parameter."
+
     def __init__(self, model: nn.Module, train_dataloader: tdata.dataloader, optimizer: VOptimizer,
                  scheduler: VScheduler, loss: VLossFunc):
         super().__init__(model, train_dataloader, optimizer, scheduler, loss)
 
     def loss_compute(self, pred: torch.Tensor, targets: torch.Tensor, **kwargs) -> torch.Tensor:
-        pass
+        assert "pre_params" in kwargs.keys(), self.ERROR_MESS6
+        loss = self.loss_func(pred, targets)
+        proximal_term = 0.0
+        for w, w_t in zip(self.model.parameters(), kwargs["pre_params"]):
+            proximal_term += (w - w_t).norm(2)
+        loss += (args.mu / 2) * proximal_term
+        return loss
+
+
+class LAWrapper(VWrapper):
+    ERROR_MESS7 = "FedLA must provide teacher_model parameter."
+
+    def __init__(self, model: nn.Module, train_dataloader: tdata.dataloader, optimizer: VOptimizer,
+                 scheduler: VScheduler, loss: VLossFunc):
+        super().__init__(model, train_dataloader, optimizer, scheduler, loss)
+        cfg = CfgNode()
+        cfg.CE_WEIGHT = args.CE_WEIGHT
+        cfg.ALPHA = args.ALPHA
+        cfg.BETA = args.BETA
+        cfg.T = args.T
+        cfg.WARMUP = args.WARMUP
+
+        self.kd_batch = args.KD_BATCH
+        self.kd_epoch = args.KD_EPOCH
+        self.kd_curt_epoch = 0
+        self.distillers = DKD(cfg)
+
+    def dkd_loss_optim(self, teacher_model: nn.Module):
+        self.model.train()
+        teacher_model.eval()
+        for e in range(self.kd_epoch):
+            for batch_idx, (inputs, targets) in enumerate(self.loader):
+                if batch_idx > self.kd_batch:
+                    break
+
+                inputs, labels = self.device.on_tensor(inputs, targets)
+                stu_pred = self.model(inputs)
+                tea_pred = teacher_model(inputs)
+
+                losses_dict = self.distillers.forward_train(stu_pred, tea_pred, labels, self.kd_curt_epoch)[1]
+
+                loss = sum([ls.mean() for ls in losses_dict.values()])
+
+                self.optim_step(loss)
+            self.scheduler_step()
+
+        self.kd_curt_epoch += self.kd_epoch
 
 
 # 传入真实数据的dataloader对模型进行测试或训练

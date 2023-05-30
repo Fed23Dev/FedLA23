@@ -45,8 +45,6 @@
 ## 博客对项目进行说明
 ### 快速熟悉项目进行二次开发
 #### 架构
-
-
 + 快速删除数据集
 1. 移除dl.data.datasets.py中get_data方法的对应的数据集选项
 2. 移除env.support_config.py中VDateSet中对应的枚举变量
@@ -54,3 +52,11 @@
 4. 移除env.yaml2args.py中supplement_args方法中对应的数据集类数量映射
 5. 移除env.static_env.py中的数据集的基本信息
 6. 移除数据集的实现和初始化接口（非torchvision官方提供的数据集）
+
++ 快速实现其他联邦学习算法
+1. 重写Wrapper类，提供特殊的loss计算或优化方式实现
+2. 重写Master和Worker类，初始化中cell类指定上一步的Wrapper类
+3. 重写Master和Worker中的对应方法，提供特殊的流程变化，提供必要参数
+4. federal.test_unit.py中编写测试函数，在main中加入进入口
+5. env.support_config.py中VState中加入对应联邦学习算法的枚举变量
+6. env.yaml2args.py中alg_str2enum中加入字符串到枚举变量的映射

@@ -12,33 +12,6 @@ def _dkd_loss(logits_student, logits_teacher, target, alpha, beta, temperature):
     pred_teacher = cat_mask(pred_teacher, gt_mask, other_mask)
     log_pred_student = torch.log(pred_student)
     tckd_loss = (
-            F.kl_div(log_pred_student, pred_teacher, reduction='sum')
-            * (temperature ** 2)
-            / target.shape[0]
-    )
-    pred_teacher_part2 = F.softmax(
-        logits_teacher / temperature - 1000.0 * gt_mask, dim=1
-    )
-    log_pred_student_part2 = F.log_softmax(
-        logits_student / temperature - 1000.0 * gt_mask, dim=1
-    )
-    nckd_loss = (
-            F.kl_div(log_pred_student_part2, pred_teacher_part2, reduction='sum')
-            * (temperature ** 2)
-            / target.shape[0]
-    )
-    return alpha * tckd_loss + beta * nckd_loss
-
-
-def _dkd_loss1(logits_student, logits_teacher, target, alpha, beta, temperature):
-    gt_mask = _get_gt_mask(logits_student, target)
-    other_mask = _get_other_mask(logits_student, target)
-    pred_student = F.softmax(logits_student / temperature, dim=1)
-    pred_teacher = F.softmax(logits_teacher / temperature, dim=1)
-    pred_student = cat_mask(pred_student, gt_mask, other_mask)
-    pred_teacher = cat_mask(pred_teacher, gt_mask, other_mask)
-    log_pred_student = torch.log(pred_student)
-    tckd_loss = (
             F.kl_div(log_pred_student, pred_teacher, size_average=False)
             * (temperature ** 2)
             / target.shape[0]
@@ -80,17 +53,11 @@ class DKD:
     """Decoupled Knowledge Distillation(CVPR 2022)"""
 
     def __init__(self, cfg: CfgNode):
-        self.ce_loss_weight = cfg.DKD.CE_WEIGHT
-        self.alpha = cfg.DKD.ALPHA
-        self.beta = cfg.DKD.BETA
-        self.temperature = cfg.DKD.T
-        self.warmup = cfg.DKD.WARMUP
-
-        # DKD.CE_WEIGHT = 1.0
-        # DKD.ALPHA = 1.0
-        # DKD.BETA = 8.0
-        # DKD.T = 4.0
-        # DKD.WARMUP = 20
+        self.ce_loss_weight = cfg.CE_WEIGHT
+        self.alpha = cfg.ALPHA
+        self.beta = cfg.BETA
+        self.temperature = cfg.T
+        self.warmup = cfg.WARMUP
 
     # logits_student, _ = self.student(image)
     #         with torch.no_grad():
