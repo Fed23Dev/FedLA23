@@ -28,6 +28,9 @@ class FedLA(FedAvg):
 
     def merge_dict(self, clients_dicts: List[dict], clients_ids: List[int] = None) -> dict:
         assert clients_ids is not None, self.ERROR_MESS2
+        if self.epoch == 0 and self.batch_limit == 0:
+            super(FedLA, self).merge_dict(clients_dicts)
+            pass
         curt_weight = self.merge_weight.index_select(0, torch.tensor(clients_ids))
         for i in range(self.epoch):
             self.union_dict.clear()

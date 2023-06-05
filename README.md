@@ -46,10 +46,6 @@ tiny-imagenet下载链接：http://cs231n.stanford.edu/tiny-imagenet-200.zip
 2. 每个包对外提供的接口只保留在test_unit.py中，所有外部包只调用该py包的接口获得服务
 
 
-## 怎样高效地进行扩展，针对其他模型和其他类型的数据集
-
-如果想要更深层地优化代码，可以访问https://wolfsion.github.io参考整体工程架构介绍，以便快速熟悉
-
 ## 怎样高效地进行扩展，针对其他优化器和学习率调度器
 1. env.support_config下提前声明要添加的优化器和调度器枚举成员
 2. yaml_args中optim_str2enum()和scheduler_str2enum()添加yaml配置值到枚举成员的映射

@@ -33,7 +33,7 @@ local_epoch: 5
 # local_epoch: 1
 test_batch_limit: 5
 
-merge_batch: 5
-merge_epoch: 10
-KD_BATCH: 10
-KD_EPOCH: 5
+merge_batch: 0
+merge_epoch: 0
+KD_BATCH: 0
+KD_EPOCH: 0
