@@ -3,6 +3,7 @@ from torch import Tensor
 
 
 # KL (y || x)
+# Approved, Right
 def _kl_divergence(x: Tensor, y: Tensor) -> Tensor:
     kl = F.kl_div(x.log(), y, reduction='sum')
     return kl

@@ -2,31 +2,27 @@ import torch
 import random
 
 
-def tensor(some: int):
-    data_dist = [torch.tensor([1, 1]), torch.tensor([1, 1])]
-    curt_dist = torch.tensor([0.] * len(data_dist[0]))
-    curt_dist[random.randrange(len(curt_dist))] = 1.
-    print(curt_dist)
+def _get_gt_mask(logits, target):
+    target = target.reshape(-1)
+    mask = torch.zeros_like(logits).scatter_(1, target.unsqueeze(1), 1).bool()
+    return mask
 
 
-def inner(a, **kwargs):
-    print(a)
-    print(kwargs['b'])
-
-
-def outter(**kwargs):
-    inner(**kwargs)
+def _get_other_mask(logits, target):
+    target = target.reshape(-1)
+    mask = torch.ones_like(logits).scatter_(1, target.unsqueeze(1), 0).bool()
+    return mask
 
 
 if __name__ == "__main__":
-    # from dl.data.test_unit import main
-    # main()
-    # from federal.test_unit import test_master
-    # test_master()
-    # from utils.test_unit import kl_and_js
-    # kl_and_js()
-    # tensor()
-    a = [10, 1, 2, 4, 5]
-    print(a[:2])
-    print(torch.tensor(1))
+    batch_size = 32
+    classes = 10
+    logits = torch.randn(batch_size, classes)
+    target = torch.randint(low=0, high=classes, size=(batch_size, 1))
+
+    a = _get_gt_mask(logits, target)
+    b = _get_other_mask(logits, target)
+    print(logits)
+    print(target)
+    print(a*1000)
     print("----------------------")
