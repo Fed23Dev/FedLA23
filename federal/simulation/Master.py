@@ -3,11 +3,9 @@ import random
 import numpy as np
 import torch
 import torch.utils.data as tdata
-from timeit import default_timer as timer
 
 from dl.SingleCell import SingleCell
 from dl.wrapper.Wrapper import ProxWrapper, LAWrapper
-from env.running_env import global_logger
 from federal.aggregation.FedLA import FedLA
 
 from federal.simulation.FLnodes import FLMaster
