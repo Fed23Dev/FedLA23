@@ -61,13 +61,13 @@ class FedProxMaster(FLMaster):
 class FedLAMaster(FLMaster):
     def __init__(self, workers: int, activists: int, local_epoch: int,
                  loader: tdata.dataloader, workers_loaders: dict, data_dist: list,
-                 num_classes: int):
+                 num_classes: int, mb: int, me: int):
 
         master_cell = SingleCell(loader)
         super().__init__(workers, activists, local_epoch, master_cell)
 
         specification = master_cell.wrapper.running_scale()
-        self.merge = FedLA(master_cell.access_model(), workers, specification, num_classes)
+        self.merge = FedLA(master_cell.access_model(), workers, specification, num_classes, me, mb)
 
         workers_cells = [SingleCell(loader, Wrapper=LAWrapper) for loader in list(workers_loaders.values())]
         self.workers_nodes = [FedLAWorker(index, cell) for index, cell in enumerate(workers_cells)]
@@ -86,15 +86,16 @@ class FedLAMaster(FLMaster):
             self.workers_nodes[index].cell.decay_lr(self.pace)
 
     def schedule_strategy(self):
-        js_distance = []
-        for dist in self.dataset_dist:
-            js_distance.append(js_divergence(self.curt_dist, dist))
-
-        sort_rank = np.argsort(np.array(js_distance))
-        self.curt_selected = sort_rank[:self.plan]
-
-        for ind in self.curt_selected:
-            self.curt_dist += self.dataset_dist[ind]
+        # js_distance = []
+        # for dist in self.dataset_dist:
+        #     js_distance.append(js_divergence(self.curt_dist, dist))
+        #
+        # sort_rank = np.argsort(np.array(js_distance))
+        # self.curt_selected = sort_rank[:self.plan]
+        #
+        # for ind in self.curt_selected:
+        #     self.curt_dist += self.dataset_dist[ind]
+        super(FedLAMaster, self).schedule_strategy()
 
     def drive_workers(self, *_args, **kwargs):
         stu_indices = self.curt_selected[:len(self.curt_selected)]

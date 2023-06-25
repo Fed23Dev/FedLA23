@@ -1,5 +1,6 @@
 !.gitkeep
 
 .idea
+logs
 res
-*.log
+

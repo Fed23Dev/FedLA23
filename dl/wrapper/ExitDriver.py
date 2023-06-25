@@ -14,14 +14,6 @@ def store_all(one_key: str = None):
     for key in global_container.keys:
         path, path_id = file_repo.new_seq(key)
         pickle_mkdir_save(global_container[key], path)
-        if check(one_key, key):
-            if args.curt_base:
-                args.running_base_path = path
-            else:
-                if args.curt_final is None or not args.curt_final:
-                    args.running_plus_path = path
-                else:
-                    args.running_final_path = path
 
 
 class ExitManager:
