@@ -59,11 +59,18 @@ class DKD:
         self.temperature = cfg.T
         self.warmup = cfg.WARMUP
 
-    # logits_student, _ = self.student(image)
-    #     with torch.no_grad():
-    #         logits_teacher, _ = self.teacher(image)
+
     def forward_train(self, logits_student, logits_teacher, target, epoch):
-        # losses
+        """
+        logits_student, _ = self.student(image)
+        with torch.no_grad():
+            logits_teacher, _ = self.teacher(image)
+        :param logits_student:
+        :param logits_teacher:
+        :param target:
+        :param epoch:
+        :return:
+        """
         loss_ce = self.ce_loss_weight * F.cross_entropy(logits_student, target)
         loss_dkd = min(epoch / self.warmup, 1.0) * _dkd_loss(
             logits_student,

@@ -15,14 +15,6 @@ def _get_other_mask(logits, target):
 
 
 if __name__ == "__main__":
-    batch_size = 32
-    classes = 10
-    logits = torch.randn(batch_size, classes)
-    target = torch.randint(low=0, high=classes, size=(batch_size, 1))
-
-    a = _get_gt_mask(logits, target)
-    b = _get_other_mask(logits, target)
-    print(logits)
-    print(target)
-    print(a*1000)
+    from dl.data.test_unit import main
+    main()
     print("----------------------")

@@ -292,8 +292,10 @@ class LAWrapper(VWrapper):
                     break
 
                 inputs, labels = self.device.on_tensor(inputs, targets)
+
                 stu_pred = self.model(inputs)
-                tea_pred = teacher_model(inputs)
+                with torch.no_grad():
+                    tea_pred = teacher_model(inputs)
 
                 losses_dict = self.distillers.forward_train(stu_pred, tea_pred, labels, self.kd_curt_epoch)[1]
 
@@ -304,6 +306,17 @@ class LAWrapper(VWrapper):
 
         self.kd_curt_epoch += self.kd_epoch
 
+    def get_logits_dist(self, batch_limit: int = args.logits_batch_limit) -> torch.Tensor:
+        avg_logits = torch.zeros(args.num_classes, args.num_classes)
+        for batch_idx, (inputs, targets) in enumerate(self.loader):
+            if batch_idx > batch_limit:
+                break
+
+            inputs, labels = self.device.on_tensor(inputs, targets)
+            pred = self.model(inputs)
+
+
+        return avg_logits
 
 # 传入真实数据的dataloader对模型进行测试或训练
 # def step_run(self, batch_limit: int, train: bool = False,

@@ -123,6 +123,7 @@ class ArgRepo:
         self.federal_round = None
         self.local_epoch = None
         self.batch_limit = None
+        self.logits_batch_limit = None
         self.loss_back = None
         self.test_batch_limit = None
 

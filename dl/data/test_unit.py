@@ -1,6 +1,7 @@
 import pickle
 
 import pandas as pd
+import torch
 from fedlab.utils.dataset import CIFAR10Partitioner
 from fedlab.utils.functional import partition_report
 import matplotlib.pyplot as plt
@@ -81,7 +82,22 @@ def test_tiny_imagenet():
     print(label0.size())
 
 
+def test_loader_label():
+    test_loader = get_data_loader(args.dataset, data_type="test", batch_size=args.batch_size,
+                                  shuffle=True, num_workers=0, pin_memory=False)
+    for batch_idx, (inputs, targets) in enumerate(test_loader):
+        if batch_idx > 0:
+            break
+        print(inputs.size())
+        print(targets.size())
+        print(targets)
+
+        label = torch.argmax(targets, -1)
+        print(label)
+        print(print(torch.unique(label, return_counts=True)))
+
+
 def main():
-    test_tiny_imagenet()
+    test_loader_label()
 
 # 各个阶段返回的数据类型
