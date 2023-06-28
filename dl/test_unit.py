@@ -1,8 +1,38 @@
+import torch
+
 from dl.SingleCell import SingleCell
 from dl.compress.compress_util import dict_coo_express
+from dl.data.dataProvider import get_data_loader
+from dl.model.model_util import create_model
 from env.running_env import args
 from env.static_env import vgg16_candidate_rate
+from env.support_config import VModel
 from utils.objectIO import pickle_mkdir_save
+
+
+def test_logits():
+    test_loader = get_data_loader(args.dataset, data_type="test", batch_size=args.batch_size,
+                                  shuffle=True, num_workers=0, pin_memory=False)
+    model = create_model(VModel.VGG16, num_classes=args.num_classes)
+    sum_logits = torch.zeros(args.num_classes, args.num_classes)
+    sum_labels = torch.zeros(args.num_classes, dtype=torch.int64)
+
+    for batch_idx, (inputs, targets) in enumerate(test_loader):
+        if batch_idx > 1:
+            break
+        labels = torch.argmax(targets, -1)
+        _labels, _cnt = torch.unique(labels, return_counts=True)
+        labels_cnt = torch.zeros(args.num_classes, dtype=torch.int64)\
+            .scatter_(dim=0, index=_labels, src=_cnt)
+
+        logits = model(inputs)
+        labels_index = torch.tensor(list(range(args.num_classes)))
+
+        sum_logits.scatter_add_(dim=0, index=labels.unsqueeze(1), src=logits)
+        sum_labels.scatter_add_(dim=0, index=labels_index, src=labels_cnt)
+
+    avg_logits = sum_logits / sum_labels
+    print(avg_logits)
 
 
 def test_center_train():
@@ -80,4 +110,4 @@ def coo_size():
 
 
 def main():
-    coo_size()
+    test_logits()

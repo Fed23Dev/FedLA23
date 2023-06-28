@@ -9,6 +9,7 @@ import matplotlib.pyplot as plt
 from dl.data.datasets import get_data
 from dl.data.samplers import dataset_user_indices
 from dl.data.dataProvider import get_data_loader, get_data_loaders, DataLoader
+from dl.model.model_util import create_model
 from env.running_env import args
 from env.support_config import VDataSet
 
@@ -88,13 +89,18 @@ def test_loader_label():
     for batch_idx, (inputs, targets) in enumerate(test_loader):
         if batch_idx > 0:
             break
+        label = torch.argmax(targets, -1)
         print(inputs.size())
         print(targets.size())
         print(targets)
-
-        label = torch.argmax(targets, -1)
         print(label)
-        print(print(torch.unique(label, return_counts=True)))
+
+        labels = torch.argmax(targets, -1)
+        _labels, _cnt = torch.unique(labels, return_counts=True)
+        labels_cnt = torch.zeros(args.num_classes, dtype=torch.int64).scatter_(dim=0, index=_labels, src=_cnt)
+        print(_labels)
+        print(_cnt)
+        print(labels_cnt)
 
 
 def main():

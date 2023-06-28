@@ -15,6 +15,6 @@ def _get_other_mask(logits, target):
 
 
 if __name__ == "__main__":
-    from dl.data.test_unit import main
+    from dl.test_unit import main
     main()
     print("----------------------")
