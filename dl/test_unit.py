@@ -14,21 +14,30 @@ def test_logits():
     test_loader = get_data_loader(args.dataset, data_type="test", batch_size=args.batch_size,
                                   shuffle=True, num_workers=0, pin_memory=False)
     model = create_model(VModel.VGG16, num_classes=args.num_classes)
+    label_dtype = torch.int64
+    # dtype 自适应更新
     sum_logits = torch.zeros(args.num_classes, args.num_classes)
-    sum_labels = torch.zeros(args.num_classes, dtype=torch.int64)
+    sum_labels = torch.zeros(args.num_classes, dtype=label_dtype)
 
     for batch_idx, (inputs, targets) in enumerate(test_loader):
         if batch_idx > 1:
             break
         labels = torch.argmax(targets, -1)
         _labels, _cnt = torch.unique(labels, return_counts=True)
-        labels_cnt = torch.zeros(args.num_classes, dtype=torch.int64)\
+        labels_cnt = torch.zeros(args.num_classes, dtype=label_dtype)\
             .scatter_(dim=0, index=_labels, src=_cnt)
 
         logits = model(inputs)
+
+        if batch_idx == 0:
+            sum_logits = sum_logits.type(logits.dtype)
+
+        # 扩展的标签索引 [0, 1] >> [[0, 0], [1, 1]]
+        logits_index = labels.unsqueeze(1).expand(logits.size())
+        # 自然数索引
         labels_index = torch.tensor(list(range(args.num_classes)))
 
-        sum_logits.scatter_add_(dim=0, index=labels.unsqueeze(1), src=logits)
+        sum_logits.scatter_add_(dim=0, index=logits_index, src=logits)
         sum_labels.scatter_add_(dim=0, index=labels_index, src=labels_cnt)
 
     avg_logits = sum_logits / sum_labels
