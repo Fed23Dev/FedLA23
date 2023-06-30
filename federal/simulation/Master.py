@@ -67,11 +67,14 @@ class FedLAMaster(FLMaster):
         super().__init__(workers, activists, local_epoch, master_cell)
 
         specification = master_cell.wrapper.running_scale()
-        self.merge = FedLA(master_cell.access_model(), workers, specification, num_classes, me, mb)
+        self.merge = FedLA(master_cell.access_model(), workers,
+                           specification, num_classes, me, mb,
+                           self.cell.test_dataloader)
 
         workers_cells = [SingleCell(loader, Wrapper=LAWrapper) for loader in list(workers_loaders.values())]
         self.workers_nodes = [FedLAWorker(index, cell) for index, cell in enumerate(workers_cells)]
 
+        # To Modify
         self.dataset_dist = data_dist
         self.curt_dist = torch.tensor([0.] * len(data_dist[0]))
         self.curt_dist[random.randrange(len(self.curt_dist))] = 1.
@@ -86,6 +89,7 @@ class FedLAMaster(FLMaster):
             self.workers_nodes[index].cell.decay_lr(self.pace)
 
     def schedule_strategy(self):
+        # To Modify
         # js_distance = []
         # for dist in self.dataset_dist:
         #     js_distance.append(js_divergence(self.curt_dist, dist))

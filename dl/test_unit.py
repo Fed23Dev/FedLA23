@@ -15,7 +15,7 @@ def test_logits():
                                   shuffle=True, num_workers=0, pin_memory=False)
     model = create_model(VModel.VGG16, num_classes=args.num_classes)
     label_dtype = torch.int64
-    # dtype 自适应更新
+
     sum_logits = torch.zeros(args.num_classes, args.num_classes)
     sum_labels = torch.zeros(args.num_classes, dtype=label_dtype)
 

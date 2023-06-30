@@ -307,15 +307,33 @@ class LAWrapper(VWrapper):
         self.kd_curt_epoch += self.kd_epoch
 
     def get_logits_dist(self, batch_limit: int = args.logits_batch_limit) -> torch.Tensor:
-        avg_logits = torch.zeros(args.num_classes, args.num_classes)
+        label_dtype = torch.int64
+
+        sum_logits = torch.zeros(args.num_classes, args.num_classes)
+        sum_labels = torch.zeros(args.num_classes, dtype=label_dtype)
+
         for batch_idx, (inputs, targets) in enumerate(self.loader):
             if batch_idx > batch_limit:
                 break
+            labels = torch.argmax(targets, -1)
+            _labels, _cnt = torch.unique(labels, return_counts=True)
+            labels_cnt = torch.zeros(args.num_classes, dtype=label_dtype) \
+                .scatter_(dim=0, index=_labels, src=_cnt)
 
-            inputs, labels = self.device.on_tensor(inputs, targets)
-            pred = self.model(inputs)
+            logits = self.model(inputs)
 
+            if batch_idx == 0:
+                sum_logits = sum_logits.type(logits.dtype)
 
+            # 扩展的标签索引 [0, 1] >> [[0, 0], [1, 1]]
+            logits_index = labels.unsqueeze(1).expand(logits.size())
+            # 自然数索引
+            labels_index = torch.tensor(list(range(args.num_classes)))
+
+            sum_logits.scatter_add_(dim=0, index=logits_index, src=logits)
+            sum_labels.scatter_add_(dim=0, index=labels_index, src=labels_cnt)
+
+        avg_logits = sum_logits / sum_labels
         return avg_logits
 
 # 传入真实数据的dataloader对模型进行测试或训练
