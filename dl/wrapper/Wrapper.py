@@ -306,6 +306,7 @@ class LAWrapper(VWrapper):
 
         self.kd_curt_epoch += self.kd_epoch
 
+    # Tensor Size: classes * classes
     def get_logits_dist(self, batch_limit: int = args.logits_batch_limit) -> torch.Tensor:
         label_dtype = torch.int64
 

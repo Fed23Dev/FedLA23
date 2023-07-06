@@ -60,10 +60,10 @@ class FedProxMaster(FLMaster):
 
 class FedLAMaster(FLMaster):
     def __init__(self, workers: int, activists: int, local_epoch: int,
-                 loader: tdata.dataloader, workers_loaders: dict, data_dist: list,
+                 loader: tdata.dataloader, workers_loaders: dict,
                  num_classes: int, mb: int, me: int):
 
-        master_cell = SingleCell(loader)
+        master_cell = SingleCell(loader, Wrapper=LAWrapper)
         super().__init__(workers, activists, local_epoch, master_cell)
 
         specification = master_cell.wrapper.running_scale()
@@ -74,10 +74,8 @@ class FedLAMaster(FLMaster):
         workers_cells = [SingleCell(loader, Wrapper=LAWrapper) for loader in list(workers_loaders.values())]
         self.workers_nodes = [FedLAWorker(index, cell) for index, cell in enumerate(workers_cells)]
 
-        # To Modify
-        self.dataset_dist = data_dist
-        self.curt_dist = torch.tensor([0.] * len(data_dist[0]))
-        self.curt_dist[random.randrange(len(self.curt_dist))] = 1.
+        self.dataset_dist = [torch.zeros(num_classes, num_classes) for _ in range(workers)]
+        self.curt_dist = torch.zeros(num_classes, num_classes)
 
     def info_aggregation(self):
         workers_dict = []
@@ -90,16 +88,21 @@ class FedLAMaster(FLMaster):
 
     def schedule_strategy(self):
         # To Modify
-        # js_distance = []
-        # for dist in self.dataset_dist:
-        #     js_distance.append(js_divergence(self.curt_dist, dist))
-        #
-        # sort_rank = np.argsort(np.array(js_distance))
-        # self.curt_selected = sort_rank[:self.plan]
-        #
-        # for ind in self.curt_selected:
-        #     self.curt_dist += self.dataset_dist[ind]
-        super(FedLAMaster, self).schedule_strategy()
+        self.dataset_dist.clear()
+        self.curt_dist.clear()
+
+        self.curt_dist = self.cell.wrapper.get_logits_dist()
+        for i in range(self.workers):
+            self.dataset_dist.append(self.workers_nodes[i].cell.wrapper.get_logits_dist())
+
+        js_distance = []
+        for dist in self.dataset_dist:
+            js_distance.append(js_divergence(self.curt_dist, dist))
+
+        sort_rank = np.argsort(np.array(js_distance))
+        self.curt_selected = sort_rank[:self.plan]
+
+        # super(FedLAMaster, self).schedule_strategy()
 
     def drive_workers(self, *_args, **kwargs):
         stu_indices = self.curt_selected[:len(self.curt_selected)]

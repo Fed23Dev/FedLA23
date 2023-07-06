@@ -26,11 +26,11 @@ def test_fedprox():
 
 def test_fedla():
     loader, loaders, user_dict = simulation_federal_process()
-    global_dist, device_ratios = get_data_ratio(user_dict)
+    # global_dist, device_ratios = get_data_ratio(user_dict)
 
     master_node = FedLAMaster(workers=args.workers, activists=args.active_workers, local_epoch=args.local_epoch,
-                              loader=loader, workers_loaders=loaders, data_dist=device_ratios,
-                              num_classes=args.num_classes, mb=args.merge_batch, me=args.merge_epoch)
+                              loader=loader, workers_loaders=loaders, num_classes=args.num_classes,
+                              mb=args.merge_batch, me=args.merge_epoch)
     master_node.union_run(args.federal_round)
     master_node.cell.exit_proc(one_key=f'{args.exp_name}-test_acc')
 
