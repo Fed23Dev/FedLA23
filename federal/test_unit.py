@@ -35,6 +35,14 @@ def test_fedla():
     master_node.cell.exit_proc(one_key=f'{args.exp_name}-test_acc')
 
 
+def test_scaffold():
+    pass
+
+
+def test_moon():
+    pass
+
+
 def main():
     global_logger.info(f"#####{args.exp_name}#####")
 
@@ -44,6 +52,10 @@ def main():
         test_fedprox()
     elif args.curt_mode == VState.FedLA:
         test_fedla()
+    elif args.curt_mode == VState.SCAFFOLD:
+        test_scaffold()
+    elif args.curt_mode == VState.MOON:
+        test_moon()
     else:
         global_logger.info(f"#####Default#####")
         simulation_federal_process()
