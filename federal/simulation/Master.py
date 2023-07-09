@@ -87,14 +87,12 @@ class FedLAMaster(FLMaster):
             self.workers_nodes[index].cell.decay_lr(self.pace)
 
     def schedule_strategy(self):
-        # To Modify
         self.dataset_dist.clear()
-        self.curt_dist.clear()
+        self.curt_dist.zero_()
 
         self.curt_dist = self.cell.wrapper.get_logits_dist()
         for i in range(self.workers):
             self.dataset_dist.append(self.workers_nodes[i].cell.wrapper.get_logits_dist())
-
         js_distance = []
         for dist in self.dataset_dist:
             js_distance.append(js_divergence(self.curt_dist, dist))

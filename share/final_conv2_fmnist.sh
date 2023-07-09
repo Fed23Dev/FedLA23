@@ -10,4 +10,4 @@ fi
 
 nohup python main.py -y $config_path > $log_path 2>&1 &
 
-# python -m pdb main.py -y 'share/experiments/fmnist-conv2.yml'
+# python -m pdb main.py -y 'share/configs/fmnist-conv2.yml'
