@@ -15,6 +15,10 @@ def _get_other_mask(logits, target):
 
 
 if __name__ == "__main__":
-    from dl.test_unit import main
-    main()
+    # from dl.test_unit import main
+    # main()
+    a = torch.ones(10)
+    logits = torch.ones(10, 10)
+    print(a)
+    print(a.unsqueeze(1).expand(logits.size()).size())
     print("----------------------")

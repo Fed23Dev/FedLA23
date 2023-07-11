@@ -335,7 +335,13 @@ class LAWrapper(VWrapper):
                 sum_logits.scatter_add_(dim=0, index=logits_index, src=logits)
                 sum_labels.scatter_add_(dim=0, index=labels_index, src=labels_cnt)
 
-            avg_logits = sum_logits / sum_labels
+        # 消掉无穷和未定义，因为non-iid
+        zero = torch.zeros_like(sum_logits)
+        one = torch.ones_like(sum_logits)
+        div_labels = sum_labels.unsqueeze(1).expand(sum_logits.size())
+        sum_logits = torch.where(sum_logits == 0, one, sum_logits)
+        avg_logits = sum_logits / div_labels
+        avg_logits = torch.where(avg_logits == torch.inf, zero, avg_logits)
         return avg_logits
 
 # 传入真实数据的dataloader对模型进行测试或训练

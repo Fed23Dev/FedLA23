@@ -74,7 +74,7 @@ class FedLAMaster(FLMaster):
         workers_cells = [SingleCell(loader, Wrapper=LAWrapper) for loader in list(workers_loaders.values())]
         self.workers_nodes = [FedLAWorker(index, cell) for index, cell in enumerate(workers_cells)]
 
-        self.dataset_dist = [torch.zeros(num_classes, num_classes) for _ in range(workers)]
+        self.workers_dist = [torch.zeros(num_classes, num_classes) for _ in range(workers)]
         self.curt_dist = torch.zeros(num_classes, num_classes)
 
     def info_aggregation(self):
@@ -87,24 +87,26 @@ class FedLAMaster(FLMaster):
             self.workers_nodes[index].cell.decay_lr(self.pace)
 
     def schedule_strategy(self):
-        self.dataset_dist.clear()
+        self.workers_dist.clear()
         self.curt_dist.zero_()
+        self.curt_selected.clear()
 
         self.curt_dist = self.cell.wrapper.get_logits_dist()
         for i in range(self.workers):
-            self.dataset_dist.append(self.workers_nodes[i].cell.wrapper.get_logits_dist())
+            self.workers_dist.append(self.workers_nodes[i].cell.wrapper.get_logits_dist())
+
         js_distance = []
-        for dist in self.dataset_dist:
+        for dist in self.workers_dist:
             js_distance.append(js_divergence(self.curt_dist, dist))
 
-        sort_rank = np.argsort(np.array(js_distance))
-        self.curt_selected = sort_rank[:self.plan]
-
+        sort_rank = np.argsort(np.array(js_distance)).tolist()
+        self.curt_selected = sort_rank[:(self.plan//2)]
+        self.curt_selected.extend(sort_rank[-(self.plan//2):])
         # super(FedLAMaster, self).schedule_strategy()
 
     def drive_workers(self, *_args, **kwargs):
-        stu_indices = self.curt_selected[:len(self.curt_selected)]
-        tea_indices = self.curt_selected[len(self.curt_selected):]
+        stu_indices = self.curt_selected[:(len(self.curt_selected)//2)]
+        tea_indices = self.curt_selected[(len(self.curt_selected)//2):]
 
         for index in self.curt_selected:
             self.workers_nodes[index].local_train()

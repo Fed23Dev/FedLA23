@@ -36,6 +36,7 @@ class FedLA(FedAvg):
             super(FedLA, self).merge_dict(clients_dicts)
             pass
         curt_weight = self.merge_weight.index_select(0, torch.tensor(clients_ids))
+        device = next(self.model.parameters()).device
 
         for i in range(self.epoch):
             self.union_dict.clear()
@@ -55,6 +56,9 @@ class FedLA(FedAvg):
                 # device = next(self.model.parameters()).device
                 # inputs = torch.randn(self.specification[0]).to(device)
                 # logits = (torch.ones(self.specification[1]) / torch.tensor(self.classes)).to(device)
+
+                inputs = inputs.to(device)
+                targets = targets.to(device)
 
                 pred = self.model(inputs)
                 loss = self.loss_func(pred, targets)
