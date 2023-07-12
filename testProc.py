@@ -18,7 +18,7 @@ if __name__ == "__main__":
     # from dl.test_unit import main
     # main()
     a = torch.ones(10)
-    logits = torch.ones(10, 10)
+    b = torch.div(a, 10)
     print(a)
-    print(a.unsqueeze(1).expand(logits.size()).size())
+    print(b)
     print("----------------------")

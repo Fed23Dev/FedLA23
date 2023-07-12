@@ -1,5 +1,3 @@
-import random
-
 import numpy as np
 import torch
 import torch.utils.data as tdata
@@ -91,9 +89,11 @@ class FedLAMaster(FLMaster):
         self.curt_dist.zero_()
         self.curt_selected.clear()
 
-        self.curt_dist = self.cell.wrapper.get_logits_dist()
+        # self.curt_dist = self.cell.wrapper.get_logits_dist()
         for i in range(self.workers):
             self.workers_dist.append(self.workers_nodes[i].cell.wrapper.get_logits_dist())
+
+        self.curt_dist = torch.div(sum(self.workers_dist), len(self.workers_dist))
 
         js_distance = []
         for dist in self.workers_dist:
