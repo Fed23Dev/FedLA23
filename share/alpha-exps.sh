@@ -3,6 +3,9 @@
 config_path='share/experiments/alpha-exps.yml'
 
 # super-parameter option
+# 修改 line:9 超参数的取值 0.1 0.2 ~ 1.0
+# 修改 line:12 超参数的字段 en_alpha: *.*/en_alpha
+
 for alpha in 0.1 0.2 0.3 0.4 0.5 0.6 0.7 0.8 0.9 1.0
 do
   echo "The value is: $alpha"

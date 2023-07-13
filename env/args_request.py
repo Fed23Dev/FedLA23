@@ -37,7 +37,7 @@ DEFAULT_ARGS = {
 
     "batch_limit": 99999,
     "test_batch_limit": 10,
-    "logits_batch_limit": 10,
+    "logits_batch_limit": 50,
     "loss_back": 3,
     "mu": 0.01,
     "info_norm": 3,
