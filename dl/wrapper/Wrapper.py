@@ -292,6 +292,7 @@ class LAWrapper(VWrapper):
                     break
 
                 inputs, labels = self.device.on_tensor(inputs, targets)
+                labels = torch.argmax(labels, -1)
 
                 stu_pred = self.model(inputs)
                 with torch.no_grad():
