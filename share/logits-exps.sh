@@ -1,6 +1,6 @@
 #!/usr/bin/env zsh
 
-config_path='share/experiments/alpha-exps.yml'
+config_path='share/configs/alpha-exps.yml'
 
 # super-parameter option
 # 修改 line:9 超参数的取值 0.1 0.2 ~ 1.0
@@ -18,12 +18,12 @@ do
 
   for loop in 1 2 3
   do
-    log_path="logs/super/alpha${alpha:2}.log$loop"
+    log_path="logs/super/alpha$alpha.log$loop"
     nohup python main.py -y $config_path > $log_path 2>&1 && sleep 1
     wait
   done
 done
 
-# nohup share/sh/logits-exps.sh &
+# nohup share/logits-exps.sh &
 # test dos
 # set ff=unix

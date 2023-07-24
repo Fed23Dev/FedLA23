@@ -1,6 +1,6 @@
 #!/usr/bin/env zsh
 
-config_path='share/experiments/alpha-exps.yml'
+config_path='share/configs/alpha-exps.yml'
 
 # super-parameter option
 # 修改 line:9 超参数的取值 0.1 0.2 ~ 1.0
@@ -23,6 +23,6 @@ done
 # sed -i 's/\r//g' share/experiments/alpha-exps.yml
 # 为什么for里面不能嵌套while？
 
-# nohup share/sh/alpha-exps.sh &
+# nohup share/alpha-exps.sh &
 # test dos
 # set ff=unix
