@@ -102,6 +102,8 @@ class FedLAMaster(FLMaster):
         sort_rank = np.argsort(np.array(js_distance)).tolist()
         self.curt_selected = sort_rank[:(self.plan//2)]
         self.curt_selected.extend(sort_rank[-(self.plan//2):])
+
+        # # debug switch: selection
         # super(FedLAMaster, self).schedule_strategy()
 
     def drive_workers(self, *_args, **kwargs):
@@ -111,5 +113,6 @@ class FedLAMaster(FLMaster):
         for index in self.curt_selected:
             self.workers_nodes[index].local_train()
 
+        # debug switch: distill
         for s_index, t_index in zip(stu_indices, tea_indices):
             self.workers_nodes[s_index].local_distill(self.workers_nodes[t_index].cell.access_model())

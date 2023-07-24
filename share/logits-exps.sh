@@ -6,10 +6,15 @@ config_path='share/experiments/alpha-exps.yml'
 # 修改 line:9 超参数的取值 0.1 0.2 ~ 1.0
 # 修改 line:12 超参数的字段 en_alpha: *.*/en_alpha
 
-for alpha in 0.1 0.2 0.3 0.4 0.5 0.6 0.7 0.8 0.9 1.0
+for alpha in 5 10 15 20 30 40 50 100
+#for alpha in 5 10 15 20 25 30 35 40
+#for alpha in 1 3 5 8 10 12 15 18 20
+
 do
   echo "The value is: $alpha"
-  sed -i "s/en_alpha: *.*/en_alpha: $alpha/g" $config_path
+  sed -i "s/logits_batch_limit: *.*/logits_batch_limit: $alpha/g" $config_path
+#  sed -i "s/KD_BATCH: *.*/KD_BATCH: $alpha/g" $config_path
+#  sed -i "s/KD_EPOCH: *.*/KD_EPOCH: $alpha/g" $config_path
 
   for loop in 1 2 3
   do
@@ -19,10 +24,6 @@ do
   done
 done
 
-# sed -i "s/en_alpha: *.*/en_alpha: $alpha/g" share/experiments/alpha-exps.yml
-# sed -i 's/\r//g' share/experiments/alpha-exps.yml
-# 为什么for里面不能嵌套while？
-
-# nohup share/sh/alpha-exps.sh &
+# nohup share/sh/logits-exps.sh &
 # test dos
 # set ff=unix
