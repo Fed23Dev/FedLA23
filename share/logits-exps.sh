@@ -16,7 +16,7 @@ do
 #  sed -i "s/KD_BATCH: *.*/KD_BATCH: $alpha/g" $config_path
 #  sed -i "s/KD_EPOCH: *.*/KD_EPOCH: $alpha/g" $config_path
 
-  for loop in 1 2 3
+  for loop in 1 2 3 4 5
   do
     log_path="logs/super/alpha$alpha.log$loop"
     nohup python main.py -y $config_path > $log_path 2>&1 && sleep 1

@@ -26,14 +26,15 @@ federal: True
 non_iid: hetero
 workers: 100
 active_workers: 10
-federal_round: 40
+federal_round: 15
 local_epoch: 5
 
 # federal_round: 11
 # local_epoch: 1
-logits_batch_limit: 50
+logits_batch_limit: 5
 
 merge_batch: 0
 merge_epoch: 0
+
 KD_BATCH: 0
 KD_EPOCH: 0
