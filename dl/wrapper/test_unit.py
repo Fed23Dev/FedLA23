@@ -1,4 +1,5 @@
 from matplotlib import pyplot as plt
+import torch
 from torch import optim
 from torch.optim import SGD
 from torchvision.models import resnet18
@@ -70,6 +71,27 @@ def test_running():
         wrapper.load_checkpoint(file_repo.model_path)
 
     wrapper.valid_performance(dataloader)
+
+
+def test_loss():
+    loss_func = torch.nn.CrossEntropyLoss(reduction="none")
+    pre = torch.tensor([[0.1, 0.5, 0.3, 0.4],
+                        [0.1, 0.5, 0.3, 0.4],
+                        [0.1, 0.5, 0.3, 0.4]], dtype=torch.float)
+    tgt = torch.tensor([[1, 0, 0, 0],
+                        [0, 1, 0, 0],
+                        [0, 0, 1, 0]], dtype=torch.float)
+    print("手动计算:")
+    print("1.softmax")
+    print(torch.softmax(pre, dim=-1))
+    print("2.取对数")
+    print(torch.log(torch.softmax(pre, dim=-1)))
+    print("3.与真实值相乘")
+    print(-torch.sum(torch.mul(torch.log(torch.softmax(pre, dim=-1)), tgt), dim=-1))
+    print()
+    print("调用损失函数:")
+    loss = loss_func(pre, tgt)
+    print(loss)
 
 
 def main():
