@@ -26,7 +26,7 @@ federal: True
 non_iid: hetero
 workers: 100
 active_workers: 10
-federal_round: 40
+federal_round: 15
 local_epoch: 5
 
 # federal_round: 11
