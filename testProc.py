@@ -1,24 +1,8 @@
-import torch
-import random
-
-
-def _get_gt_mask(logits, target):
-    target = target.reshape(-1)
-    mask = torch.zeros_like(logits).scatter_(1, target.unsqueeze(1), 1).bool()
-    return mask
-
-
-def _get_other_mask(logits, target):
-    target = target.reshape(-1)
-    mask = torch.ones_like(logits).scatter_(1, target.unsqueeze(1), 0).bool()
-    return mask
-
+import numpy as np
 
 if __name__ == "__main__":
     # from dl.test_unit import main
     # main()
-    a = torch.ones(10)
-    b = torch.div(a, 10)
+    a = np.argsort(-np.array([1, 3, 4, 5, 2])).tolist()
     print(a)
-    print(b)
     print("----------------------")
