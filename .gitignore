@@ -1,7 +1,8 @@
-!.gitkeep
-
 .idea
-logs
-logs
-res
 
+res
+logs
+
+!logs/exps
+!logs/super
+!.gitkeep
