@@ -55,9 +55,7 @@ NCKD 隐藏主要的知识信息 \beta[1,0, 10.0] 超参数，需要调节但最
 ## 待优化
 
 1. 中心端学习聚合参数更加细粒度，当前为节点一个数，后为和参数相同的规格
-2. 在新环境配置时候，需要手动创建logs/exps目录
-3. 在新环境配置时候，需要手动创建logs/super目录
-4. 调度和聚合过程都存在中心化数据假设，如何解决
+2. 调度和聚合过程都存在中心化数据假设，如何解决
 
 ## 问题
 
@@ -70,28 +68,34 @@ F函数涉及求导，针对交叉熵损失函数和SGD的形式为（针对单�
 
 $$
 F = \Theta - \eta(-\frac{1}{n}\sum^n_{i=1}P_{i}log(h_{\Theta}(x_i)))'
+
 $$
 
 $$
 P_ilog(h_{\Theta}(x_i)) = P_{i_{t}}log(h_{\Theta}(x_{i_t}))
+
 $$
 
 $$
 h_{\Theta}(x)=\sum^{m}_{i=1}\Theta_ix_i
+
 $$
 
 $$
 log(f(x))'=\frac{1}{f(x)}f(x)'
+
 $$
 
 $$
 M_{LA}\approx h_{\Theta}(x)
+
 $$
 
 最终目标:
 
 $$
 F(F(\Theta, D_1),D_2) \approx \alpha_1F(\Theta, D_1) + \alpha_2 F(\Theta, D_2)
+
 $$
 
 ## 博客对项目进行说明
@@ -113,4 +117,3 @@ $$
 4. federal.test_unit.py中编写测试函数，在main中加入进入口
 5. env.support_config.py中VState中加入对应联邦学习算法的枚举变量
 6. env.yaml2args.py中alg_str2enum中加入字符串到枚举变量的映射
-
