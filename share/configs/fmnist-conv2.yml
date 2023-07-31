@@ -35,6 +35,7 @@ logits_batch_limit: 5
 
 merge_batch: 0
 merge_epoch: 0
+<<<<<<< HEAD
 KD_BATCH: 0
 KD_EPOCH: 0
 
