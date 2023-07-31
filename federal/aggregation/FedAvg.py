@@ -52,6 +52,7 @@ class FedAvg:
             self.last_loss = curt_loss
         else:
             master_cell.access_model().load_state_dict(self.pre_dict)
+            self.union_dict = copy.deepcopy(self.pre_dict)
 
     def sync_dict(self, checkpoint: dict):
         self.union_dict = checkpoint

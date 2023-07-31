@@ -19,6 +19,10 @@
 2. 单独测试非对称蒸馏方案，调节hetero beta值和shards
 3. 测试完整方案
 
+
++ debug weight_redo
++ debug matrix_switch
+
 ## 待实现
 
 ### 聚合方案
@@ -68,34 +72,28 @@ F函数涉及求导，针对交叉熵损失函数和SGD的形式为（针对单�
 
 $$
 F = \Theta - \eta(-\frac{1}{n}\sum^n_{i=1}P_{i}log(h_{\Theta}(x_i)))'
-
 $$
 
 $$
 P_ilog(h_{\Theta}(x_i)) = P_{i_{t}}log(h_{\Theta}(x_{i_t}))
-
 $$
 
 $$
 h_{\Theta}(x)=\sum^{m}_{i=1}\Theta_ix_i
-
 $$
 
 $$
 log(f(x))'=\frac{1}{f(x)}f(x)'
-
 $$
 
 $$
 M_{LA}\approx h_{\Theta}(x)
-
 $$
 
 最终目标:
 
 $$
 F(F(\Theta, D_1),D_2) \approx \alpha_1F(\Theta, D_1) + \alpha_2 F(\Theta, D_2)
-
 $$
 
 ## 博客对项目进行说明
