@@ -75,6 +75,8 @@ class FedLAMaster(FLMaster):
         self.workers_dist = [torch.zeros(num_classes, num_classes) for _ in range(workers)]
         self.curt_dist = torch.zeros(num_classes, num_classes)
 
+        self.debug_round = 0
+
     def info_aggregation(self):
         workers_dict = []
         part_selected = self.curt_selected
@@ -88,6 +90,10 @@ class FedLAMaster(FLMaster):
             self.workers_nodes[index].cell.decay_lr(self.pace)
 
     def schedule_strategy(self):
+        if self.curt_round <= 2:
+            super(FedLAMaster, self).schedule_strategy()
+            return
+
         self.workers_dist.clear()
         self.curt_dist.zero_()
         self.curt_selected.clear()

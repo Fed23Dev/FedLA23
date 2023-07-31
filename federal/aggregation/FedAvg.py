@@ -47,11 +47,11 @@ class FedAvg:
     def weight_redo(self, master_cell: SingleCell):
         master_cell.access_model().load_state_dict(self.union_dict)
         curt_loss = master_cell.run_model(batch_limit=args.test_batch_limit)
-        if curt_loss < self.SUFF * self.last_loss:
-            self.pre_dict = copy.deepcopy(self.union_dict)
-            self.last_loss = curt_loss
-        else:
-            master_cell.access_model().load_state_dict(self.pre_dict)
+        # if curt_loss < self.SUFF * self.last_loss:
+        #     self.pre_dict = copy.deepcopy(self.union_dict)
+        #     self.last_loss = curt_loss
+        # else:
+        #     master_cell.access_model().load_state_dict(self.pre_dict)
 
     def sync_dict(self, checkpoint: dict):
         self.union_dict = checkpoint
