@@ -12,7 +12,7 @@ from federal.aggregation.fed_util import get_speech_right
 class FedAvg:
     ERROR_MESS1 = "The length of clients_dicts must be equal to the length of the speech_right."
     MAX_VAL = torch.tensor(99.99)
-    SUFF = torch.tensor(3)
+    SUFF = torch.tensor(2)
 
     def __init__(self, init_dict: dict):
         self.union_dict = OrderedDict()

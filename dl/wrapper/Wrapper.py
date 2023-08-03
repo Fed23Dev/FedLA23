@@ -325,6 +325,8 @@ class LAWrapper(VWrapper):
 
                 logits = self.model(inputs).cpu()
 
+                logits = torch.nn.functional.softmax(logits, dim=1)
+
                 if batch_idx == 0:
                     sum_logits = sum_logits.type(logits.dtype)
 
