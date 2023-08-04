@@ -5,6 +5,12 @@
 + wandb云端可视化使用 https://blog.csdn.net/q_xiami123/article/details/116937033
 + python配置库yacs https://blog.csdn.net/qq_41185868/article/details/103881451
 
+注意：
+
+```
+# debug: to del
+```
+
 ## 待测试
 
 固定non-iid度，调节算法超参数
@@ -18,7 +24,6 @@
 1. 单独测试调度方案，调节hetero beta值和shards
 2. 单独测试非对称蒸馏方案，调节hetero beta值和shards
 3. 测试完整方案
-
 
 + debug weight_redo
 + debug matrix_switch

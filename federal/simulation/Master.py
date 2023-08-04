@@ -79,8 +79,10 @@ class FedLAMaster(FLMaster):
 
     def info_aggregation(self):
         workers_dict = []
-        part_selected = self.curt_selected
-        # part_selected = self.curt_selected[:(len(self.curt_selected)//2)]
+
+        # debug: to del
+        # part_selected = self.curt_selected
+        part_selected = self.curt_selected[:(len(self.curt_selected)//2)]
         # part_selected = self.curt_selected[(len(self.curt_selected)//2):]
 
         for index in part_selected:
@@ -117,8 +119,12 @@ class FedLAMaster(FLMaster):
         # super(FedLAMaster, self).schedule_strategy()
 
     def drive_workers(self, *_args, **kwargs):
-        tea_indices = self.curt_selected[:(len(self.curt_selected)//2)]
-        stu_indices = self.curt_selected[(len(self.curt_selected)//2):]
+        # debug: to del
+        # tea_indices = self.curt_selected[:(len(self.curt_selected)//2)]
+        # stu_indices = self.curt_selected[(len(self.curt_selected)//2):]
+
+        stu_indices = self.curt_selected[:(len(self.curt_selected) // 2)]
+        tea_indices = self.curt_selected[(len(self.curt_selected) // 2):]
 
         for index in self.curt_selected:
             self.workers_nodes[index].local_train()
