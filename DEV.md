@@ -11,6 +11,10 @@
 # debug: to del
 ```
 
+## 疑惑
++ torch.scatter()
++ torch.gather()
+
 ## 待测试
 
 固定non-iid度，调节算法超参数

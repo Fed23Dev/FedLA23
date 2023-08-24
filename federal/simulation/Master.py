@@ -81,8 +81,8 @@ class FedLAMaster(FLMaster):
         workers_dict = []
 
         # debug: to del
-        # part_selected = self.curt_selected
-        part_selected = self.curt_selected[:(len(self.curt_selected)//2)]
+        part_selected = self.curt_selected
+        # part_selected = self.curt_selected[:(len(self.curt_selected)//2)]
         # part_selected = self.curt_selected[(len(self.curt_selected)//2):]
 
         for index in part_selected:
