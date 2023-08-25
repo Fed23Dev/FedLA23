@@ -15,7 +15,7 @@ if __name__ == "__main__":
     info_matrix[1][1] = 1
     info_matrix[2][2] = 1
 
-    target = torch.tensor([0, 1, 2, 1, 2, 0])
+    target = torch.tensor([0, 1, 2, 1])
     target = target.unsqueeze(1).expand(target.size()[0], info_matrix.size()[0])
 
     # info_target = torch.zeros(target.size()[0], info_matrix.size()[0]) \
