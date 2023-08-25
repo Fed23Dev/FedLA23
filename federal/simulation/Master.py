@@ -82,8 +82,11 @@ class FedLAMaster(FLMaster):
 
         # debug: to del
         # part_selected = self.curt_selected
-        part_selected = self.curt_selected[:(len(self.curt_selected)//2)]
-        # part_selected = self.curt_selected[(len(self.curt_selected)//2):]
+
+        # DKD-i
+        # part_selected = self.curt_selected[:(len(self.curt_selected)//2)]
+
+        part_selected = self.curt_selected[(len(self.curt_selected)//2):]
 
         for index in part_selected:
             workers_dict.append(self.workers_nodes[index].cell.access_model().state_dict())
@@ -120,11 +123,12 @@ class FedLAMaster(FLMaster):
 
     def drive_workers(self, *_args, **kwargs):
         # debug: to del
-        # tea_indices = self.curt_selected[:(len(self.curt_selected)//2)]
-        # stu_indices = self.curt_selected[(len(self.curt_selected)//2):]
+        tea_indices = self.curt_selected[:(len(self.curt_selected)//2)]
+        stu_indices = self.curt_selected[(len(self.curt_selected)//2):]
 
-        stu_indices = self.curt_selected[:(len(self.curt_selected) // 2)]
-        tea_indices = self.curt_selected[(len(self.curt_selected) // 2):]
+        # DKD-i
+        # stu_indices = self.curt_selected[:(len(self.curt_selected) // 2)]
+        # tea_indices = self.curt_selected[(len(self.curt_selected) // 2):]
 
         for index in self.curt_selected:
             self.workers_nodes[index].local_train()
