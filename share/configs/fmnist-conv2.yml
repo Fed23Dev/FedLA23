@@ -25,7 +25,7 @@ min_lr: 0.0
 federal: True
 non_iid: hetero
 workers: 100
-active_workers: 10
+active_workers: 2
 federal_round: 15
 local_epoch: 5
 
