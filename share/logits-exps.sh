@@ -8,20 +8,20 @@ config_path='share/configs/alpha-exps.yml'
 
 # for alpha in 5 10 15 20 30 40 50 100
 # for alpha in 5 20 40 60 80 100 120 150
-# for alpha in 1 3 5 8 10 12 15 18 20
+for alpha in 1 3 5 8 10 12 15 18 20
 # for alpha in 1 2 3 4 5 6 7 8 9 10
-for alpha in 5
+# for alpha in 5
 
 do
   echo "The value is: $alpha"
-  sed -i "s/logits_batch_limit: *.*/logits_batch_limit: $alpha/g" $config_path
-  sed -n '34p' $config_path
+#  sed -i "s/logits_batch_limit: *.*/logits_batch_limit: $alpha/g" $config_path
+#  sed -n '34p' $config_path
 
 #  sed -i "s/KD_BATCH: *.*/KD_BATCH: $alpha/g" $config_path
 #  sed -n '39p' $config_path
 
-#  sed -i "s/KD_EPOCH: *.*/KD_EPOCH: $alpha/g" $config_path
-#  sed -n '40p' $config_path
+  sed -i "s/KD_EPOCH: *.*/KD_EPOCH: $alpha/g" $config_path
+  sed -n '40p' $config_path
 
 #  sed -i "s/ALPHA: *.*/ALPHA: $alpha/g" $config_path
 #  sed -n '42p' $config_path
