@@ -1,5 +1,5 @@
 # resource config
-exp_name: fmnist-conv2
+exp_name: cifar10-vgg16-avg
 
 ###################################### 16
 
@@ -16,7 +16,7 @@ batch_size: 32
 # optimizer config
 # optim: sgd
 optim: sgd
-learning_rate: 0.1
+learning_rate: 0.01
 
 # scheduler config
 scheduler: warmup_cos_lr
@@ -34,13 +34,13 @@ local_epoch: 10
 ###################################### 16
 # federal_round: 11
 # local_epoch: 1
-logits_batch_limit: 50
+logits_batch_limit: 20
 
 merge_batch: 0
 merge_epoch: 0
 
-KD_BATCH: 10
-KD_EPOCH: 128
+KD_BATCH: 128
+KD_EPOCH: 10
 
 ALPHA: 1
 BETA: 8
