@@ -5,7 +5,6 @@ from dl.compress.compress_util import dict_coo_express
 from dl.data.dataProvider import get_data_loader
 from dl.model.model_util import create_model
 from env.running_env import args
-from env.static_env import vgg16_candidate_rate
 from env.support_config import VModel
 from utils.objectIO import pickle_mkdir_save
 

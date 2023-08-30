@@ -1,9 +1,6 @@
 from ruamel.yaml import YAML
 from copy import deepcopy
 
-from custom_path import vgg16_ranks, resnet110_ranks, mobilenetv2_ranks, resnet56_ranks, conv2_ranks
-from env.static_env import vgg16_candidate_rate, resnet56_candidate_rate, \
-    resnet110_candidate_rate, mobile_candidate_rate, conv2_candidate_rate
 from env.args_request import DEFAULT_ARGS
 from env.support_config import *
 
@@ -195,25 +192,6 @@ class ArgRepo:
         else:
             print("The dataset is not supported.")
             exit(1)
-        if self.model == VModel.VGG16:
-            self.prune_rate = vgg16_candidate_rate
-            self.rank_path = vgg16_ranks
-        elif self.model == VModel.ResNet56:
-            self.prune_rate = resnet56_candidate_rate
-            self.rank_path = resnet56_ranks
-        elif self.model == VModel.ResNet110:
-            self.prune_rate = resnet110_candidate_rate
-            self.rank_path = resnet110_ranks
-        elif self.model == VModel.MobileNetV2:
-            self.prune_rate = mobile_candidate_rate
-            self.rank_path = mobilenetv2_ranks
-        elif self.model == VModel.Conv2:
-            self.prune_rate = conv2_candidate_rate
-            self.rank_path = conv2_ranks
-        else:
-            print("The model is not supported.")
-            exit(1)
-
         # if self.federal:
         #     self.pre_train = False
         # else:

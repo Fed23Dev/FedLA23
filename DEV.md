@@ -5,8 +5,41 @@
 + wandb云端可视化使用 https://blog.csdn.net/q_xiami123/article/details/116937033
 + python配置库yacs https://blog.csdn.net/qq_41185868/article/details/103881451
 
-注意：
+快速开始:
+1. 创建虚拟环境:
+```shell
+conda create -n fedla python=3.8
+conda activate fedla
+pip install torch torchvision fedlab torchsummary thop
+pip install yacs ruamel.yaml matplotlib
+```
 
+2. 在当前目录'~/la/datasets'下的目录树(tree -a -L 2)为:
+```text
+├── CIFAR10
+│   ├── cifar-10-batches-py
+│   └── cifar-10-python.tar.gz
+├── CIFAR100
+│   ├── cifar-100-python
+│   ├── cifar-100-python.tar.gz
+│   ├── cifar-10-batches-py
+│   └── cifar-10-python.tar.gz
+├── FMNIST
+│   └── FashionMNIST
+├── tiny-imagenet-200
+│   ├── test
+│   ├── train
+│   ├── val
+│   ├── wnids.txt
+│   └── words.txt
+
+```
+3. 为脚本添加执行权限:
+```shell
+sudo chmod +x share/*.sh
+```
+
+注意:
 ```
 # debug: to del
 ```
@@ -86,34 +119,28 @@ F函数涉及求导，针对交叉熵损失函数和SGD的形式为（针对单�
 
 $$
 F = \Theta - \eta(-\frac{1}{n}\sum^n_{i=1}P_{i}log(h_{\Theta}(x_i)))'
-
 $$
 
 $$
 P_ilog(h_{\Theta}(x_i)) = P_{i_{t}}log(h_{\Theta}(x_{i_t}))
-
 $$
 
 $$
 h_{\Theta}(x)=\sum^{m}_{i=1}\Theta_ix_i
-
 $$
 
 $$
 log(f(x))'=\frac{1}{f(x)}f(x)'
-
 $$
 
 $$
 M_{LA}\approx h_{\Theta}(x)
-
 $$
 
 最终目标:
 
 $$
 F(F(\Theta, D_1),D_2) \approx \alpha_1F(\Theta, D_1) + \alpha_2 F(\Theta, D_2)
-
 $$
 
 ## 博客对项目进行说明

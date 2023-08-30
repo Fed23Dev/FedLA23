@@ -64,7 +64,7 @@ class TinyImageNet(Dataset):
                 if f.endswith(".JPEG"):
                     num_images = num_images + 1
 
-        self.len_dataset = num_images;
+        self.len_dataset = num_images
 
         self.tgt_idx_to_class = {i: classes[i] for i in range(len(classes))}
         self.class_to_tgt_idx = {classes[i]: i for i in range(len(classes))}

@@ -5,7 +5,7 @@
 ```shell
 pip install torch torchvision fedlab torchsummary thop
 
-## 待定
+## 还需
 ## pip install yacs-or-ruamel.yaml matplotlib
 pip install yacs ruamel.yaml matplotlib
 

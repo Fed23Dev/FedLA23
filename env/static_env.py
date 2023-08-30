@@ -48,29 +48,6 @@ FMNIST_CLASSES = 10
 
 # VGG const config
 
-# vgg11_bn
-vgg11_candidate_rate = [0.45]*7 + [0.78]*3 + [0.83]*2
-
-# vgg16_bn
-vgg16_candidate_rate = [0.45]*7 + [0.78]*3 + [0.83]*2
-# vgg16_candidate_rate = [0.45]*7 + [0.78]*5
-
-# resnet56
-# resnet56_candidate_rate = [0.] + [0.18]*29
-resnet56_candidate_rate = [0.1] + [0.60]*35 + [0.0]*2 + [0.6]*6 + [0.4]*3 + \
-                          [0.1] + [0.4] + [0.1] + [0.4] + [0.1] + [0.4] + [0.1] + [0.4]
-
-# resnet110
-# resnet110_candidate_rate = [0.] + [0.2]*2 + [0.3]*18 + [0.35]*36
-resnet110_candidate_rate = [0.1] + [0.40]*36 + [0.40]*36 + [0.4]*36
-
-# mobilenetv2
-mobile_candidate_rate = [0.] + [0.3]*7
-# mobile_candidate_rate = [0.] + [0.4]*51
-
-# Conv2
-conv2_candidate_rate = [0.5]
-
 # Others
 MAX_HOOK_LAYER = 50
 valid_limit = 5
@@ -88,7 +65,5 @@ wu_batch = 32
 # acc_info
 print_interval = 10
 
-# pruning hyper
-pruning_inter = 10
 
 

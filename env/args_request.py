@@ -22,6 +22,7 @@ ARGS_STANDARD = dict(zip(MUST_KEYS, zip(DATA_TYPE, DATA_DOMAIN, DATA_HELP)))
 DEFAULT_ARGS = {
     "use_gpu": True,
     "gpu_ids": [0],
+    "pre_train": False,
 
     "learning_rate": 0.1,
     "min_lr": 1e-9,

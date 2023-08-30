@@ -1,8 +1,7 @@
 # resource config
-exp_name: cifar10-vgg16-avg
+exp_name: cifar10-vgg16-la
 
 ###################################### 16
-
 # checkpoint config
 model: vgg16
 alg: fedla
@@ -14,7 +13,6 @@ dataset: cifar10
 batch_size: 32
 
 # optimizer config
-# optim: sgd
 optim: sgd
 learning_rate: 0.01
 

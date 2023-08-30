@@ -28,12 +28,6 @@ resnet110_model = r'res/checkpoint/resnet/ResNet110.snap'
 mobilenetv2_model = r'res/checkpoint/mobilenet/MobileNetV2.snap'
 conv2_model = r'res/checkpoint/conv2/conv2.snap'
 
-vgg16_ranks = r'res/milestone/vgg_16_bn/Norm_Rank---03.19.npy'
-resnet56_ranks = r'res/milestone/resnet_56/Norm_Rank---02.13.npy'
-resnet110_ranks = r'res/milestone/ResNet110/Norm_Rank---02.13.npy'
-mobilenetv2_ranks = r'res/milestone/MobileNetV2/Norm_Rank---03.29.npy'
-conv2_ranks = r'res/milestone/Conv2/Norm_Rank---02.14.npy'
-
 debug_config = r'share/configs/alpha-exps.yml'
 # debug_config = r'share/configs/cifar10-vgg16-final#.yml'
 
