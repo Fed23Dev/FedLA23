@@ -1,9 +1,11 @@
 # resource config
 exp_name: cifar10-vgg16-avg
 
+###################################### 16
+
 # checkpoint config
 model: vgg16
-alg: fedavg
+alg: fedla
 gpu_ids: [0, 1]
 # pre_train: True
 
@@ -18,26 +20,27 @@ learning_rate: 0.01
 
 # scheduler config
 scheduler: warmup_cos_lr
-warm_steps: 80
+warm_steps: 20
 min_lr: 0.0
 
 # federal config
 federal: True
-non_iid: shards
+non_iid: hetero
 workers: 100
 active_workers: 2
-federal_round: 500
+federal_round: 150
 local_epoch: 10
 
+###################################### 16
 # federal_round: 11
 # local_epoch: 1
-logits_batch_limit: 50
+logits_batch_limit: 20
 
 merge_batch: 0
 merge_epoch: 0
 
-KD_BATCH: 10
-KD_EPOCH: 128
+KD_BATCH: 128
+KD_EPOCH: 10
 
 ALPHA: 1
 BETA: 8
