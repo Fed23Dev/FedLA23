@@ -12,6 +12,7 @@
 ```
 
 ## 疑惑
+
 + torch.scatter()
 + torch.gather()
 
