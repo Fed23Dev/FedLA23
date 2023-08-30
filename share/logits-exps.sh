@@ -10,7 +10,7 @@ config_path='share/configs/alpha-exps.yml'
 # for alpha in 5 20 40 60 80 100 120 150
 # for alpha in 1 3 5 8 10 12 15 18 20
 # for alpha in 1 2 3 4 5 6 7 8 9 10
-for alpha in 5
+for alpha in 20
 
 do
   echo "The value is: $alpha"
