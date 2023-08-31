@@ -38,9 +38,9 @@ class FedLAWorker(FLWorker):
     def __init__(self, worker_id: int, worker_cell: SingleCell):
         super().__init__(worker_id, worker_cell)
 
-    def local_train(self):
+    def local_train(self, info_matrix: torch.Tensor):
         global_logger.info(f'------Train from device: {self.id}------')
-        self.cell.run_model(train=True)
+        self.cell.run_model(train=True, info_matrix=info_matrix)
 
     def local_distill(self, teacher_model: torch.nn.Module):
         self.cell.wrapper.dkd_loss_optim(teacher_model)

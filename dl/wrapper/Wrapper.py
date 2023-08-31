@@ -267,6 +267,7 @@ class ProxWrapper(VWrapper):
 
 class LAWrapper(VWrapper):
     ERROR_MESS7 = "FedLA must provide teacher_model parameter."
+    ERROR_MESS8 = "FedLA must provide info_matrix parameter."
 
     def __init__(self, model: nn.Module, train_dataloader: tdata.dataloader, optimizer: VOptimizer,
                  scheduler: VScheduler, loss: VLossFunc):
@@ -303,12 +304,36 @@ class LAWrapper(VWrapper):
                 loss = sum([ls.mean() for ls in losses_dict.values()])
 
                 self.optim_step(loss)
-            self.scheduler_step()
 
-        self.kd_curt_epoch += self.kd_epoch
+            self.kd_curt_epoch += 1
+            # self.scheduler_step()
+
+    def global_im_optim(self, info_matrix: torch.Tensor):
+        pass
+
+    def local_im_optim(self, info_matrix: torch.Tensor):
+        pass
+
+    def loss_compute(self, pred: torch.Tensor, targets: torch.Tensor, **kwargs) -> torch.Tensor:
+        assert "info_matrix" in kwargs.keys(), self.ERROR_MESS8
+        info_matrix = kwargs["info_matrix"]
+        # debug: to del local
+        self_matrix = self.get_logits_matrix()
+        mask = ~info_matrix.bool()
+        info_matrix = mask * self_matrix + info_matrix
+
+        # debug: to del global
+        info_matrix = next(self.device.on_tensor(info_matrix))
+        labels = torch.argmax(targets, -1)
+        constraint_matrix = self.get_optim_matrix(labels, info_matrix)
+        losses_dict = {"loss_ce": super().loss_compute(pred, targets),
+                       "loss_im": super().loss_compute(pred, constraint_matrix)}
+
+        loss = sum([ls.mean() for ls in losses_dict.values()])
+        return super().loss_compute(pred, targets, **kwargs)
 
     # Tensor Size: classes * classes
-    def get_logits_dist(self, batch_limit: int = args.logits_batch_limit) -> torch.Tensor:
+    def get_logits_matrix(self, batch_limit: int = args.logits_batch_limit) -> torch.Tensor:
         label_dtype = torch.int64
 
         sum_logits = torch.zeros(args.num_classes, args.num_classes)
@@ -347,7 +372,7 @@ class LAWrapper(VWrapper):
         avg_logits = torch.where(avg_logits == torch.inf, zero, avg_logits)
         return avg_logits
 
-    def get_optim_target(self, target: torch.Tensor,
+    def get_optim_matrix(self, target: torch.Tensor,
                          info_matrix: torch.Tensor) -> torch.Tensor:
         target = target.unsqueeze(1).expand(target.size()[0], info_matrix.size()[0])
         return torch.gather(input=info_matrix, dim=0, index=target)

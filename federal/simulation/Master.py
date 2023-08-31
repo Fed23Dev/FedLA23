@@ -72,8 +72,8 @@ class FedLAMaster(FLMaster):
         workers_cells = [SingleCell(loader, Wrapper=LAWrapper) for loader in list(workers_loaders.values())]
         self.workers_nodes = [FedLAWorker(index, cell) for index, cell in enumerate(workers_cells)]
 
-        self.workers_dist = [torch.zeros(num_classes, num_classes) for _ in range(workers)]
-        self.curt_dist = torch.zeros(num_classes, num_classes)
+        self.workers_matrix = [torch.zeros(num_classes, num_classes) for _ in range(workers)]
+        self.curt_matrix = torch.zeros(num_classes, num_classes)
 
         self.debug_round = 0
 
@@ -98,19 +98,19 @@ class FedLAMaster(FLMaster):
             super(FedLAMaster, self).schedule_strategy()
             return
 
-        self.workers_dist.clear()
-        self.curt_dist.zero_()
+        self.workers_matrix.clear()
+        self.curt_matrix.zero_()
         self.curt_selected.clear()
 
         # self.curt_dist = self.cell.wrapper.get_logits_dist()
         for i in range(self.workers):
-            self.workers_dist.append(self.workers_nodes[i].cell.wrapper.get_logits_dist())
+            self.workers_matrix.append(self.workers_nodes[i].cell.wrapper.get_logits_matrix())
 
-        self.curt_dist = torch.div(sum(self.workers_dist), len(self.workers_dist))
+        self.curt_matrix = torch.div(sum(self.workers_matrix), len(self.workers_matrix))
 
         js_distance = []
-        for dist in self.workers_dist:
-            js_distance.append(js_divergence(self.curt_dist, dist))
+        for dist in self.workers_matrix:
+            js_distance.append(js_divergence(self.curt_matrix, dist))
 
         # modify
         sort_rank = np.argsort(np.array(js_distance)).tolist()
@@ -129,8 +129,13 @@ class FedLAMaster(FLMaster):
         # stu_indices = self.curt_selected[:(len(self.curt_selected) // 2)]
         # tea_indices = self.curt_selected[(len(self.curt_selected) // 2):]
 
+        # debug: to del global
         for index in self.curt_selected:
-            self.workers_nodes[index].local_train()
+            self.workers_nodes[index].local_train(self.curt_matrix)
+
+        # # debug: to del local
+        #     for index in self.curt_selected:
+        #         self.workers_nodes[index].local_train(self.curt_matrix)
 
         # debug switch: distill
         for s_index, t_index in zip(stu_indices, tea_indices):
