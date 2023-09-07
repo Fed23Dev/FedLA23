@@ -118,11 +118,11 @@ class FedLAMaster(FLMaster):
         # self.curt_selected = sort_rank[:(self.plan//2)]
         # self.curt_selected.extend(sort_rank[-(self.plan//2):])
 
-        # debug: to del sch
-        self.curt_selected = sort_rank[:self.plan]
-        #
         # # debug: to del sch
-        # self.curt_selected.extend(sort_rank[-self.plan:])
+        # self.curt_selected = sort_rank[:self.plan]
+
+        # debug: to del sch
+        self.curt_selected = sort_rank[-self.plan:]
 
         # # debug switch: selection
         # super(FedLAMaster, self).schedule_strategy()
