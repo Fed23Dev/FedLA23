@@ -19,7 +19,7 @@ learning_rate: 0.1
 
 # scheduler config
 scheduler: warmup_cos_lr
-warm_steps: 10
+warm_steps: 5
 min_lr: 0.0
 
 # federal config
@@ -40,6 +40,9 @@ merge_epoch: 0
 
 #KD_BATCH: 128
 #KD_EPOCH: 10
+
+#KD_BATCH: 32
+#KD_EPOCH: 3
 
 KD_BATCH: 0
 KD_EPOCH: 0

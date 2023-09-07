@@ -114,8 +114,15 @@ class FedLAMaster(FLMaster):
 
         # modify
         sort_rank = np.argsort(np.array(js_distance)).tolist()
-        self.curt_selected = sort_rank[:(self.plan//2)]
-        self.curt_selected.extend(sort_rank[-(self.plan//2):])
+
+        # self.curt_selected = sort_rank[:(self.plan//2)]
+        # self.curt_selected.extend(sort_rank[-(self.plan//2):])
+
+        # debug: to del sch
+        self.curt_selected = sort_rank[:self.plan]
+        #
+        # # debug: to del sch
+        # self.curt_selected.extend(sort_rank[-self.plan:])
 
         # # debug switch: selection
         # super(FedLAMaster, self).schedule_strategy()
