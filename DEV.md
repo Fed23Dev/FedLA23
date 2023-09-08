@@ -162,3 +162,8 @@ $$
 4. federal.test_unit.py中编写测试函数，在main中加入进入口
 5. env.support_config.py中VState中加入对应联邦学习算法的枚举变量
 6. env.yaml2args.py中alg_str2enum中加入字符串到枚举变量的映射
+
+
+## 致谢
+1. ShuffleNetV2: https://blog.csdn.net/BIT_Legend/article/details/123386705
+2. 
