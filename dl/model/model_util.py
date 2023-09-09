@@ -9,6 +9,7 @@ import torch.nn as nn
 from dl.model.conv2 import Conv2
 from dl.model.mobilenetV2 import MobileNetV2
 from dl.model.resnet import ResNet, BasicBlock
+from dl.model.shufflenetV2 import shufflenet_v2_x2_0
 from dl.model.vgg import VGG16, VGG11
 from env.running_env import global_logger
 from env.static_env import *
@@ -31,22 +32,23 @@ def initialize(model: nn.Module) -> nn.Module:
     return model
 
 
-def create_model(model: VModel, compress_rate=ORIGIN_CP_RATE, num_classes=10) -> nn.Module:
+def create_model(model: VModel, compress_rate=ORIGIN_CP_RATE,
+                 num_classes: int = 10, in_channels: int = 1) -> nn.Module:
     if model == VModel.VGG11:
         return initialize(VGG11(compress_rate=compress_rate, num_classes=num_classes))
     elif model == VModel.VGG16:
         return initialize(VGG16(compress_rate=compress_rate, num_classes=num_classes))
     elif model == VModel.ResNet56:
         return initialize(ResNet(BasicBlock, 56, compress_rate=compress_rate, num_classes=num_classes,
-                                 input_channel=1))
+                                 input_channel=in_channels))
     elif model == VModel.ResNet110:
         return initialize(ResNet(BasicBlock, 110, compress_rate=compress_rate, num_classes=num_classes))
     elif model == VModel.MobileNetV2:
         return initialize(MobileNetV2(compress_rate=compress_rate, num_classes=num_classes))
     elif model == VModel.Conv2:
-        return initialize(Conv2(compress_rate=compress_rate, num_classes=num_classes, in_channels=1))
+        return initialize(Conv2(compress_rate=compress_rate, num_classes=num_classes, in_channels=in_channels))
     elif model == VModel.ShuffleNetV2:
-        return initialize()
+        return initialize(shufflenet_v2_x2_0(num_classes=num_classes, in_channels=in_channels))
 
 
 def load_model_params(load_model: nn.Module, source_model: nn.Module):

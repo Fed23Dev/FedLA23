@@ -5,6 +5,7 @@ from dl.model.ModelExt import Extender
 from dl.model.model_util import create_model
 from env.static_env import ORIGIN_CP_RATE
 from env.support_config import VModel
+from torchsummary import summary
 
 
 def test_model():
@@ -50,6 +51,16 @@ def test_pre_model():
     cell.test_performance()
 
 
+def test_shunet():
+    model = create_model(VModel.ShuffleNetV2, num_classes=10, in_channels=3)
+
+    data = torch.randn(32, 3, 32, 32)
+    out = model(data)
+    print(out.size())
+
+    summary(model, (3, 32, 32))
+
+
 def model_forward():
     data = torch.randn(32, 3, 32, 32)
 
@@ -58,5 +69,3 @@ def model_forward():
 
     out = model(data)
     print(out)
-
-
