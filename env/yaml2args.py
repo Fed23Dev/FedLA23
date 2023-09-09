@@ -16,6 +16,8 @@ def model_str2enum(value: str) -> VModel:
         ret = VModel.MobileNetV2
     elif value == 'conv2':
         ret = VModel.Conv2
+    elif value == 'shuffleNetV2':
+        ret = VModel.ShuffleNetV2
     else:
         ret = VModel.Init
     return ret

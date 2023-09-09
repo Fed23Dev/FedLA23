@@ -45,6 +45,8 @@ def create_model(model: VModel, compress_rate=ORIGIN_CP_RATE, num_classes=10) ->
         return initialize(MobileNetV2(compress_rate=compress_rate, num_classes=num_classes))
     elif model == VModel.Conv2:
         return initialize(Conv2(compress_rate=compress_rate, num_classes=num_classes, in_channels=1))
+    elif model == VModel.ShuffleNetV2:
+        return initialize()
 
 
 def load_model_params(load_model: nn.Module, source_model: nn.Module):
