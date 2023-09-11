@@ -21,6 +21,7 @@ class VModel(Enum):
     ResNet110 = 4
     MobileNetV2 = 5
     Conv2 = 6
+    ShuffleNetV2 = 7
 
 
 # Optimizer Type

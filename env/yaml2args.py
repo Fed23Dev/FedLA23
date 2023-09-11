@@ -16,6 +16,8 @@ def model_str2enum(value: str) -> VModel:
         ret = VModel.MobileNetV2
     elif value == 'conv2':
         ret = VModel.Conv2
+    elif value == 'shuffleNetV2':
+        ret = VModel.ShuffleNetV2
     else:
         ret = VModel.Init
     return ret
@@ -139,6 +141,7 @@ class ArgRepo:
 
     def runtime_attr_placeholder(self):
         self.num_classes = None
+        self.in_channels = None
         self.curt_mode = None
 
     @property
@@ -183,12 +186,16 @@ class ArgRepo:
     def supplement_args(self):
         if self.dataset == VDataSet.CIFAR10:
             self.num_classes = 10
+            self.in_channels = 3
         elif self.dataset == VDataSet.CIFAR100:
             self.num_classes = 100
+            self.in_channels = 3
         elif self.dataset == VDataSet.TinyImageNet:
             self.num_classes = 200
+            self.in_channels = 3
         elif self.dataset == VDataSet.FMNIST:
             self.num_classes = 10
+            self.in_channels = 1
         else:
             print("The dataset is not supported.")
             exit(1)

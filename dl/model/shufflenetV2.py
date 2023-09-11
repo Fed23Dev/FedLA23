@@ -76,8 +76,9 @@ class InvertedResidual(nn.Module):
 
 
 class ShuffleNetV2(nn.Module):
-    def __init__(self, stages_repeats: List[int], stages_out_channels: List[int], num_classes: int = 1000,
-                 inverted_residual: Callable[..., nn.Module] = InvertedResidual) -> None:
+    def __init__(self, stages_repeats: List[int], stages_out_channels: List[int],
+                 inverted_residual: Callable[..., nn.Module] = InvertedResidual,
+                 num_classes: int = 1000, in_channels: int = 3) -> None:
         super().__init__()
 
         if len(stages_repeats) != 3:
@@ -86,7 +87,7 @@ class ShuffleNetV2(nn.Module):
             raise ValueError("expected stages_out_channels as list of 5 positive ints")
         self._stage_out_channels = stages_out_channels
 
-        input_channels = 3
+        input_channels = in_channels
         output_channels = self._stage_out_channels[0]
         self.conv1 = nn.Sequential(
             nn.Conv2d(input_channels, output_channels, 3, 2, 1, bias=False),

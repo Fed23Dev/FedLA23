@@ -27,7 +27,7 @@ class SingleCell:
         self.train_epoch = 1
 
         # Wrapper init
-        model = create_model(args.model, num_classes=args.num_classes)
+        model = create_model(args.model, num_classes=args.num_classes, in_channels=args.in_channels)
         if train_loader is None:
             dataloader = get_data_loader(args.dataset, data_type="train",
                                          batch_size=args.batch_size, shuffle=True)
