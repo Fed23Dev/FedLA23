@@ -12,15 +12,9 @@ momentum = 0.01
 def channel_shuffle(x: Tensor, groups: int) -> Tensor:
     batchsize, num_channels, height, width = x.size()
     channels_per_group = num_channels // groups
-
-    # reshape
     x = x.view(batchsize, groups, channels_per_group, height, width)
-
     x = torch.transpose(x, 1, 2).contiguous()
-
-    # flatten
     x = x.view(batchsize, -1, height, width)
-
     return x
 
 
@@ -146,48 +140,16 @@ def _shufflenetv2(*args: Any, **kwargs: Any) -> ShuffleNetV2:
 
 
 def shufflenet_v2_x0_5(**kwargs: Any) -> ShuffleNetV2:
-    """
-    Constructs a ShuffleNetV2 with 0.5x output channels, as described in
-    `"ShuffleNet V2: Practical Guidelines for Efficient CNN Architecture Design"
-    <https://arxiv.org/abs/1807.11164>`_.
-    Args:
-        pretrained (bool): If True, returns a model pre-trained on ImageNet
-        progress (bool): If True, displays a progress bar of the download to stderr
-    """
     return _shufflenetv2([4, 8, 4], [24, 48, 96, 192, 1024], **kwargs)
 
 
 def shufflenet_v2_x1_0(**kwargs: Any) -> ShuffleNetV2:
-    """
-    Constructs a ShuffleNetV2 with 1.0x output channels, as described in
-    `"ShuffleNet V2: Practical Guidelines for Efficient CNN Architecture Design"
-    <https://arxiv.org/abs/1807.11164>`_.
-    Args:
-        pretrained (bool): If True, returns a model pre-trained on ImageNet
-        progress (bool): If True, displays a progress bar of the download to stderr
-    """
     return _shufflenetv2([4, 8, 4], [24, 116, 232, 464, 1024], **kwargs)
 
 
 def shufflenet_v2_x1_5(**kwargs: Any) -> ShuffleNetV2:
-    """
-    Constructs a ShuffleNetV2 with 1.5x output channels, as described in
-    `"ShuffleNet V2: Practical Guidelines for Efficient CNN Architecture Design"
-    <https://arxiv.org/abs/1807.11164>`_.
-    Args:
-        pretrained (bool): If True, returns a model pre-trained on ImageNet
-        progress (bool): If True, displays a progress bar of the download to stderr
-    """
     return _shufflenetv2([4, 8, 4], [24, 176, 352, 704, 1024], **kwargs)
 
 
 def shufflenet_v2_x2_0(**kwargs: Any) -> ShuffleNetV2:
-    """
-    Constructs a ShuffleNetV2 with 2.0x output channels, as described in
-    `"ShuffleNet V2: Practical Guidelines for Efficient CNN Architecture Design"
-    <https://arxiv.org/abs/1807.11164>`_.
-    Args:
-        pretrained (bool): If True, returns a model pre-trained on ImageNet
-        progress (bool): If True, displays a progress bar of the download to stderr
-    """
     return _shufflenetv2([4, 8, 4], [24, 244, 488, 976, 2048], **kwargs)
