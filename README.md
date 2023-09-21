@@ -29,13 +29,13 @@ tiny-imagenet下载链接：http://cs231n.stanford.edu/tiny-imagenet-200.zip
 
 | Config item | Options                                                      |
 |:-----------:|:-------------------------------------------------------------|
-|    model    | vgg16, resnet56, resnet110, mobilenetV2                      |
-|   dataset   | cifar10, cifar100                                            |
+|    model    | vgg16, resnet56, resnet110, mobilenetV2, shufflenetV2        |
+|   dataset   | fmnist, cifar10, cifar100, tinyimagenet                      |
 |    optim    | sgd, sgd_pfl, adam                                           |
 |  scheduler  | step_lr, cosine_lr, reduce_lr, warmup_cos_lr, warmup_step_lr |
 |    loss     | cross_entropy                                                |
 |   non-iid   | hetero, shards                                               |  
-|     alg     | fedavg, fedprox, fedir, hrankfl, calimfl                     |
+|     alg     | fedavg, fedprox, fedla, moon, ...                            |
 
 4. 修改main.py line:36 的当前年份，remain_days表示最多保存多少天前的数据文件
 
