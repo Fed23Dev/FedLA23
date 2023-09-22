@@ -5,13 +5,13 @@ exp_name: test
 alg: single
 
 # checkpoint config
-model: vgg16
+model: conv2
 use_gpu: False
 gpu_ids: [0]
 pre_train: False
 
 # dataset config
-dataset: cifar10
+dataset: fmnist
 batch_size: 16
 
 # optimizer config
@@ -27,22 +27,11 @@ scheduler: step_lr
 step_size: 1
 gamma: 0.99309
 
-# prune config
-rank_path: none
-info_norm: 3
-backward: 1
-en_alpha: 0.5
-en_shrink: 0.95
-
-interval: True
-rank_plus: True
-
 # federal config
 non_iid: hetero
 workers: 100
 active_workers: 10
 federal_round: 100
-check_inter: 1
 
 local_epoch: 5
 batch_limit: 99999
