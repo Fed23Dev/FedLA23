@@ -1,6 +1,7 @@
 import numpy as np
 import torch
 import torch.utils.data as tdata
+from sklearn.cluster import DBSCAN
 
 from dl.SingleCell import SingleCell
 from dl.wrapper.Wrapper import ProxWrapper, LAWrapper
@@ -72,10 +73,14 @@ class FedLAMaster(FLMaster):
         workers_cells = [SingleCell(loader, Wrapper=LAWrapper) for loader in list(workers_loaders.values())]
         self.workers_nodes = [FedLAWorker(index, cell) for index, cell in enumerate(workers_cells)]
 
+        self.prev_workers_matrix = [torch.zeros(num_classes, num_classes) for _ in range(workers)]
         self.workers_matrix = [torch.zeros(num_classes, num_classes) for _ in range(workers)]
         self.curt_matrix = torch.zeros(num_classes, num_classes)
 
         self.debug_round = 0
+
+    def db_clusters(self):
+        pass
 
     def info_aggregation(self):
         workers_dict = []
@@ -118,19 +123,19 @@ class FedLAMaster(FLMaster):
         # self.curt_selected = sort_rank[:(self.plan//2)]
         # self.curt_selected.extend(sort_rank[-(self.plan//2):])
 
-        # # debug: to del sch
-        # self.curt_selected = sort_rank[:self.plan]
-
         # debug: to del sch
-        self.curt_selected = sort_rank[-self.plan:]
+        self.curt_selected = sort_rank[:self.plan]
+
+        # # debug: to del sch
+        # self.curt_selected = sort_rank[-self.plan:]
 
         # # debug switch: selection
         # super(FedLAMaster, self).schedule_strategy()
 
     def drive_workers(self, *_args, **kwargs):
         # debug: to del
-        tea_indices = self.curt_selected[:(len(self.curt_selected)//2)]
-        stu_indices = self.curt_selected[(len(self.curt_selected)//2):]
+        tea_indices = self.curt_selected[:(len(self.curt_selected) // 2)]
+        stu_indices = self.curt_selected[(len(self.curt_selected) // 2):]
 
         # DKD-i
         # stu_indices = self.curt_selected[:(len(self.curt_selected) // 2)]
