@@ -27,6 +27,7 @@ resnet56_model = r'res/checkpoint/resnet/resnet_56.pt'
 resnet110_model = r'res/checkpoint/resnet/ResNet110.snap'
 mobilenetv2_model = r'res/checkpoint/mobilenet/MobileNetV2.snap'
 conv2_model = r'res/checkpoint/conv2/conv2.snap'
+shufflenetv2_model = r'res/checkpoint/shufflenet/ShufflenetV2.snap'
 
 debug_config = r'share/configs/alpha-exps.yml'
 # debug_config = r'share/configs/cifar10-vgg16-final#.yml'

@@ -30,6 +30,8 @@ elif args.model == VModel.MobileNetV2:
     model_path = mobilenetv2_model
 elif args.model == VModel.Conv2:
     model_path = conv2_model
+elif args.model == VModel.ShuffleNetV2:
+    model_path = shufflenetv2_model
 else:
     model_path = vgg16_model
     print('Not supported model type.')
