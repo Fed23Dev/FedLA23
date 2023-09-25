@@ -1,5 +1,6 @@
 import numpy as np
 import torch
+from sklearn.cluster import DBSCAN, OPTICS, AgglomerativeClustering, BisectingKMeans
 
 
 def tes():
@@ -11,8 +12,23 @@ def tes():
 
 
 if __name__ == "__main__":
-    from dl.model.test_unit import test_shunet
+    a = torch.randn(10, 10).reshape(-1)
+    b = torch.randn(10, 10).reshape(-1)
+    c = torch.randn(10, 10).reshape(-1)
 
-    test_shunet()
+    X = torch.stack((a, b, c), dim=0).numpy()
+    clustering = DBSCAN(eps=200, min_samples=2).fit(X)
+    print(clustering.labels_)
 
+    clustering = OPTICS(min_samples=3).fit(X)
+    print(clustering.labels_)
+
+    clustering = OPTICS(min_samples=3).fit(X)
+    print(clustering.labels_)
+
+    clustering = AgglomerativeClustering(n_clusters=2).fit(X)
+    print(clustering.labels_)
+
+    clustering = BisectingKMeans(n_clusters=2).fit(X)
+    print(clustering.labels_)
     print("----------------------")
