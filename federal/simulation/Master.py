@@ -113,6 +113,8 @@ class FedLAMaster(FLMaster):
 
         self.curt_matrix = torch.div(sum(self.workers_matrix), len(self.workers_matrix))
 
+
+
         js_distance = []
         for dist in self.workers_matrix:
             js_distance.append(js_divergence(self.curt_matrix, dist))

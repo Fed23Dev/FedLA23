@@ -162,4 +162,16 @@ $$
 
 ## 致谢
 1. ShuffleNetV2: https://blog.csdn.net/BIT_Legend/article/details/123386705
-2. 
+
+
+## 数据快速提取与可视化 - seaborn、ploty
+最直接相关的类为utils.VContainer，可以根据唯一键存储时间顺延的序列数据，例如：一个模型在联邦学习中的前500轮的测试精度序列
+utils.VContainer中存储的数据只停留在内存中，所以还需要通过dl.wrapper.ExitDriver类将关键指标数据反序列化到本地文件中
+dl.wrapper.ExitDriver不仅存储关键指标数据，还可以存储模型参数和相关配置等等，所以我们需要关注的方式是running_freeze()方法
+所有存储的数据指标文件在res/milestone/[model_name]下的.seq后缀文件下，具体可以查看res/milestone/[model_name]下的\*paths\*.txt文件，里面有实验后的所有本地文件路径
+
++ 数据指标保存
+在能读取关键数据指标的地方加入
+
++ 数据指标转换为标准输入csv，支持多个同数合并
+

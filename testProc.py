@@ -11,7 +11,7 @@ def tes():
     print(mask * all + zero)
 
 
-if __name__ == "__main__":
+def dbscan():
     a = torch.randn(10, 10).reshape(-1)
     b = torch.randn(10, 10).reshape(-1)
     c = torch.randn(10, 10).reshape(-1)
@@ -23,12 +23,26 @@ if __name__ == "__main__":
     clustering = OPTICS(min_samples=3).fit(X)
     print(clustering.labels_)
 
-    clustering = OPTICS(min_samples=3).fit(X)
-    print(clustering.labels_)
-
+    # Specific
     clustering = AgglomerativeClustering(n_clusters=2).fit(X)
     print(clustering.labels_)
 
     clustering = BisectingKMeans(n_clusters=2).fit(X)
     print(clustering.labels_)
+
+
+if __name__ == "__main__":
+    import time
+
+
+    def curt_time_stamp(simp: bool = False):
+        pattern = '%Y.%m.%d_%H-%M-%S'
+        time_str = time.strftime(pattern, time.localtime(time.time()))
+        if simp:
+            return time_str[5: 10]+time_str[14: 16]+time_str[17: 19]
+        else:
+            return time_str
+
+    print(curt_time_stamp(True))
+    print(curt_time_stamp(False))
     print("----------------------")
