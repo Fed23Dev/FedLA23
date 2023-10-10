@@ -24,7 +24,6 @@ class FileType(Enum):
     LOG_TYPE = '.log'
     EXP_TYPE = '.txt'
     SEQ_TYPE = '.seq'
-    RANK_TYPE = '.npy'
     CHECKPOINT_TYPE = '.snap'
 
 
@@ -40,7 +39,7 @@ def curt_time_stamp(simp: bool = False):
 def only_time_stamp():
     pattern = '%Y.%m.%d_%H-%M-%S'
     time_str = time.strftime(pattern, time.localtime(time.time()))
-    return time_str[st3: st3+2]+time_str[st4: st3+2]+time_str[st5: st3+2]
+    return time_str[st3: st3 + 2] + time_str[st4: st4 + 2] + time_str[st5: st5 + 2]
 
 
 def file_name(file_type: FileType, name: str = None, ext_time: bool = True) -> str:

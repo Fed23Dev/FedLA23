@@ -1,3 +1,5 @@
+from copy import deepcopy
+
 import numpy as np
 import torch
 import torch.utils.data as tdata
@@ -5,6 +7,7 @@ from sklearn.cluster import DBSCAN
 
 from dl.SingleCell import SingleCell
 from dl.wrapper.Wrapper import ProxWrapper, LAWrapper
+from env.running_env import global_container
 from federal.aggregation.FedLA import FedLA
 
 from federal.simulation.FLnodes import FLMaster
@@ -113,7 +116,7 @@ class FedLAMaster(FLMaster):
 
         self.curt_matrix = torch.div(sum(self.workers_matrix), len(self.workers_matrix))
 
-
+        global_container.flash('avg_matrix', deepcopy(self.curt_matrix).numpy())
 
         js_distance = []
         for dist in self.workers_matrix:

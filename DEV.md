@@ -171,7 +171,14 @@ dl.wrapper.ExitDriver不仅存储关键指标数据，还可以存储模型参�
 所有存储的数据指标文件在res/milestone/[model_name]下的.seq后缀文件下，具体可以查看res/milestone/[model_name]下的\*paths\*.txt文件，里面有实验后的所有本地文件路径
 
 + 数据指标保存
-在能读取关键数据指标的地方加入
+在能读取关键数据指标的地方加入，必须是循环体中，已重复加入同一指标数据组成时间相关序列
+```python
+global global_container
+curt_matrix = None
 
-+ 数据指标转换为标准输入csv，支持多个同数合并
+global_container.flash('avg_matrix', curt_matrix)
+```
+
++ 数据指标转换为标准输入csv，支持多个同数目序列合并
+
 

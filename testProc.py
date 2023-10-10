@@ -34,15 +34,14 @@ def dbscan():
 if __name__ == "__main__":
     import time
 
+    st3 = 11
+    st4 = 14
+    st5 = 17
 
-    def curt_time_stamp(simp: bool = False):
+    def only_time_stamp():
         pattern = '%Y.%m.%d_%H-%M-%S'
         time_str = time.strftime(pattern, time.localtime(time.time()))
-        if simp:
-            return time_str[5: 10]+time_str[14: 16]+time_str[17: 19]
-        else:
-            return time_str
+        return time_str[st3: st3 + 2] + time_str[st4: st4 + 2] + time_str[st5: st5 + 2]
 
-    print(curt_time_stamp(True))
-    print(curt_time_stamp(False))
+    print(only_time_stamp())
     print("----------------------")
