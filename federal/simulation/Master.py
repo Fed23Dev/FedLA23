@@ -150,10 +150,6 @@ class FedLAMaster(FLMaster):
         for index in self.curt_selected:
             self.workers_nodes[index].local_train(self.curt_matrix)
 
-        # # debug: to del local
-        #     for index in self.curt_selected:
-        #         self.workers_nodes[index].local_train(self.curt_matrix)
-
         # debug switch: distill
         for s_index, t_index in zip(stu_indices, tea_indices):
             self.workers_nodes[s_index].local_distill(self.workers_nodes[t_index].cell.access_model())
