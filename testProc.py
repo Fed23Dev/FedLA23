@@ -16,7 +16,9 @@ def dbscan():
     b = torch.randn(10, 10).reshape(-1)
     c = torch.randn(10, 10).reshape(-1)
 
-    X = torch.stack((a, b, c), dim=0).numpy()
+    lis = [a, b, c]
+
+    X = torch.stack(lis, dim=0).numpy()
     clustering = DBSCAN(eps=200, min_samples=2).fit(X)
     print(clustering.labels_)
 
@@ -24,7 +26,7 @@ def dbscan():
     print(clustering.labels_)
 
     # Specific
-    clustering = AgglomerativeClustering(n_clusters=2).fit(X)
+    clustering = AgglomerativeClustering(n_clusters=3).fit(X)
     print(clustering.labels_)
 
     clustering = BisectingKMeans(n_clusters=2).fit(X)
@@ -44,6 +46,10 @@ def timestamp():
         return time_str[st3: st3 + 2] + time_str[st4: st4 + 2] + time_str[st5: st5 + 2]
 
     print(only_time_stamp())
+
+
+def test_lis():
+    sample = [2, 1, 0, 1]
 
 
 if __name__ == "__main__":

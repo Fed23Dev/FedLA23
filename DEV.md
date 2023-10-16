@@ -42,6 +42,8 @@ sudo chmod +x share/*.sh
 注意:
 ```
 # debug: to del
+# plan:to impl
+# doing: to modify
 ```
 
 ## 疑惑

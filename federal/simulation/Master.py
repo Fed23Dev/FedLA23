@@ -3,7 +3,7 @@ from copy import deepcopy
 import numpy as np
 import torch
 import torch.utils.data as tdata
-from sklearn.cluster import DBSCAN
+from sklearn.cluster import AgglomerativeClustering
 
 from dl.SingleCell import SingleCell
 from dl.wrapper.Wrapper import ProxWrapper, LAWrapper
@@ -69,9 +69,7 @@ class FedLAMaster(FLMaster):
         super().__init__(workers, activists, local_epoch, master_cell)
 
         specification = master_cell.wrapper.running_scale()
-        self.merge = FedLA(master_cell.access_model(), workers,
-                           specification, num_classes, me, mb,
-                           self.cell.test_dataloader)
+        self.merge = FedLA(master_cell.access_model(), specification, num_classes)
 
         workers_cells = [SingleCell(loader, Wrapper=LAWrapper) for loader in list(workers_loaders.values())]
         self.workers_nodes = [FedLAWorker(index, cell) for index, cell in enumerate(workers_cells)]
@@ -80,76 +78,62 @@ class FedLAMaster(FLMaster):
         self.workers_matrix = [torch.zeros(num_classes, num_classes) for _ in range(workers)]
         self.curt_matrix = torch.zeros(num_classes, num_classes)
 
-        self.debug_round = 0
+        self.num_clusters = 5
+        self.pipeline_id = 0
+        self.clusters_indices = []
 
-    def clusters_pipeline(self):
-        pass
+    def adaptive_clusters(self):
+        return self.num_clusters
 
-    def info_aggregation(self):
-        workers_dict = []
-
-        # debug: to del
-        part_selected = self.curt_selected
-
-        # DKD-i
-        # part_selected = self.curt_selected[:(len(self.curt_selected)//2)]
-        # part_selected = self.curt_selected[(len(self.curt_selected)//2):]
-
-        for index in part_selected:
-            workers_dict.append(self.workers_nodes[index].cell.access_model().state_dict())
-        self.merge.merge_dict(workers_dict, part_selected)
-        for index in self.curt_selected:
-            self.workers_nodes[index].cell.decay_lr(self.pace)
-
-    def schedule_strategy(self):
-        if self.curt_round <= 2:
-            super(FedLAMaster, self).schedule_strategy()
-            return
-
+    def sync_matrix(self):
+        self.prev_workers_matrix = deepcopy(self.workers_matrix)
         self.workers_matrix.clear()
         self.curt_matrix.zero_()
-        self.curt_selected.clear()
 
-        # self.curt_dist = self.cell.wrapper.get_logits_dist()
         for i in range(self.workers):
             self.workers_matrix.append(self.workers_nodes[i].cell.wrapper.get_logits_matrix())
 
         self.curt_matrix = torch.div(sum(self.workers_matrix), len(self.workers_matrix))
+        # global_container.flash('avg_matrix', deepcopy(self.curt_matrix).numpy())
 
-        global_container.flash('avg_matrix', deepcopy(self.curt_matrix).numpy())
+    def info_aggregation(self):
+        workers_dict = []
 
-        js_distance = []
-        for dist in self.workers_matrix:
-            js_distance.append(js_divergence(self.curt_matrix, dist))
+        for index in self.curt_selected:
+            workers_dict.append(self.workers_nodes[index].cell.access_model().state_dict())
 
-        # modify
-        sort_rank = np.argsort(np.array(js_distance)).tolist()
+        # plan:to impl
+        workers_dict = workers_dict
 
-        self.curt_selected = sort_rank[:(self.plan//2)]
-        self.curt_selected.extend(sort_rank[-(self.plan//2):])
+        self.merge.merge_dict(workers_dict)
 
-        # # debug: to del sch
-        # self.curt_selected = sort_rank[:self.plan]
+        for index in self.curt_selected:
+            self.workers_nodes[index].cell.decay_lr(self.pace)
 
-        # # debug: to del sch
-        # self.curt_selected = sort_rank[-self.plan:]
+    def schedule_strategy(self):
+        if self.curt_round <= 1:
+            super(FedLAMaster, self).schedule_strategy()
+            return
+
+        self.curt_selected.clear()
+        self.sync_matrix()
+
+        if self.pipeline_id == 0:
+            X = torch.stack(self.workers_matrix, dim=0).numpy()
+            clustering = AgglomerativeClustering(n_clusters=self.adaptive_clusters()).fit(X)
+            self.clusters_indices = clustering.labels_
+
+        # doing: to modify
+        self.curt_selected = np.where(self.clusters_indices == self.pipeline_id)[0].tolist()
+
+        self.pipeline_id += 1
+
+        if self.pipeline_id == self.adaptive_clusters():
+            self.pipeline_id = 0
 
         # # debug switch: selection
         # super(FedLAMaster, self).schedule_strategy()
 
     def drive_workers(self, *_args, **kwargs):
-        # # debug: to del
-        # tea_indices = self.curt_selected[:(len(self.curt_selected) // 2)]
-        # stu_indices = self.curt_selected[(len(self.curt_selected) // 2):]
-
-        # DKD-i
-        # stu_indices = self.curt_selected[:(len(self.curt_selected) // 2)]
-        # tea_indices = self.curt_selected[(len(self.curt_selected) // 2):]
-
-        # debug: to del global
         for index in self.curt_selected:
             self.workers_nodes[index].local_train(self.curt_matrix)
-
-        # # debug switch: distill
-        # for s_index, t_index in zip(stu_indices, tea_indices):
-        #     self.workers_nodes[s_index].local_distill(self.workers_nodes[t_index].cell.access_model())
