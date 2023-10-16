@@ -31,7 +31,7 @@ def dbscan():
     print(clustering.labels_)
 
 
-if __name__ == "__main__":
+def timestamp():
     import time
 
     st3 = 11
@@ -44,4 +44,8 @@ if __name__ == "__main__":
         return time_str[st3: st3 + 2] + time_str[st4: st4 + 2] + time_str[st5: st5 + 2]
 
     print(only_time_stamp())
+
+
+if __name__ == "__main__":
+    dbscan()
     print("----------------------")

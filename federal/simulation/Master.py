@@ -82,7 +82,7 @@ class FedLAMaster(FLMaster):
 
         self.debug_round = 0
 
-    def db_clusters(self):
+    def clusters_pipeline(self):
         pass
 
     def info_aggregation(self):
@@ -138,9 +138,9 @@ class FedLAMaster(FLMaster):
         # super(FedLAMaster, self).schedule_strategy()
 
     def drive_workers(self, *_args, **kwargs):
-        # debug: to del
-        tea_indices = self.curt_selected[:(len(self.curt_selected) // 2)]
-        stu_indices = self.curt_selected[(len(self.curt_selected) // 2):]
+        # # debug: to del
+        # tea_indices = self.curt_selected[:(len(self.curt_selected) // 2)]
+        # stu_indices = self.curt_selected[(len(self.curt_selected) // 2):]
 
         # DKD-i
         # stu_indices = self.curt_selected[:(len(self.curt_selected) // 2)]
@@ -150,6 +150,6 @@ class FedLAMaster(FLMaster):
         for index in self.curt_selected:
             self.workers_nodes[index].local_train(self.curt_matrix)
 
-        # debug switch: distill
-        for s_index, t_index in zip(stu_indices, tea_indices):
-            self.workers_nodes[s_index].local_distill(self.workers_nodes[t_index].cell.access_model())
+        # # debug switch: distill
+        # for s_index, t_index in zip(stu_indices, tea_indices):
+        #     self.workers_nodes[s_index].local_distill(self.workers_nodes[t_index].cell.access_model())
