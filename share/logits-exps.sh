@@ -40,3 +40,5 @@ done
 # nohup share/logits-exps.sh &
 # test dos
 # set ff=unix
+
+# python -m pdb main.py -y 'share/configs/alpha-exps.yml'

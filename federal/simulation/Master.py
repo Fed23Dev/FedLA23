@@ -63,7 +63,7 @@ class FedProxMaster(FLMaster):
 class FedLAMaster(FLMaster):
     def __init__(self, workers: int, activists: int, local_epoch: int,
                  loader: tdata.dataloader, workers_loaders: dict,
-                 num_classes: int, mb: int, me: int):
+                 num_classes: int):
 
         master_cell = SingleCell(loader, Wrapper=LAWrapper)
         super().__init__(workers, activists, local_epoch, master_cell)
@@ -111,28 +111,30 @@ class FedLAMaster(FLMaster):
             self.workers_nodes[index].cell.decay_lr(self.pace)
 
     def schedule_strategy(self):
-        if self.curt_round <= 1:
-            super(FedLAMaster, self).schedule_strategy()
-            return
-
-        self.curt_selected.clear()
         self.sync_matrix()
 
-        if self.pipeline_id == 0:
-            X = torch.stack(self.workers_matrix, dim=0).numpy()
-            clustering = AgglomerativeClustering(n_clusters=self.adaptive_clusters()).fit(X)
-            self.clusters_indices = clustering.labels_
+        # if self.curt_round <= 1:
+        #     super(FedLAMaster, self).schedule_strategy()
+        #     return
+        #
+        # self.curt_selected.clear()
+        # self.sync_matrix()
+        #
+        # if self.pipeline_id == 0:
+        #     X = torch.stack(self.workers_matrix, dim=0).numpy()
+        #     clustering = AgglomerativeClustering(n_clusters=self.adaptive_clusters()).fit(X)
+        #     self.clusters_indices = clustering.labels_
+        #
+        # # doing: to modify
+        # self.curt_selected = np.where(self.clusters_indices == self.pipeline_id)[0].tolist()
+        #
+        # self.pipeline_id += 1
+        #
+        # if self.pipeline_id == self.adaptive_clusters():
+        #     self.pipeline_id = 0
 
-        # doing: to modify
-        self.curt_selected = np.where(self.clusters_indices == self.pipeline_id)[0].tolist()
-
-        self.pipeline_id += 1
-
-        if self.pipeline_id == self.adaptive_clusters():
-            self.pipeline_id = 0
-
-        # # debug switch: selection
-        # super(FedLAMaster, self).schedule_strategy()
+        # debug switch: selection
+        super(FedLAMaster, self).schedule_strategy()
 
     def drive_workers(self, *_args, **kwargs):
         for index in self.curt_selected:

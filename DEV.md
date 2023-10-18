@@ -66,6 +66,13 @@ sudo chmod +x share/*.sh
 
 查看matrix的变化情况
 
+调节聚类算法的超参
+sklearn.cluster.AgglomerativeClustering()
+n_clusters：指定聚类的簇数目。这是一个重要的参数，需要根据具体问题和聚类目标来选择合适的值。
+linkage：连接策略参数，用于指定计算簇之间距离的方法。如前面提到的，可以选择"ward"、"complete"、"average"或"single"等不同的连接策略。
+affinity：距离度量参数，用于指定计算样本之间距离的方法。默认值为"euclidean"，表示使用欧几里德距离。除了欧几里德距离外，还可以选择其他距离度量，如曼哈顿距离（"manhattan"）等。
+distance_threshold：距离阈值参数，用于指定聚类过程中的合并阈值。当两个簇之间的距离超过该阈值时，将停止合并，得到最终的聚类结果。如果不设置该参数，则根据n_clusters参数确定簇数目，否则将根据完整的层次结构进行聚类。
+
 ## 待实现
 
 ### 聚合or优化方案

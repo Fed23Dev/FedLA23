@@ -137,7 +137,10 @@ class VWrapper:
             inputs, labels = self.device.on_tensor(inputs, targets)
             pred = self.model(inputs)
 
-            loss = self.loss_compute(pred, labels, **kwargs)
+            if train:
+                loss = self.loss_compute(pred, labels, **kwargs)
+            else:
+                loss = self.test_loss_compute(pred, labels)
 
             if train:
                 self.optim_step(loss)
@@ -247,6 +250,9 @@ class VWrapper:
     def loss_compute(self, pred: torch.Tensor, targets: torch.Tensor, **kwargs) -> torch.Tensor:
         return self.loss_func(pred, targets)
 
+    def test_loss_compute(self, pred: torch.Tensor, targets: torch.Tensor) -> torch.Tensor:
+        return self.loss_func(pred, targets)
+
 
 class ProxWrapper(VWrapper):
     ERROR_MESS6 = "FedProx must provide pre_params parameter."
@@ -315,22 +321,22 @@ class LAWrapper(VWrapper):
         pass
 
     def loss_compute(self, pred: torch.Tensor, targets: torch.Tensor, **kwargs) -> torch.Tensor:
-        # assert "info_matrix" in kwargs.keys(), self.ERROR_MESS8
-        # info_matrix = kwargs["info_matrix"]
-        # # debug: to del local
-        # self_matrix = self.get_logits_matrix()
-        # mask = ~info_matrix.bool()
-        # info_matrix = mask * self_matrix + info_matrix
-        #
-        # # debug: to del global
-        # info_matrix = next(self.device.on_tensor(info_matrix))
-        # labels = torch.argmax(targets, -1)
-        # constraint_matrix = self.get_optim_matrix(labels, info_matrix)
-        # losses_dict = {"loss_ce": super().loss_compute(pred, targets),
-        #                "loss_im": super().loss_compute(pred, constraint_matrix)}
-        #
-        # loss = sum([ls.mean() for ls in losses_dict.values()])
-        return super().loss_compute(pred, targets, **kwargs)
+        assert "info_matrix" in kwargs.keys(), self.ERROR_MESS8
+        info_matrix = kwargs["info_matrix"]
+        # debug: to del local
+        self_matrix = self.get_logits_matrix()
+        mask = ~info_matrix.bool()
+        info_matrix = mask * self_matrix + info_matrix
+
+        # debug: to del global
+        info_matrix = next(self.device.on_tensor(info_matrix))
+        labels = torch.argmax(targets, -1)
+        constraint_matrix = self.get_optim_matrix(labels, info_matrix)
+        losses_dict = {"loss_ce": super().loss_compute(pred, targets),
+                       "loss_im": super().loss_compute(pred, constraint_matrix)}
+
+        return sum([ls.mean() for ls in losses_dict.values()])
+        # return super().loss_compute(pred, targets, **kwargs)
 
     # Tensor Size: classes * classes
     def get_logits_matrix(self, batch_limit: int = args.logits_batch_limit) -> torch.Tensor:
