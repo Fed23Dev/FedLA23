@@ -78,7 +78,7 @@ class FedLAMaster(FLMaster):
         self.workers_matrix = [torch.zeros(num_classes, num_classes) for _ in range(workers)]
         self.curt_matrix = torch.zeros(num_classes, num_classes)
 
-        self.num_clusters = 5
+        self.num_clusters = 10
         self.pipeline_id = 0
         self.clusters_indices = []
 
@@ -111,30 +111,32 @@ class FedLAMaster(FLMaster):
             self.workers_nodes[index].cell.decay_lr(self.pace)
 
     def schedule_strategy(self):
+        # self.sync_matrix()
+
+        if self.curt_round <= 1:
+            super(FedLAMaster, self).schedule_strategy()
+            return
+
+        self.curt_selected.clear()
         self.sync_matrix()
 
-        # if self.curt_round <= 1:
-        #     super(FedLAMaster, self).schedule_strategy()
-        #     return
-        #
-        # self.curt_selected.clear()
-        # self.sync_matrix()
-        #
-        # if self.pipeline_id == 0:
-        #     X = torch.stack(self.workers_matrix, dim=0).numpy()
-        #     clustering = AgglomerativeClustering(n_clusters=self.adaptive_clusters()).fit(X)
-        #     self.clusters_indices = clustering.labels_
-        #
-        # # doing: to modify
-        # self.curt_selected = np.where(self.clusters_indices == self.pipeline_id)[0].tolist()
-        #
-        # self.pipeline_id += 1
-        #
-        # if self.pipeline_id == self.adaptive_clusters():
-        #     self.pipeline_id = 0
+        if self.pipeline_id == 0:
+            X = torch.stack(self.workers_matrix, dim=0).numpy()
+            n_samples, dim1, dim2 = X.shape
+            flattened_X = X.reshape(n_samples, dim1 * dim2)
+            clustering = AgglomerativeClustering(n_clusters=self.adaptive_clusters()).fit(flattened_X)
+            self.clusters_indices = clustering.labels_
 
-        # debug switch: selection
-        super(FedLAMaster, self).schedule_strategy()
+        # doing: to modify
+        self.curt_selected = np.where(self.clusters_indices == self.pipeline_id)[0].tolist()
+
+        self.pipeline_id += 1
+
+        if self.pipeline_id == self.adaptive_clusters():
+            self.pipeline_id = 0
+
+        # # debug switch: selection
+        # super(FedLAMaster, self).schedule_strategy()
 
     def drive_workers(self, *_args, **kwargs):
         for index in self.curt_selected:

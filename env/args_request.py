@@ -56,4 +56,6 @@ DEFAULT_ARGS = {
     "WARMUP": 20,
     "KD_BATCH": 20,
     "KD_EPOCH": 5,
+
+    "clusters": 10,
 }

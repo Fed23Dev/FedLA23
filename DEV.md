@@ -148,6 +148,8 @@ $$
 5. env.support_config.py中VState中加入对应联邦学习算法的枚举变量
 6. env.yaml2args.py中alg_str2enum中加入字符串到枚举变量的映射
 
++ 快速添加新的超参数
+1. 
 
 ## 致谢
 1. ShuffleNetV2: https://blog.csdn.net/BIT_Legend/article/details/123386705
