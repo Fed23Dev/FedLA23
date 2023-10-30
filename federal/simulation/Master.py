@@ -63,7 +63,7 @@ class FedProxMaster(FLMaster):
 class FedLAMaster(FLMaster):
     def __init__(self, workers: int, activists: int, local_epoch: int,
                  loader: tdata.dataloader, workers_loaders: dict,
-                 num_classes: int):
+                 num_classes: int, clusters: int):
 
         master_cell = SingleCell(loader, Wrapper=LAWrapper)
         super().__init__(workers, activists, local_epoch, master_cell)
@@ -78,8 +78,8 @@ class FedLAMaster(FLMaster):
         self.workers_matrix = [torch.zeros(num_classes, num_classes) for _ in range(workers)]
         self.curt_matrix = torch.zeros(num_classes, num_classes)
 
-        self.num_clusters = 10
-        self.pipeline_id = 0
+        self.num_clusters = clusters
+        self.pipeline_status = 0
         self.clusters_indices = []
 
     def adaptive_clusters(self):
@@ -120,7 +120,7 @@ class FedLAMaster(FLMaster):
         self.curt_selected.clear()
         self.sync_matrix()
 
-        if self.pipeline_id == 0:
+        if self.pipeline_status == 0:
             X = torch.stack(self.workers_matrix, dim=0).numpy()
             n_samples, dim1, dim2 = X.shape
             flattened_X = X.reshape(n_samples, dim1 * dim2)
@@ -128,12 +128,12 @@ class FedLAMaster(FLMaster):
             self.clusters_indices = clustering.labels_
 
         # doing: to modify
-        self.curt_selected = np.where(self.clusters_indices == self.pipeline_id)[0].tolist()
+        self.curt_selected = np.where(self.clusters_indices == self.pipeline_status)[0].tolist()
 
-        self.pipeline_id += 1
+        self.pipeline_status += 1
 
-        if self.pipeline_id == self.adaptive_clusters():
-            self.pipeline_id = 0
+        if self.pipeline_status == self.adaptive_clusters():
+            self.pipeline_status = 0
 
         # # debug switch: selection
         # super(FedLAMaster, self).schedule_strategy()

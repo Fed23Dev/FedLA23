@@ -32,6 +32,7 @@ workers: 100
 active_workers: 10
 federal_round: 15
 local_epoch: 5
+clusters: 10
 
 ###################################### 16
 

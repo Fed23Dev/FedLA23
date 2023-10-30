@@ -149,7 +149,12 @@ $$
 6. env.yaml2args.py中alg_str2enum中加入字符串到枚举变量的映射
 
 + 快速添加新的超参数
-1. 
+1. env.arg_requests下的DEFAULT_ARGS中加入该参数的键值对，键为参数名，值为默认值
+2. env.yaml2args下的ArgRepo中的init_attr_placeholder()方法中加入对应的初始化
+3. 在share.configs下创建.yml文件，加入和键名一样的超参数配置
+4. 在要使用超参数的位置，添加from env.running_env import args
+5. 然后使用超参数args.键名
+
 
 ## 致谢
 1. ShuffleNetV2: https://blog.csdn.net/BIT_Legend/article/details/123386705
