@@ -219,7 +219,8 @@ class ArgRepo:
                f"learning rate:{self.learning_rate}\n" \
                f"scheduler:{scheduler}\n" \
                f"warm steps:{self.warm_steps}\n" \
-               f"epoch:{self.local_epoch}"
+               f"epoch:{self.local_epoch}" \
+               f"clusters:{self.clusters}\n"
 
     @exp_name.setter
     def exp_name(self, value):

@@ -353,7 +353,7 @@ class LAWrapper(VWrapper):
                 _labels, _cnt = torch.unique(labels, return_counts=True)
                 labels_cnt = torch.zeros(args.num_classes, dtype=label_dtype) \
                     .scatter_(dim=0, index=_labels, src=_cnt)
-
+                inputs = self.device.sync_tensor(inputs)
                 logits = self.model(inputs).cpu()
 
                 logits = torch.nn.functional.softmax(logits, dim=1)
