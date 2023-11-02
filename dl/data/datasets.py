@@ -7,7 +7,7 @@ from dl.data.transform import init_transform, init_target_transform, init_tiny_i
 from env.static_env import CIFAR10_MEAN, CIFAR10_STD, CIFAR10_CLASSES, \
     CIFAR100_MEAN, CIFAR100_STD, CIFAR100_CLASSES, FMNIST_CLASSES, TinyImageNet_CLASSES
 from env.support_config import VDataSet
-from env.running_env import file_repo
+from env.running_env import global_file_repo
 
 from torch.utils.data import Dataset
 from torchvision import transforms
@@ -140,7 +140,7 @@ def get_data(dataset: VDataSet, data_type, transform=None, target_transform=None
             transform = init_transform(data_type, CIFAR10_MEAN, CIFAR10_STD)
         if target_transform is None:
             target_transform = init_target_transform(CIFAR10_CLASSES)
-        return torchvision.datasets.CIFAR10(root=join(file_repo.dataset_path, "CIFAR10"),
+        return torchvision.datasets.CIFAR10(root=join(global_file_repo.dataset_path, "CIFAR10"),
                                             train=data_type == "train", download=True,
                                             transform=transform,
                                             target_transform=target_transform)
@@ -150,7 +150,7 @@ def get_data(dataset: VDataSet, data_type, transform=None, target_transform=None
             transform = init_transform(data_type, CIFAR100_MEAN, CIFAR100_STD)
         if target_transform is None:
             target_transform = init_target_transform(CIFAR100_CLASSES)
-        return torchvision.datasets.CIFAR100(root=join(file_repo.dataset_path, "CIFAR100"),
+        return torchvision.datasets.CIFAR100(root=join(global_file_repo.dataset_path, "CIFAR100"),
                                              train=data_type == "train", download=True,
                                              transform=transform,
                                              target_transform=target_transform)
@@ -162,7 +162,7 @@ def get_data(dataset: VDataSet, data_type, transform=None, target_transform=None
                 transforms.Normalize(mean=0.5, std=0.5)])
         if target_transform is None:
             target_transform = init_target_transform(FMNIST_CLASSES)
-        return torchvision.datasets.FashionMNIST(root=join(file_repo.dataset_path, "FMNIST"),
+        return torchvision.datasets.FashionMNIST(root=join(global_file_repo.dataset_path, "FMNIST"),
                                                  train=data_type == "train",
                                                  transform=transform, target_transform=target_transform,
                                                  download=True)
@@ -173,7 +173,7 @@ def get_data(dataset: VDataSet, data_type, transform=None, target_transform=None
         if target_transform is None:
             target_transform = init_target_transform(TinyImageNet_CLASSES)
         # r"C:\\Users\<your_name>\la\datasets\tiny-imagenet-200"
-        return TinyImageNet(root=join(file_repo.dataset_path, "tiny-imagenet-200"),
+        return TinyImageNet(root=join(global_file_repo.dataset_path, "tiny-imagenet-200"),
                             train=data_type == "train",
                             transform=transform,
                             target_transform=target_transform)

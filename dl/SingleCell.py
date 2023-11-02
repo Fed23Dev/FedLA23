@@ -7,7 +7,7 @@ import torch.utils.data as tdata
 from dl.model.model_util import create_model
 from dl.wrapper.Wrapper import VWrapper
 from dl.wrapper.ExitDriver import ExitManager
-from env.running_env import args, file_repo, global_container
+from env.running_env import args, global_file_repo, global_container
 from dl.data.dataProvider import get_data_loader
 from env.running_env import global_logger
 
@@ -44,7 +44,7 @@ class SingleCell:
         self.wrapper.init_scheduler_loss(args.step_size, args.gamma, total_epoch, args.warm_steps, args.min_lr)
 
         if args.pre_train:
-            self.wrapper.load_checkpoint(file_repo.model_path)
+            self.wrapper.load_checkpoint(global_file_repo.model_path)
 
         self.test_dataloader = dataloader if test_loader is None else test_loader
         self.exit_manager = ExitManager(self.wrapper)

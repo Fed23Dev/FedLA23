@@ -1,6 +1,12 @@
 import os
 import pickle
 import warnings
+from copy import deepcopy
+from typing import List
+
+import pandas as pd
+
+PRIME_COL = "No."
 
 
 def dir_files(dir_path: str) -> list:
@@ -68,6 +74,29 @@ def str_save(text: str, f: str):
     f = os.path.expanduser(f)
     with open(f, "w") as opened_f:
         opened_f.write(text)
+
+
+def seq2csv(f: str, out: str):
+    seq = pickle_load(f)
+    df = pd.DataFrame(columns=[1])
+    df[1] = df[1].astype(object)
+    df[1] = seq
+    df.to_csv(out)
+
+
+def seqs2csv(fs: List[str], out: str, cols: List[str] = None):
+    assert len(fs) >= 1, 'Not a empty List fs'
+    seqs = []
+    df = pd.DataFrame()
+    base_length = len(pickle_load(fs[0]))
+    for f in fs:
+        tmp = pickle_load(f)
+        if len(tmp) == base_length:
+            seqs.append(deepcopy(tmp))
+    for ind, seq in enumerate(seqs):
+        col = cols[ind] if cols else ind+1
+        df[col] = seq
+    df.to_csv(out)
 
 
 if __name__ == '__main__':

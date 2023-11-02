@@ -10,10 +10,11 @@ class FileCleaner:
     ERROR_MESS1 = "Do not search date to satisfy the regular(FileCleaner.pattern)."
     ERROR_MESS2 = "Do not search date to satisfy the regular(FileCleaner.data_pattern)."
 
-    def __init__(self, remain_days: int, year: int = 2022):
+    def __init__(self, remain_days: int, year: int = 2023):
         self.curt_year = year
         self.remain = remain_days
         self.format_time = "%Y.%m.%d"
+        # 匹配两种文件格式，一种是日志，一种是普通带日期文件，都只提取日期
         self.pattern = re.compile(r"---([\d\.]+)\.[\w]+$|^\d+\.([\d\.]+)_", re.MULTILINE)
         self.data_pattern = re.compile(r"[\d\.]+", re.MULTILINE)
 

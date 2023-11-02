@@ -1,6 +1,6 @@
 from env import yaml2args
 from env.support_config import VModel
-from utils.PathManager import HRankPathManager
+from utils.PathManager import PathManager
 from utils.VContainer import VContainer
 from utils.Vlogger import VLogger
 from custom_path import *
@@ -42,13 +42,13 @@ else:
 ###
 
 # Path
-file_repo = HRankPathManager(model_path, datasets_base)
-file_repo.derive_path(exp_base, image_base, milestone_base, log_base)
+global_file_repo = PathManager(model_path, datasets_base)
+global_file_repo.derive_path(exp_base, image_base, milestone_base, log_base)
 
 
 # Logger
 # global_logger_PATH = "logs/hrankFL.log"
-logger_path, _ = file_repo.new_log()
+logger_path, _ = global_file_repo.new_log()
 global_logger = VLogger(logger_path, True).logger
 
 # Container

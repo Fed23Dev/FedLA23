@@ -100,7 +100,7 @@ class HRank(ABC):
 
         path_id = -1
         if store:
-            path, path_id = file_repo.new_rank('Norm_Rank')
+            path, path_id = global_file_repo.new_rank('Norm_Rank')
             self.save_rank(path)
         global_logger.info("Rank init finished======================>")
         return path_id
@@ -146,7 +146,7 @@ class HRank(ABC):
         self.info_flow_list = arrays_normalization(self.info_flow_list,
                                                    calculate_average_value(self.rank_list))
         self.rank_aggregation(backward, args.en_alpha)
-        path, path_id = file_repo.new_rank('Rank_Plus')
+        path, path_id = global_file_repo.new_rank('Rank_Plus')
         self.save_rank(path)
         global_logger.info("Rank plus finished======================>")
         return path_id

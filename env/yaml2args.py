@@ -80,6 +80,10 @@ def alg_str2enum(value: str) -> VState:
         ret = VState.FedProx
     elif value == 'fedla':
         ret = VState.FedLA
+    elif value == 'scaffold':
+        ret = VState.SCAFFOLD
+    elif value == 'moon':
+        ret = VState.MOON
     elif value == 'single':
         ret = VState.Single
     else:
@@ -138,6 +142,8 @@ class ArgRepo:
         self.WARMUP = None
         self.KD_BATCH = None
         self.KD_EPOCH = None
+
+        self.clusters = None
 
     def runtime_attr_placeholder(self):
         self.num_classes = None
@@ -213,7 +219,8 @@ class ArgRepo:
                f"learning rate:{self.learning_rate}\n" \
                f"scheduler:{scheduler}\n" \
                f"warm steps:{self.warm_steps}\n" \
-               f"epoch:{self.local_epoch}"
+               f"epoch:{self.local_epoch}" \
+               f"clusters:{self.clusters}\n"
 
     @exp_name.setter
     def exp_name(self, value):

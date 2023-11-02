@@ -4,7 +4,7 @@ exp_name: fmnist-conv2
 # checkpoint config
 model: conv2
 alg: fedla
-gpu_ids: [0, 1]
+gpu_ids: [1]
 # pre_train: True
 
 # dataset config
@@ -32,27 +32,30 @@ active_workers: 2
 federal_round: 15
 local_epoch: 5
 
-#################################################
 
-# hetero - finish
-# optim: sgd
-optim: sgd
-learning_rate: 0.01
+clusters: 10
 
-# scheduler config
-scheduler: warmup_cos_lr
-warm_steps: 15
-min_lr: 0.0
-
-# federal config
-federal: True
-non_iid: hetero
-workers: 100
-active_workers: 2
-federal_round: 30
-local_epoch: 5
-
-#################################################
+##################################################
+#
+## hetero - finish
+## optim: sgd
+#optim: sgd
+#learning_rate: 0.01
+#
+## scheduler config
+#scheduler: warmup_cos_lr
+#warm_steps: 15
+#min_lr: 0.0
+#
+## federal config
+#federal: True
+#non_iid: hetero
+#workers: 100
+#active_workers: 2
+#federal_round: 30
+#local_epoch: 5
+#
+##################################################
 
 ## shards
 ## federal config
@@ -115,12 +118,3 @@ local_epoch: 5
 # federal_round: 11
 # local_epoch: 1
 logits_batch_limit: 5
-
-merge_batch: 0
-merge_epoch: 0
-
-KD_BATCH: 3
-KD_EPOCH: 5
-
-ALPHA: 1
-BETA: 8

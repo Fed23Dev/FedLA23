@@ -1,4 +1,3 @@
-from abc import ABC
 import os
 import time
 from enum import Enum, unique
@@ -6,13 +5,15 @@ from typing import Any
 
 from utils.objectIO import pickle_mkdir_save, pickle_load, touch_file, create_path
 
-
 # 待实现优化
 # 将milestone内容迁移到checkpoint对应模型下
 # checkout 当目录不存在时创建
 # 对象的序列化与反序列化实现
 simp_time_stamp_index1 = 5
 simp_time_stamp_index2 = 10
+st3 = 11
+st4 = 14
+st5 = 17
 
 
 @unique
@@ -23,7 +24,6 @@ class FileType(Enum):
     LOG_TYPE = '.log'
     EXP_TYPE = '.txt'
     SEQ_TYPE = '.seq'
-    RANK_TYPE = '.npy'
     CHECKPOINT_TYPE = '.snap'
 
 
@@ -36,17 +36,23 @@ def curt_time_stamp(simp: bool = False):
         return time_str
 
 
+def only_time_stamp():
+    pattern = '%Y.%m.%d_%H-%M-%S'
+    time_str = time.strftime(pattern, time.localtime(time.time()))
+    return time_str[st3: st3 + 2] + time_str[st4: st4 + 2] + time_str[st5: st5 + 2]
+
+
 def file_name(file_type: FileType, name: str = None, ext_time: bool = True) -> str:
     if name is None:
         return f"{curt_time_stamp()}{file_type.value}"
     else:
         if ext_time:
-            return f"{name}---{curt_time_stamp(ext_time)}{file_type.value}"
+            return f"{name}_{only_time_stamp()}---{curt_time_stamp(ext_time)}{file_type.value}"
         else:
             return f"{name}{file_type.value}"
 
 
-class PathManager(ABC):
+class PathManager:
     ERROR_MESS1 = "Given directory doesn't exists."
     ERROR_MESS2 = "Given key doesn't exists."
 
@@ -98,7 +104,7 @@ class PathManager(ABC):
         return ret
 
     def latest_path(self) -> str:
-        return self.fetch_path(self.curt_id-1)
+        return self.fetch_path(self.curt_id - 1)
 
     def new_log(self, name: str = None) -> (str, int):
         new_file = os.path.join(self.log_path, file_name(FileType.LOG_TYPE, name))
@@ -119,18 +125,6 @@ class PathManager(ABC):
 
     def new_exp(self, name: str = None) -> (str, int):
         new_file = os.path.join(self.exp_path, file_name(FileType.EXP_TYPE, name))
-        file_id = self.sync_path(new_file)
-        return new_file, file_id
-
-
-class HRankPathManager(PathManager):
-
-    def __init__(self, model_path: str, dataset_path: str) -> None:
-        super().__init__(model_path, dataset_path)
-
-    # file_id 方便将来取用之前生成的str类型的file地址，通过fetch_path取用
-    def new_rank(self, name: str = None) -> (str, int):
-        new_file = os.path.join(self.mile_path, file_name(FileType.RANK_TYPE, name))
         file_id = self.sync_path(new_file)
         return new_file, file_id
 

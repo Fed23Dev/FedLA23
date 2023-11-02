@@ -10,7 +10,7 @@ from dl.wrapper.ExitDriver import ExitManager
 from dl.wrapper.Wrapper import VWrapper
 from dl.wrapper.optimizer.WarmUpCosinLR import WarmUPCosineLR
 from dl.wrapper.optimizer.WarmUpStepLR import WarmUPStepLR
-from env.running_env import args, file_repo
+from env.running_env import args, global_file_repo
 
 
 def exit_process(wrapper: VWrapper):
@@ -68,7 +68,7 @@ def test_running():
         else args.local_epoch
     wrapper.init_scheduler_loss(args.step_size, args.gamma, total_epoch, args.warm_steps, args.min_lr)
     if args.pre_train:
-        wrapper.load_checkpoint(file_repo.model_path)
+        wrapper.load_checkpoint(global_file_repo.model_path)
 
     wrapper.valid_performance(dataloader)
 

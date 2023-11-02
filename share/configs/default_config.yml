@@ -3,7 +3,7 @@
 # resource config
 exp_name: test
 alg: single
-
+ 
 # checkpoint config
 model: conv2
 use_gpu: False

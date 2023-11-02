@@ -3,7 +3,7 @@ from random import random
 import torch
 
 from utils.Cleaner import FileCleaner
-from env.running_env import args, file_repo, global_container
+from env.running_env import args, global_file_repo, global_container
 from utils.MathTools import kl_divergence, js_divergence, _kl_divergence
 
 
