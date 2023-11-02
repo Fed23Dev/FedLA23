@@ -32,7 +32,6 @@ active_workers: 2
 federal_round: 15
 local_epoch: 5
 
-
 clusters: 10
 
 ##################################################
