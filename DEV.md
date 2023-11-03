@@ -194,10 +194,11 @@ dl.wrapper.ExitDriver不仅存储关键指标数据，还可以存储模型参�
 
 ```python
 from env.running_env import global_container
+from copy import deepcopy
 
 curt_matrix = ...
 
-global_container.flash('avg_matrix', curt_matrix)
+global_container.flash('avg_matrix', deepcopy(curt_matrix))
 ```
 
 + 数据指标转换为标准输入csv，支持多个同数目序列合并 >> LA-Vis
