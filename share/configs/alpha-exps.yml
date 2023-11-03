@@ -34,6 +34,6 @@ local_epoch: 5
 
 ###################################### 16
 
-clusters: 10
+clusters: 25
 logits_batch_limit: 20
 
