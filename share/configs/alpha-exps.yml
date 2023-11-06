@@ -5,7 +5,7 @@ exp_name: fmnist-conv2
 
 # checkpoint config
 model: conv2
-alg: fedavg
+alg: fedla
 gpu_ids: [0, 1]
 # pre_train: True
 
@@ -29,11 +29,11 @@ federal: True
 non_iid: shards
 workers: 100
 active_workers: 2
-federal_round: 70
+federal_round: 100
 local_epoch: 5
 
 ###################################### 16
 
-clusters: 25
+clusters: 50
 logits_batch_limit: 20
 
