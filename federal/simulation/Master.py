@@ -114,7 +114,7 @@ class FedLAMaster(FLMaster):
         # if self.curt_round <= 1:
         #     super(FedLAMaster, self).schedule_strategy()
         #     return
-        #z
+        #
         # self.curt_selected.clear()
         # self.sync_matrix()
         #
@@ -138,5 +138,9 @@ class FedLAMaster(FLMaster):
 
     def drive_workers(self, *_args, **kwargs):
         global_container.flash('selected_workers', deepcopy(self.curt_selected))
+        already = 0
         for index in self.curt_selected:
             self.workers_nodes[index].local_train(self.curt_matrix)
+            already += 1
+            if already == self.plan:
+                break
