@@ -143,5 +143,5 @@ class FedLAMaster(FLMaster):
 
     def drive_workers(self, *_args, **kwargs):
         global_container.flash('selected_workers', deepcopy(self.curt_selected))
-        # for index in self.curt_selected:
-        #     self.workers_nodes[index].local_train(self.curt_matrix)
+        for index in self.curt_selected:
+            self.workers_nodes[index].local_train(self.curt_matrix)
