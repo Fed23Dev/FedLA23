@@ -134,6 +134,7 @@ class FedLAMaster(FLMaster):
         if self.pipeline_status == self.adaptive_clusters():
             self.pipeline_status = 0
 
+        self.curt_selected = random.sample(self.curt_selected, self.plan)
         # # debug switch: selection
         # self.sync_matrix()
         #
@@ -142,6 +143,5 @@ class FedLAMaster(FLMaster):
 
     def drive_workers(self, *_args, **kwargs):
         global_container.flash('selected_workers', deepcopy(self.curt_selected))
-        self.curt_selected = random.sample(self.curt_selected, self.plan)
         # for index in self.curt_selected:
         #     self.workers_nodes[index].local_train(self.curt_matrix)
