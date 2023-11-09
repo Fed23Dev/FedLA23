@@ -134,7 +134,8 @@ class FedLAMaster(FLMaster):
         if self.pipeline_status == self.adaptive_clusters():
             self.pipeline_status = 0
 
-        self.curt_selected = random.sample(self.curt_selected, self.plan)
+        if len(self.curt_selected) > self.plan:
+            self.curt_selected = random.sample(self.curt_selected, self.plan)
         # # debug switch: selection
         # self.sync_matrix()
         #
