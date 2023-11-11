@@ -58,14 +58,6 @@ clusters: 10
 
 ## shards
 ## federal config
-#federal: True
-#non_iid: hetero
-#workers: 100
-#active_workers: 2
-#federal_round: 15
-#local_epoch: 5
-#
-## optim: sgd
 #optim: sgd
 #learning_rate: 0.01
 #

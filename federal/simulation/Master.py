@@ -95,7 +95,7 @@ class FedLAMaster(FLMaster):
             self.workers_matrix.append(self.workers_nodes[i].cell.wrapper.get_logits_matrix())
 
         self.curt_matrix = torch.div(sum(self.workers_matrix), len(self.workers_matrix))
-        # global_container.flash('avg_matrix', deepcopy(self.curt_matrix).numpy())
+        global_container.flash('avg_matrix', deepcopy(self.curt_matrix).numpy())
 
     def info_aggregation(self):
         workers_dict = []
@@ -112,7 +112,7 @@ class FedLAMaster(FLMaster):
             self.workers_nodes[index].cell.decay_lr(self.pace)
 
     def schedule_strategy(self):
-        if self.curt_round <= 1:
+        if self.curt_round <= 0:
             super(FedLAMaster, self).schedule_strategy()
             return
 
@@ -134,12 +134,16 @@ class FedLAMaster(FLMaster):
         if self.pipeline_status == self.adaptive_clusters():
             self.pipeline_status = 0
 
+        if len(self.curt_selected) > self.plan:
+            self.curt_selected = random.sample(self.curt_selected, self.plan)
+
+        # # debug switch: selection
+        # self.sync_matrix()
+
         # # debug switch: selection
         # super(FedLAMaster, self).schedule_strategy()
 
     def drive_workers(self, *_args, **kwargs):
         global_container.flash('selected_workers', deepcopy(self.curt_selected))
-        if len(self.curt_selected) > self.plan:
-            self.curt_selected = random.sample(self.curt_selected, self.plan)
         for index in self.curt_selected:
             self.workers_nodes[index].local_train(self.curt_matrix)
