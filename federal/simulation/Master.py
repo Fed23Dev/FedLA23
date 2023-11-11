@@ -1,3 +1,4 @@
+import random
 from copy import deepcopy
 
 import numpy as np
@@ -111,36 +112,34 @@ class FedLAMaster(FLMaster):
             self.workers_nodes[index].cell.decay_lr(self.pace)
 
     def schedule_strategy(self):
-        # if self.curt_round <= 1:
-        #     super(FedLAMaster, self).schedule_strategy()
-        #     return
-        #
-        # self.curt_selected.clear()
-        # self.sync_matrix()
-        #
-        # if self.pipeline_status == 0:
-        #     X = torch.stack(self.workers_matrix, dim=0).numpy()
-        #     n_samples, dim1, dim2 = X.shape
-        #     flattened_X = X.reshape(n_samples, dim1 * dim2)
-        #     clustering = AgglomerativeClustering(n_clusters=self.adaptive_clusters()).fit(flattened_X)
-        #     self.clusters_indices = clustering.labels_
-        #
-        # # doing: to modify
-        # self.curt_selected = np.where(self.clusters_indices == self.pipeline_status)[0].tolist()
-        #
-        # self.pipeline_status += 1
-        #
-        # if self.pipeline_status == self.adaptive_clusters():
-        #     self.pipeline_status = 0
+        if self.curt_round <= 1:
+            super(FedLAMaster, self).schedule_strategy()
+            return
 
-        # debug switch: selection
-        super(FedLAMaster, self).schedule_strategy()
+        self.curt_selected.clear()
+        self.sync_matrix()
+
+        if self.pipeline_status == 0:
+            X = torch.stack(self.workers_matrix, dim=0).numpy()
+            n_samples, dim1, dim2 = X.shape
+            flattened_X = X.reshape(n_samples, dim1 * dim2)
+            clustering = AgglomerativeClustering(n_clusters=self.adaptive_clusters()).fit(flattened_X)
+            self.clusters_indices = clustering.labels_
+
+        # doing: to modify
+        self.curt_selected = np.where(self.clusters_indices == self.pipeline_status)[0].tolist()
+
+        self.pipeline_status += 1
+
+        if self.pipeline_status == self.adaptive_clusters():
+            self.pipeline_status = 0
+
+        # # debug switch: selection
+        # super(FedLAMaster, self).schedule_strategy()
 
     def drive_workers(self, *_args, **kwargs):
         global_container.flash('selected_workers', deepcopy(self.curt_selected))
-        already = 0
+        if len(self.curt_selected) > self.plan:
+            self.curt_selected = random.sample(self.curt_selected, self.plan)
         for index in self.curt_selected:
             self.workers_nodes[index].local_train(self.curt_matrix)
-            already += 1
-            if already == self.plan:
-                break
