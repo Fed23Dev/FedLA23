@@ -137,6 +137,16 @@ class FedLAMaster(FLMaster):
         if len(self.curt_selected) > self.plan:
             self.curt_selected = random.sample(self.curt_selected, self.plan)
 
+        node_cnt = len(self.curt_selected) if len(self.curt_selected) < self.plan else self.plan
+        all_indices = set(list(range(len(self.workers_nodes))))
+        la_indices = set(self.curt_selected)
+        difference = list(all_indices - la_indices)
+
+        half1 = random.sample(self.curt_selected, node_cnt // 2 + 1)
+        half2 = random.sample(difference, node_cnt // 2 + 1)
+        half1.extend(half2)
+        self.curt_selected = deepcopy(half1)
+
         # # debug switch: selection
         # self.sync_matrix()
 
