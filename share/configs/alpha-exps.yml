@@ -5,7 +5,7 @@ exp_name: fmnist-conv2
 
 # checkpoint config
 model: conv2
-alg: fedla
+alg: fedavg
 gpu_ids: [0, 1]
 # pre_train: True
 
@@ -30,8 +30,8 @@ min_lr: 0.0
 federal: True
 non_iid: hetero
 workers: 100
-active_workers: 2
-federal_round: 15
+active_workers: 3
+federal_round: 10
 local_epoch: 5
 
 ###################################### 16
