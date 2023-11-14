@@ -99,12 +99,13 @@ class FedLAMaster(FLMaster):
 
     def info_aggregation(self):
         workers_dict = []
+        drag = int(0.5*len(self.curt_selected))
 
-        for index in self.curt_selected:
+        for index in random.sample(self.curt_selected, len(self.curt_selected)-drag):
             workers_dict.append(self.workers_nodes[index].cell.access_model().state_dict())
 
-        # plan:to impl
-        workers_dict = workers_dict
+        for _ in range(drag):
+            workers_dict.append(self.merge.pre_dict)
 
         self.merge.merge_dict(workers_dict)
 
