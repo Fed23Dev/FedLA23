@@ -58,4 +58,5 @@ DEFAULT_ARGS = {
     "KD_EPOCH": 5,
 
     "clusters": 10,
+    "drag": 0.5,
 }

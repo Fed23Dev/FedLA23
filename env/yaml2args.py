@@ -144,6 +144,7 @@ class ArgRepo:
         self.KD_EPOCH = None
 
         self.clusters = None
+        self.drag = None
 
     def runtime_attr_placeholder(self):
         self.num_classes = None

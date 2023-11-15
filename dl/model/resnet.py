@@ -3,6 +3,9 @@ import torch.nn.functional as F
 
 
 def adapt_channel(compress_rate, num_layers):
+    if num_layers == 8:
+        stage_repeat = [1, 1, 1]
+        stage_out_channel = [16] + [16] * 1 + [32] * 1 + [64] * 1
     if num_layers == 56:
         stage_repeat = [9, 9, 9]
         stage_out_channel = [16] + [16] * 9 + [32] * 9 + [64] * 9
@@ -79,13 +82,6 @@ class BasicBlock(nn.Module):
                                     (
                                     0, 0, 0, 0, (planes - inplanes) // 2, planes - inplanes - (planes - inplanes) // 2),
                                     "constant", 0))
-            # self.shortcut = LambdaLayer(
-            #    lambda x: F.pad(x[:, :, ::2, ::2], (0, 0, 0, 0, planes//4, planes//4),"constant", 0))
-
-            '''self.shortcut = nn.Sequential(
-                conv1x1(inplanes, planes, stride=stride),
-                #nn.BatchNorm2d(planes),
-            )#'''
 
     def forward(self, x):
         out = self.conv1(x)
@@ -95,7 +91,6 @@ class BasicBlock(nn.Module):
         out = self.conv2(out)
         out = self.bn2(out)
 
-        # print(self.stride, self.inplanes, self.planes, out.size(), self.shortcut(x).size())
         out += self.shortcut(x)
         out = self.relu2(out)
 
@@ -124,10 +119,7 @@ class ResNet(nn.Module):
 
         self.avgpool = nn.AdaptiveAvgPool2d((1, 1))
 
-        if self.num_layer == 56:
-            self.fc = nn.Linear(64 * BasicBlock.expansion, num_classes)
-        else:
-            self.linear = nn.Linear(64 * BasicBlock.expansion, num_classes)
+        self.fc = nn.Linear(64 * BasicBlock.expansion, num_classes)
 
     def _make_layer(self, block, blocks_num, stride):
         layers = []
@@ -157,9 +149,5 @@ class ResNet(nn.Module):
         x = self.avgpool(x)
         x = x.view(x.size(0), -1)
 
-        if self.num_layer == 56:
-            x = self.fc(x)
-        else:
-            x = self.linear(x)
-
+        x = self.fc(x)
         return x

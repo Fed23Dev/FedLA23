@@ -17,11 +17,12 @@ class VModel(Enum):
     Init = 0
     VGG11 = 1
     VGG16 = 2
-    ResNet56 = 3
-    ResNet110 = 4
-    MobileNetV2 = 5
-    Conv2 = 6
-    ShuffleNetV2 = 7
+    ResNet8 = 3
+    ResNet56 = 4
+    ResNet110 = 5
+    MobileNetV2 = 6
+    Conv2 = 7
+    ShuffleNetV2 = 8
 
 
 # Optimizer Type

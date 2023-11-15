@@ -64,7 +64,7 @@ class FedProxMaster(FLMaster):
 class FedLAMaster(FLMaster):
     def __init__(self, workers: int, activists: int, local_epoch: int,
                  loader: tdata.dataloader, workers_loaders: dict,
-                 num_classes: int, clusters: int):
+                 num_classes: int, clusters: int, drag: int):
 
         master_cell = SingleCell(loader, Wrapper=LAWrapper)
         super().__init__(workers, activists, local_epoch, master_cell)
@@ -80,6 +80,7 @@ class FedLAMaster(FLMaster):
         self.curt_matrix = torch.zeros(num_classes, num_classes)
 
         self.num_clusters = clusters
+        self.drag = drag
         self.pipeline_status = 0
         self.clusters_indices = []
 
@@ -99,7 +100,7 @@ class FedLAMaster(FLMaster):
 
     def info_aggregation(self):
         workers_dict = []
-        drag = int(0.5*len(self.curt_selected))
+        drag = int(self.drag*len(self.curt_selected))
 
         for index in random.sample(self.curt_selected, len(self.curt_selected)-drag):
             workers_dict.append(self.workers_nodes[index].cell.access_model().state_dict())

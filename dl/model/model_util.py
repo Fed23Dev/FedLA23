@@ -38,6 +38,9 @@ def create_model(model: VModel, compress_rate=ORIGIN_CP_RATE,
         return initialize(VGG11(compress_rate=compress_rate, num_classes=num_classes))
     elif model == VModel.VGG16:
         return initialize(VGG16(compress_rate=compress_rate, num_classes=num_classes))
+    elif model == VModel.ResNet8:
+        return initialize(ResNet(BasicBlock, 8, compress_rate=compress_rate, num_classes=num_classes,
+                                 input_channel=in_channels))
     elif model == VModel.ResNet56:
         return initialize(ResNet(BasicBlock, 56, compress_rate=compress_rate, num_classes=num_classes,
                                  input_channel=in_channels))
