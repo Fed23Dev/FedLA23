@@ -32,7 +32,7 @@ local_epoch: 5
 # fedla
 clusters: 10
 drag: 0.5
-threshold: 0.2
+threshold: 0.05
 
 logits_batch_limit: 20
 

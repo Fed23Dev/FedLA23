@@ -91,7 +91,7 @@ class FedLAMaster(FLMaster):
         js_dists = []
         for info_matrix in self.workers_matrix:
             js_dists.append(js_divergence(self.curt_matrix, info_matrix))
-        self.curt_selected = [min(js_dists)]
+        self.curt_selected = [js_dists.index(min(js_dists))]
 
     def adaptive_clusters(self):
         if self.num_clusters == 0:
