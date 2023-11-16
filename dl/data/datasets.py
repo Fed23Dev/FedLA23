@@ -1,20 +1,18 @@
+import sys
+import os
 from os.path import join
-
+from PIL import Image
 import torchvision.datasets
-
+import urllib.request
+import zipfile
+from torch.utils.data import Dataset
+from torchvision import transforms
 
 from dl.data.transform import init_transform, init_target_transform, init_tiny_imagenet_transform
 from env.static_env import CIFAR10_MEAN, CIFAR10_STD, CIFAR10_CLASSES, \
     CIFAR100_MEAN, CIFAR100_STD, CIFAR100_CLASSES, FMNIST_CLASSES, TinyImageNet_CLASSES
 from env.support_config import VDataSet
 from env.running_env import global_file_repo
-
-from torch.utils.data import Dataset
-from torchvision import transforms
-
-import sys
-import os
-from PIL import Image
 
 
 class TinyImageNet(Dataset):
@@ -182,7 +180,7 @@ def get_data(dataset: VDataSet, data_type, transform=None, target_transform=None
 
 
 def download_datasets():
-    torchvision.datasets.CIFAR10(root='res/datasets/CIFAR10',
+    torchvision.datasets.CIFAR10(root='~/la/datasets/CIFAR10',
                                  train=True, download=True)
     torchvision.datasets.FashionMNIST(root="~/la/datasets/FMNIST", train=True,
                                       download=True)
@@ -191,3 +189,11 @@ def download_datasets():
 
     # tiny imagenet
     # http://cs231n.stanford.edu/tiny-imagenet-200.zip
+
+    url = "http://cs231n.stanford.edu/tiny-imagenet-200.zip"
+    file_name = "tinyimagenet.zip"
+    urllib.request.urlretrieve(url, file_name)
+
+    extract_dir = "~/la/datasets"
+    with zipfile.ZipFile(file_name, 'r') as zip_ref:
+        zip_ref.extractall(extract_dir)

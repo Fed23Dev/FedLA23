@@ -5,7 +5,6 @@ import torch
 from thop import profile
 
 from dl.SingleCell import SingleCell
-from dl.compress.DKD import _dkd_loss1
 from dl.data.dataProvider import get_data_loader
 from dl.model.ModelExt import Extender
 from dl.model.model_util import create_model, dict_diff
@@ -50,60 +49,6 @@ def sparse_optim():
     coo_dict = util.dict_coo_express(dic)
     pickle_mkdir_save(dic, 'ori')
     pickle_mkdir_save(coo_dict, 'coo')
-
-
-def test_vrank():
-    test_loader = get_data_loader(VDataSet.CIFAR10, data_type="test", batch_size=args.batch_size,
-                                  shuffle=True, num_workers=0, pin_memory=False)
-    master_cell = SingleCell(test_loader, True)
-    master_cell.prune_ext.get_rank(random=True)
-    master_cell.prune_ext.rank_plus(info_norm=args.info_norm, backward=args.backward)
-
-
-def hyper_cosine():
-    test_loader = get_data_loader(VDataSet.CIFAR10, data_type="test", batch_size=args.batch_size,
-                                  shuffle=True, num_workers=0, pin_memory=False)
-    master_cell = SingleCell(test_loader, True)
-    for i in range(100):
-        master_cell.run_model(train=True)
-        master_cell.prune_model(plus=False, random=False, auto_inter=True)
-    str_save(str(global_container['cos']), 'cos_test.ori')
-    pickle_mkdir_save(global_container['cos'], 'cos_test.pickle')
-
-
-def coo_recover():
-    test_loader = get_data_loader(args.dataset, data_type="test", batch_size=args.batch_size,
-                                  shuffle=True, num_workers=0, pin_memory=False)
-    args.federal_round = 1
-    args.check_inter = 1
-    master_cell = SingleCell(test_loader, True)
-    master_cell.prune_ext.get_rank()
-    master_cell.prune_ext.mask_prune(resnet110_candidate_rate)
-
-    model_dict = master_cell.access_model().cpu().state_dict()
-
-    coo_dict = util.dict_coo_express(model_dict)
-    recover_dict = util.dict_coo_recover(coo_dict)
-
-    print(f"COO:{dict_diff(model_dict, recover_dict)}")
-
-    pickle_mkdir_save(model_dict, 'ori')
-    pickle_mkdir_save(coo_dict, 'coo')
-
-
-
-
-def test_flops():
-    test_loader = get_data_loader(VDataSet.CIFAR10, data_type="test", batch_size=args.batch_size,
-                                  shuffle=True, num_workers=0, pin_memory=False)
-    args.federal_round = 1
-    args.check_inter = 1
-    master_cell = SingleCell(test_loader, True)
-    master_cell.test_performance()
-
-    master_cell.prune_ext.get_rank()
-    master_cell.prune_ext.mask_prune(vgg16_candidate_rate)
-    master_cell.test_performance()
 
 
 def test_self_flops():

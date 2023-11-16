@@ -29,7 +29,7 @@ mobilenetv2_model = r'res/checkpoint/mobilenet/MobileNetV2.snap'
 conv2_model = r'res/checkpoint/conv2/conv2.snap'
 shufflenetv2_model = r'res/checkpoint/shufflenet/ShufflenetV2.snap'
 
-debug_config = r'share/configs/alpha-exps.yml'
+debug_config = r'share/configs/hyper-exps.yml'
 # debug_config = r'share/configs/cifar10-vgg16-final#.yml'
 
 

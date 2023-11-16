@@ -3,7 +3,7 @@ exp_name: cifar10-vgg16-ult-shards
 
 # checkpoint config
 model: vgg16
-alg: calimfl
+alg: fedavg
 gpu_ids: [0, 1]
 # pre_train: True
 
@@ -30,6 +30,3 @@ federal_round: 500
 
 local_epoch: 10
 test_batch_limit: 5
-
-check_inter: 100
-random_data: True

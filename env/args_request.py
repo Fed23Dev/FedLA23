@@ -41,13 +41,6 @@ DEFAULT_ARGS = {
     "logits_batch_limit": 50,
     "loss_back": 3,
     "mu": 0.01,
-    "info_norm": 3,
-    "backward": 1,
-    "random_data": False,
-    "auto_inter": False,
-
-    "merge_batch": 5,
-    "merge_epoch": 10,
 
     "CE_WEIGHT": 1.0,
     "ALPHA": 1.0,
@@ -59,4 +52,5 @@ DEFAULT_ARGS = {
 
     "clusters": 10,
     "drag": 0.5,
+    "threshold": 0.2,
 }

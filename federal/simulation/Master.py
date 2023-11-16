@@ -64,7 +64,8 @@ class FedProxMaster(FLMaster):
 class FedLAMaster(FLMaster):
     def __init__(self, workers: int, activists: int, local_epoch: int,
                  loader: tdata.dataloader, workers_loaders: dict,
-                 num_classes: int, clusters: int, drag: int):
+                 num_classes: int, clusters: int, drag: int,
+                 threshold: float):
 
         master_cell = SingleCell(loader, Wrapper=LAWrapper)
         super().__init__(workers, activists, local_epoch, master_cell)
@@ -77,18 +78,37 @@ class FedLAMaster(FLMaster):
 
         self.prev_workers_matrix = [torch.zeros(num_classes, num_classes) for _ in range(workers)]
         self.workers_matrix = [torch.zeros(num_classes, num_classes) for _ in range(workers)]
+        self.prev_matrix = torch.zeros(num_classes, num_classes)
         self.curt_matrix = torch.zeros(num_classes, num_classes)
 
-        self.num_clusters = clusters
+        self.num_clusters = self.workers//2       # [2, M/2]
+        self.threshold = threshold
         self.drag = drag
         self.pipeline_status = 0
         self.clusters_indices = []
 
+    def single_select(self):
+        js_dists = []
+        for info_matrix in self.workers_matrix:
+            js_dists.append(js_divergence(self.curt_matrix, info_matrix))
+        self.curt_selected = [min(js_dists)]
+
     def adaptive_clusters(self):
+        if self.num_clusters == 0:
+            return self.num_clusters
+
+        IM_diff = torch.abs(self.curt_matrix - self.prev_matrix)
+        IM_ratio = IM_diff / self.prev_matrix
+        average_ratio = torch.mean(IM_ratio)
+        if average_ratio > self.threshold:
+            self.num_clusters = self.num_clusters//2 if self.num_clusters//2 > 2 else 2
+        else:
+            self.num_clusters = 0
         return self.num_clusters
 
     def sync_matrix(self):
         self.prev_workers_matrix = deepcopy(self.workers_matrix)
+        self.prev_matrix = deepcopy(self.curt_matrix)
         self.workers_matrix.clear()
         self.curt_matrix.zero_()
 
@@ -100,12 +120,12 @@ class FedLAMaster(FLMaster):
 
     def info_aggregation(self):
         workers_dict = []
-        drag = int(self.drag*len(self.curt_selected))
+        drag_cnt = int(self.drag*len(self.curt_selected))
 
-        for index in random.sample(self.curt_selected, len(self.curt_selected)-drag):
+        for index in random.sample(self.curt_selected, len(self.curt_selected)-drag_cnt):
             workers_dict.append(self.workers_nodes[index].cell.access_model().state_dict())
 
-        for _ in range(drag):
+        for _ in range(drag_cnt):
             workers_dict.append(self.merge.pre_dict)
 
         self.merge.merge_dict(workers_dict)
@@ -114,18 +134,21 @@ class FedLAMaster(FLMaster):
             self.workers_nodes[index].cell.decay_lr(self.pace)
 
     def schedule_strategy(self):
-        if self.curt_round <= 0:
+        if self.curt_round == 0:
             super(FedLAMaster, self).schedule_strategy()
             return
 
-        self.curt_selected.clear()
-        self.sync_matrix()
+        clusters = self.adaptive_clusters()
+
+        if clusters == 0:
+            self.single_select()
+            return
 
         if self.pipeline_status == 0:
             X = torch.stack(self.workers_matrix, dim=0).numpy()
             n_samples, dim1, dim2 = X.shape
             flattened_X = X.reshape(n_samples, dim1 * dim2)
-            clustering = AgglomerativeClustering(n_clusters=self.adaptive_clusters()).fit(flattened_X)
+            clustering = AgglomerativeClustering(n_clusters=clusters).fit(flattened_X)
             self.clusters_indices = clustering.labels_
 
         # doing: to modify
@@ -133,7 +156,7 @@ class FedLAMaster(FLMaster):
 
         self.pipeline_status += 1
 
-        if self.pipeline_status == self.adaptive_clusters():
+        if self.pipeline_status == clusters:
             self.pipeline_status = 0
 
         if len(self.curt_selected) == 1:
@@ -162,3 +185,6 @@ class FedLAMaster(FLMaster):
         global_container.flash('selected_workers', deepcopy(self.curt_selected))
         for index in self.curt_selected:
             self.workers_nodes[index].local_train(self.curt_matrix)
+
+        self.curt_selected.clear()
+        self.sync_matrix()

@@ -8,7 +8,6 @@ import torch.utils.data as tdata
 from timeit import default_timer as timer
 
 from dl.SingleCell import SingleCell
-from dl.compress.Calim import HRank
 import dl.compress.compress_util as com_util
 
 # FedProx Nodes

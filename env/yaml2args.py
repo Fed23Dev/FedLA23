@@ -131,10 +131,8 @@ class ArgRepo:
         self.test_batch_limit = None
 
         self.alg = None
-        self.en_alpha = None
-        self.merge_batch = None
-        self.merge_epoch = None
 
+        # Temporarily deprecated
         self.CE_WEIGHT = None
         self.ALPHA = None
         self.BETA = None
@@ -145,6 +143,7 @@ class ArgRepo:
 
         self.clusters = None
         self.drag = None
+        self.threshold = None
 
     def runtime_attr_placeholder(self):
         self.num_classes = None
@@ -206,10 +205,6 @@ class ArgRepo:
         else:
             print("The dataset is not supported.")
             exit(1)
-        # if self.federal:
-        #     self.pre_train = False
-        # else:
-        #     self.pre_train = True
 
     # call after mount_args()
     def get_snapshot(self) -> str:

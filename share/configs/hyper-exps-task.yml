@@ -1,11 +1,9 @@
 # resource config
-exp_name: cifar10-vgg16-ult
+exp_name: cifar10-vgg16
 
-# checkpoint config
 model: vgg16
 alg: fedavg
 gpu_ids: [0, 1]
-# pre_train: True
 
 # dataset config
 dataset: cifar10
@@ -27,9 +25,12 @@ non_iid: hetero
 workers: 100
 active_workers: 10
 federal_round: 150
-
 local_epoch: 10
-test_batch_limit: 5
 
+# fedla
+clusters: 10
+drag: 0.5
+threshold: 0.2
 
+logits_batch_limit: 20
 

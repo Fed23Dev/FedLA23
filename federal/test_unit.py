@@ -30,7 +30,7 @@ def test_fedla():
 
     master_node = FedLAMaster(workers=args.workers, activists=args.active_workers, local_epoch=args.local_epoch,
                               loader=loader, workers_loaders=loaders, num_classes=args.num_classes,
-                              clusters=args.clusters, drag=args.drag)
+                              clusters=args.clusters, drag=args.drag, threshold=args.threshold)
     master_node.union_run(args.federal_round)
     master_node.cell.exit_proc(one_key=f'{args.exp_name}-test_acc')
 

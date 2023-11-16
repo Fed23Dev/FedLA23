@@ -1,10 +1,12 @@
 #!/usr/bin/env zsh
 
-config_path='share/configs/alpha-exps.yml'
+config_path='share/configs/hyper-exps.yml' # hetero fmnist
+# config_path='share/configs/hyper-exps-noniid.yml' # shards fmnist
+# config_path='share/configs/hyper-exps-task.yml' # cifar10
 
 # super-parameter option
-# 修改 line:9 超参数的取值 0.1 0.2 ~ 1.0
-# 修改 line:12 超参数的字段 en_alpha: *.*/en_alpha
+# 修改 line:15 超参数的取值 0.1 0.2 ~ 1.0
+# 修改 line:19 超参数的字段 logits_batch_limit: *.*/logits_batch_limit
 
 # for alpha in 5 10 15 20 30 40 50 100
 # for alpha in 5 20 40 60 80 100 120 150
@@ -37,8 +39,12 @@ do
   done
 done
 
-# nohup share/logits-exps.sh &
+# sed -i "s/en_alpha: *.*/en_alpha: $alpha/g" share/experiments/hyper-exps.yml
+# sed -i 's/\r//g' share/experiments/hyper-exps.yml
+# 为什么for里面不能嵌套while？
+
+# nohup share/hyper-exps.sh &
 # test dos
 # set ff=unix
 
-# python -m pdb main.py -y 'share/configs/alpha-exps.yml'
+# python -m pdb main.py -y 'share/configs/hyper-exps.yml'

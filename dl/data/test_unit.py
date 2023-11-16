@@ -8,10 +8,10 @@ import matplotlib.pyplot as plt
 
 from dl.data.datasets import get_data
 from dl.data.samplers import dataset_user_indices
-from dl.data.dataProvider import get_data_loader, get_data_loaders, DataLoader
-from dl.model.model_util import create_model
+from dl.data.dataProvider import get_data_loader, get_data_loaders
 from env.running_env import args
 from env.support_config import VDataSet
+from dl.data.datasets import download_datasets
 
 
 def data_size():
@@ -106,4 +106,6 @@ def test_loader_label():
 def main():
     test_loader_label()
 
-# 各个阶段返回的数据类型
+
+if __name__ == '__main__':
+    download_datasets()

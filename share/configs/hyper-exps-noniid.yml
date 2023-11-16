@@ -1,20 +1,19 @@
 # resource config
-exp_name: cifar10-vgg16-ult
+exp_name: fmnist-conv2-shards
 
 # checkpoint config
-model: vgg16
+model: conv2
 alg: fedavg
 gpu_ids: [0, 1]
 # pre_train: True
 
 # dataset config
-dataset: cifar10
+dataset: fmnist
 batch_size: 32
 
-# optimizer config
-# optim: sgd
+# federal config
 optim: sgd
-learning_rate: 0.1
+learning_rate: 0.01
 
 # scheduler config
 scheduler: warmup_cos_lr
@@ -23,13 +22,16 @@ min_lr: 0.0
 
 # federal config
 federal: True
-non_iid: hetero
+non_iid: shards
 workers: 100
-active_workers: 10
-federal_round: 150
+active_workers: 2
+federal_round: 50
+local_epoch: 5
 
-local_epoch: 10
-test_batch_limit: 5
+# fedla
+clusters: 10
+drag: 0.5
+threshold: 0.2
 
-
+logits_batch_limit: 20
 

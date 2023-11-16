@@ -1,19 +1,14 @@
 # resource config
 exp_name: fmnist-conv2
 
-###################################### 16
-
 # checkpoint config
 model: conv2
-alg: fedla
+alg: fedavg
 gpu_ids: [0, 1]
-# pre_train: True
 
 # dataset config
 dataset: fmnist
 batch_size: 32
-
-#################################################
 
 # optimizer config
 # optim: sgd
@@ -31,13 +26,13 @@ federal: True
 non_iid: hetero
 workers: 100
 active_workers: 3
-federal_round: 15
-local_epoch: 10
+federal_round: 10
+local_epoch: 5
 
-###################################### 16
-
+# fedla
 clusters: 10
 drag: 0.5
+threshold: 0.2
 
 logits_batch_limit: 20
 

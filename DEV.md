@@ -40,11 +40,18 @@ pip install yacs ruamel.yaml matplotlib
 3. 为脚本添加执行权限:
 
 ```shell
+cd FedLA
 sudo chmod +x share/*.sh
 ```
 
 4. 手动创建logs/super等目录
-5. 将share/*.sh下的脚本设置为set ff=unix
+
+```shell
+cd FedLA
+mkdir logs/super
+```
+
+6. 将share/*.sh下的脚本设置为set ff=unix
 
 注意:
 
