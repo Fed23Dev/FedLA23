@@ -20,7 +20,7 @@ class AccExtractor:
                 lines = file.readlines()
                 # 从末尾开始遍历文件行
                 for line in reversed(lines):
-                    match = re.search(r"Loss: .* \| Acc: (\d+\.\d+)", line)
+                    match = re.search(r"Loss: .* \| Evaluation Acc: (\d+\.\d+)", line)
                     if match:
                         acc_value = float(match.group(1))
                         self.acc_data.append(acc_value)

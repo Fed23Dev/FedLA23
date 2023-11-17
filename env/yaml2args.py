@@ -219,8 +219,8 @@ class ArgRepo:
                f"workers:{self.workers}\n" \
                f"active_workers:{self.active_workers}\n"\
                f"federal_round:{self.federal_round}\n" \
-               f"local epoch:{self.local_epoch}" \
-               f"drag:{self.drag}\n"
+               f"local epoch:{self.local_epoch}\n" \
+               f"drag:{self.drag}"
 
     @exp_name.setter
     def exp_name(self, value):

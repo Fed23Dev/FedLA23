@@ -105,5 +105,6 @@ class SingleCell:
         if check:
             self.exit_manager.checkpoint_freeze()
         self.exit_manager.running_freeze(one_key)
-        config = self.exit_manager.config_freeze()
-        global_logger.info(config)
+        config_str = self.exit_manager.config_freeze()
+        config_str = f"{{{config_str}}}".replace("\n", " || ")
+        global_logger.info(config_str)

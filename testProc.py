@@ -2,6 +2,8 @@ import numpy as np
 import torch
 from sklearn.cluster import DBSCAN, OPTICS, AgglomerativeClustering, BisectingKMeans
 
+from utils.Vlogger import VLogger
+
 
 def tes():
     all = torch.tensor([[2, 2, 2], [3, 3, 3], [4, 4, 4]])
