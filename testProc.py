@@ -53,5 +53,10 @@ def test_lis():
 
 
 if __name__ == "__main__":
-    dbscan()
+    from utils.AccExtractor import AccExtractor
+    path = "logs/super"
+    extractor = AccExtractor(path)
+    extractor.extract_acc_data()
+    extractor.show_detail_rets()
+    extractor.show_avg_rets()
     print("----------------------")

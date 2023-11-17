@@ -25,6 +25,7 @@ class ExitManager:
         config = args.get_snapshot()
         file, file_id = global_file_repo.new_exp(args.exp_name)
         str_save(config, file)
+        return config
 
     def checkpoint_freeze(self, fixed: bool = True):
         name = str(args.model).split('.')[1]

@@ -26,12 +26,12 @@ federal: True
 non_iid: hetero
 workers: 100
 active_workers: 3
-federal_round: 10
-local_epoch: 5
+federal_round: 15
+local_epoch: 10
 
 # fedla
 clusters: 10
-drag: 0.5
+drag: 0.6
 threshold: 0.05
 
 logits_batch_limit: 20

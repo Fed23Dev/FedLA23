@@ -215,8 +215,12 @@ class ArgRepo:
                f"learning rate:{self.learning_rate}\n" \
                f"scheduler:{scheduler}\n" \
                f"warm steps:{self.warm_steps}\n" \
-               f"epoch:{self.local_epoch}" \
-               f"clusters:{self.clusters}\n"
+               f"non_iid:{self.non_iid}\n" \
+               f"workers:{self.workers}\n" \
+               f"active_workers:{self.active_workers}\n"\
+               f"federal_round:{self.federal_round}\n" \
+               f"local epoch:{self.local_epoch}" \
+               f"drag:{self.drag}\n"
 
     @exp_name.setter
     def exp_name(self, value):

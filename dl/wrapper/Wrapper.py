@@ -236,7 +236,7 @@ class VWrapper:
         total_params = sum(p.numel() for p in self.model.parameters())
         total_trainable_params = sum(p.numel() for p in self.model.parameters() if p.requires_grad)
 
-        global_logger.info('Loss: %.3f | Acc: %.3f%% (%d/%d)'
+        global_logger.info('Evaluation Loss: %.3f | Evaluation Acc: %.3f%% (%d/%d)'
                            % (test_loss, 100. * correct / total, correct, total))
 
         global_logger.info('Time cost: %.6f | FLOPs: %d | Params: %d'

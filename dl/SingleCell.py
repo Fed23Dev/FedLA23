@@ -104,5 +104,6 @@ class SingleCell:
     def exit_proc(self, check: bool = False, one_key: str = None):
         if check:
             self.exit_manager.checkpoint_freeze()
-        self.exit_manager.config_freeze()
         self.exit_manager.running_freeze(one_key)
+        config = self.exit_manager.config_freeze()
+        global_logger.info(config)

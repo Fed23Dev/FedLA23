@@ -1,4 +1,5 @@
 from collections import OrderedDict
+from copy import deepcopy
 
 
 class VContainer:
@@ -13,10 +14,10 @@ class VContainer:
         if key not in self.container.keys():
             self.keys.append(key)
             self.container[key] = []
-            self.container[key].append(element)
+            self.container[key].append(deepcopy(element))
         else:
             assert type(self.container[key][0]) == type(element), self.ERROR_MESS1
-            self.container[key].append(element)
+            self.container[key].append(deepcopy(element))
 
     def __getitem__(self, item):
         return self.container[item]
