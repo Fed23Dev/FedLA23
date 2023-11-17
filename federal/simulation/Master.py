@@ -17,7 +17,6 @@ from utils.MathTools import js_divergence
 
 
 class FedAvgMaster(FLMaster):
-
     def __init__(self, workers: int, activists: int, local_epoch: int,
                  loader: tdata.dataloader, workers_loaders: dict):
         """
@@ -87,6 +86,9 @@ class FedLAMaster(FLMaster):
         self.pipeline_status = 0
         self.clusters_indices = []
 
+        self.cut_off = self.workers//2
+        self.fix = clusters
+
     def single_select(self):
         js_dists = []
         for info_matrix in self.workers_matrix:
@@ -94,7 +96,7 @@ class FedLAMaster(FLMaster):
         self.curt_selected = [js_dists.index(min(js_dists))]
 
     def adaptive_clusters(self):
-        if self.num_clusters == 0:
+        if self.num_clusters == self.cut_off:
             return self.num_clusters
 
         IM_diff = torch.abs(self.curt_matrix - self.prev_matrix)
@@ -103,7 +105,7 @@ class FedLAMaster(FLMaster):
         if average_ratio > self.threshold:
             self.num_clusters = self.num_clusters//2 if self.num_clusters//2 > 2 else 2
         else:
-            self.num_clusters = 0
+            self.num_clusters = self.cut_off
         return self.num_clusters
 
     def sync_matrix(self):
@@ -141,7 +143,7 @@ class FedLAMaster(FLMaster):
 
         clusters = self.adaptive_clusters()
 
-        if clusters == 0:
+        if clusters == self.cut_off:
             self.single_select()
             return
 
