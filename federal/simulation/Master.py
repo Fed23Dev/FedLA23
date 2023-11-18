@@ -92,7 +92,7 @@ class FedLAMaster(FLMaster):
     def single_select(self):
         js_dists = []
         for info_matrix in self.workers_matrix:
-            js_dists.append(js_divergence(self.curt_matrix, info_matrix))
+            js_dists.append(js_divergence(self.curt_matrix, info_matrix).numpy())
         global_container.flash("js_dists", js_dists)
         self.curt_selected = [js_dists.index(min(js_dists))]
 
@@ -103,13 +103,12 @@ class FedLAMaster(FLMaster):
         IM_diff = torch.abs(self.curt_matrix - self.prev_matrix)
         IM_ratio = IM_diff / self.prev_matrix
         average_ratio = torch.mean(IM_ratio)
-        global_container.flash("average_delta_ratio", average_ratio.item())
+        global_container.flash("average_delta_ratio", average_ratio.numpy())
         if average_ratio > self.threshold:
             self.num_clusters = self.num_clusters//2 if self.num_clusters//2 > 2 else 2
         else:
             self.num_clusters = self.cut_off
         return self.num_clusters
-
         # return self.fix
 
     def sync_matrix(self):
@@ -141,12 +140,12 @@ class FedLAMaster(FLMaster):
 
     def schedule_strategy(self):
         self.curt_selected.clear()
+
         if self.curt_round == 0:
             super(FedLAMaster, self).schedule_strategy()
             return
 
         clusters = self.adaptive_clusters()
-
         if clusters == self.cut_off:
             self.single_select()
             return

@@ -12,17 +12,17 @@ config_path='share/configs/hyper-exps.yml' # hetero fmnist
 # for alpha in 5 20 40 60 80 100 120 150
 # for alpha in 1 3 5 8 10 12 15 18 20
 # for alpha in 1 2 3 4 5 6 7 8 9 10
-# for alpha in 20
-for alpha in 0.0 0.1 0.2 0.3 0.4 0.5 0.6 0.7 0.8 0.9
+for alpha in 20
+# for alpha in 0.0 0.1 0.2 0.3 0.4 0.5 0.6 0.7 0.8 0.9
 
 do
-#  echo "The value is: $alpha"
-#  sed -i "s/logits_batch_limit: *.*/logits_batch_limit: $alpha/g" $config_path
-#  sed -n '37p' $config_path
-
   echo "The value is: $alpha"
-  sed -i "s/drag: *.*/drag: $alpha/g" $config_path
-  sed -n '34p' $config_path
+  sed -i "s/logits_batch_limit: *.*/logits_batch_limit: $alpha/g" $config_path
+  sed -n '37p' $config_path
+
+#  echo "The value is: $alpha"
+#  sed -i "s/drag: *.*/drag: $alpha/g" $config_path
+#  sed -n '34p' $config_path
 
 #  sed -i "s/KD_BATCH: *.*/KD_BATCH: $alpha/g" $config_path
 #  sed -n '39p' $config_path
