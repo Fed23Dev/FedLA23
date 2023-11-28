@@ -94,7 +94,7 @@ class FedLAMaster(FLMaster):
         for info_matrix in self.workers_matrix:
             js_dists.append(js_divergence(self.curt_matrix, info_matrix).numpy())
         global_container.flash("js_dists", js_dists)
-        self.curt_selected = [js_dists.index(min(js_dists))]
+        self.curt_selected = [js_dists.index(max(js_dists))]
 
     def adaptive_clusters(self):
         if self.num_clusters == self.cut_off:
@@ -140,6 +140,8 @@ class FedLAMaster(FLMaster):
 
     def schedule_strategy(self):
         self.curt_selected.clear()
+
+        # self.sync_matrix()
 
         if self.curt_round == 0:
             super(FedLAMaster, self).schedule_strategy()
