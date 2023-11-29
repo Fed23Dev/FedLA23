@@ -108,6 +108,7 @@ M个节点 >> 簇数目n范围为[2, M/2]
 $$
 \frac{\overline{IM(t)} -\overline{IM(t-1)}}{\overline{IM(t)}} \geq \delta \\
 n_{t+1} = n_{t}\times 2
+
 $$
 
 ## TODO
@@ -138,28 +139,34 @@ F函数涉及求导，针对交叉熵损失函数和SGD的形式为（针对单�
 
 $$
 F = \Theta - \eta(-\frac{1}{n}\sum^n_{i=1}P_{i}log(h_{\Theta}(x_i)))'
+
 $$
 
 $$
 P_ilog(h_{\Theta}(x_i)) = P_{i_{t}}log(h_{\Theta}(x_{i_t}))
+
 $$
 
 $$
 h_{\Theta}(x)=\sum^{m}_{i=1}\Theta_ix_i
+
 $$
 
 $$
 log(f(x))'=\frac{1}{f(x)}f(x)'
+
 $$
 
 $$
 M_{LA}\approx h_{\Theta}(x)
+
 $$
 
 最终目标:
 
 $$
 F(F(\Theta, D_1),D_2) \approx \alpha_1F(\Theta, D_1) + \alpha_2 F(\Theta, D_2)
+
 $$
 
 ## 博客对项目进行说明
