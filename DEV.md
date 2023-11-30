@@ -108,7 +108,6 @@ M个节点 >> 簇数目n范围为[2, M/2]
 $$
 \frac{\overline{IM(t)} -\overline{IM(t-1)}}{\overline{IM(t)}} \geq \delta \\
 n_{t+1} = n_{t}\times 2
-
 $$
 
 ## TODO
@@ -121,6 +120,7 @@ Conv-FMNIST 最省时任务
 + 调度曲线到底是先多后少，还是先少后多，肯定是能少则少最好
 + 考虑聚合这次没学习的节点，抑制过拟合，其实本质上是上一轮的初始权重，0.5权重还是什么
 + 信息矩阵的计算是由本地训练后得出试试，优化计算和通信轮次
++ 每次调度单个节点，每次本地训练大量local epoch
 
 ## 优势
 
@@ -139,34 +139,28 @@ F函数涉及求导，针对交叉熵损失函数和SGD的形式为（针对单�
 
 $$
 F = \Theta - \eta(-\frac{1}{n}\sum^n_{i=1}P_{i}log(h_{\Theta}(x_i)))'
-
 $$
 
 $$
 P_ilog(h_{\Theta}(x_i)) = P_{i_{t}}log(h_{\Theta}(x_{i_t}))
-
 $$
 
 $$
 h_{\Theta}(x)=\sum^{m}_{i=1}\Theta_ix_i
-
 $$
 
 $$
 log(f(x))'=\frac{1}{f(x)}f(x)'
-
 $$
 
 $$
 M_{LA}\approx h_{\Theta}(x)
-
 $$
 
 最终目标:
 
 $$
 F(F(\Theta, D_1),D_2) \approx \alpha_1F(\Theta, D_1) + \alpha_2 F(\Theta, D_2)
-
 $$
 
 ## 博客对项目进行说明
