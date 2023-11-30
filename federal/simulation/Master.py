@@ -94,22 +94,22 @@ class FedLAMaster(FLMaster):
         for info_matrix in self.workers_matrix:
             js_dists.append(js_divergence(self.curt_matrix, info_matrix).numpy())
         global_container.flash("js_dists", js_dists)
-        self.curt_selected = [js_dists.index(max(js_dists))]
+        self.curt_selected = [js_dists.index(min(js_dists))]
 
     def adaptive_clusters(self):
-        # if self.num_clusters == self.cut_off:
-        #     return self.num_clusters
-        #
-        # IM_diff = torch.abs(self.curt_matrix - self.prev_matrix)
-        # IM_ratio = IM_diff / self.prev_matrix
-        # average_ratio = torch.mean(IM_ratio)
-        # global_container.flash("average_delta_ratio", average_ratio.numpy())
-        # if average_ratio > self.threshold:
-        #     self.num_clusters = self.num_clusters//2 if self.num_clusters//2 > 2 else 2
-        # else:
-        #     self.num_clusters = self.cut_off
-        # return self.num_clusters
-        return self.fix
+        if self.num_clusters == self.cut_off:
+            return self.num_clusters
+
+        IM_diff = torch.abs(self.curt_matrix - self.prev_matrix)
+        IM_ratio = IM_diff / self.prev_matrix
+        average_ratio = torch.mean(IM_ratio)
+        global_container.flash("average_delta_ratio", average_ratio.numpy())
+        if average_ratio > self.threshold:
+            self.num_clusters = self.num_clusters//2 if self.num_clusters//2 > 2 else 2
+        else:
+            self.num_clusters = self.cut_off
+        return self.num_clusters
+        # return self.fix
 
     def sync_matrix(self):
         self.prev_workers_matrix = deepcopy(self.workers_matrix)

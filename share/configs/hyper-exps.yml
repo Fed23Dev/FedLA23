@@ -11,7 +11,6 @@ dataset: fmnist
 batch_size: 32
 
 # optimizer config
-# optim: sgd
 optim: sgd
 learning_rate: 0.1
 
@@ -33,6 +32,7 @@ local_epoch: 5
 clusters: 10
 drag: 0.8
 threshold: 0.05
+# threshold: 0.001
 
 logits_batch_limit: 20
 
