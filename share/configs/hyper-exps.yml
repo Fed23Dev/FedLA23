@@ -32,7 +32,7 @@ local_epoch: 5
 clusters: 10
 drag: 0.8
 # threshold: 0.05
-threshold: 0.00000000000001
+threshold: 0.00000000000000001
 
 logits_batch_limit: 20
 
