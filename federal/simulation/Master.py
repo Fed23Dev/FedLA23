@@ -7,12 +7,12 @@ import torch.utils.data as tdata
 from sklearn.cluster import AgglomerativeClustering
 
 from dl.SingleCell import SingleCell
-from dl.wrapper.Wrapper import ProxWrapper, LAWrapper
+from dl.wrapper.Wrapper import ProxWrapper, LAWrapper, ScaffoldWrapper, MoonWrapper
 from env.running_env import global_container
 from federal.aggregation.FedLA import FedLA
 
 from federal.simulation.FLnodes import FLMaster
-from federal.simulation.Worker import FedAvgWorker, FedProxWorker, FedLAWorker
+from federal.simulation.Worker import FedAvgWorker, FedProxWorker, FedLAWorker, ScaffoldWorker, MoonWorker
 from utils.MathTools import js_divergence
 
 
@@ -52,7 +52,8 @@ class FedProxMaster(FLMaster):
         master_cell = SingleCell(loader, Wrapper=ProxWrapper)
         super().__init__(workers, activists, local_epoch, master_cell)
 
-        workers_cells = [SingleCell(loader) for loader in list(workers_loaders.values())]
+        workers_cells = [SingleCell(loader, Wrapper=ProxWrapper)
+                         for loader in list(workers_loaders.values())]
         self.workers_nodes = [FedProxWorker(index, cell) for index, cell in enumerate(workers_cells)]
 
     def drive_workers(self):
@@ -80,7 +81,7 @@ class FedLAMaster(FLMaster):
         self.prev_matrix = torch.zeros(num_classes, num_classes)
         self.curt_matrix = torch.zeros(num_classes, num_classes)
 
-        self.num_clusters = self.workers//2       # [2, M/2]
+        self.num_clusters = self.workers // 2  # [2, M/2]
         self.threshold = threshold
         self.drag = drag
         self.pipeline_status = 0
@@ -108,7 +109,7 @@ class FedLAMaster(FLMaster):
         global_container.flash("delta_ratio", IM_ratio.numpy())
 
         if average_ratio > self.threshold:
-            self.num_clusters = self.num_clusters//2 if self.num_clusters//2 > 2 else 2
+            self.num_clusters = self.num_clusters // 2 if self.num_clusters // 2 > 2 else 2
         else:
             self.num_clusters = self.cut_off
         return self.num_clusters
@@ -128,9 +129,9 @@ class FedLAMaster(FLMaster):
 
     def info_aggregation(self):
         workers_dict = []
-        drag_cnt = int(self.drag*len(self.curt_selected))
+        drag_cnt = int(self.drag * len(self.curt_selected))
 
-        for index in random.sample(self.curt_selected, len(self.curt_selected)-drag_cnt):
+        for index in random.sample(self.curt_selected, len(self.curt_selected) - drag_cnt):
             workers_dict.append(self.workers_nodes[index].cell.access_model().state_dict())
 
         for _ in range(drag_cnt):
@@ -198,3 +199,72 @@ class FedLAMaster(FLMaster):
             self.workers_nodes[index].local_train(self.curt_matrix)
 
         self.sync_matrix()
+
+
+class ScaffoldMaster(FLMaster):
+    def __init__(self, workers: int, activists: int, local_epoch: int,
+                 loader: tdata.dataloader, workers_loaders: dict, local_batch: int):
+        """
+
+        :param workers:
+        :param activists:
+        :param local_epoch:
+        :param loader: *only in simulation*
+        :param workers_loaders: *only in simulation*
+        """
+        master_cell = SingleCell(loader, Wrapper=ScaffoldWrapper)
+        super().__init__(workers, activists, local_epoch, master_cell)
+        self.control, self.delta_control, self.delta_y = dict(), dict(), dict()
+        for k, v in self.cell.access_model().named_parameters():
+            self.control[k] = torch.zeros_like(v.data)
+            self.delta_control[k] = torch.zeros_like(v.data)
+            self.delta_y[k] = torch.zeros_like(v.data)
+        self.sca_pace = local_epoch*local_batch
+
+        workers_cells = [SingleCell(loader, Wrapper=ScaffoldWrapper)
+                         for loader in list(workers_loaders.values())]
+        self.workers_nodes = [ScaffoldWorker(index, cell) for index, cell in enumerate(workers_cells)]
+
+    def drive_workers(self):
+        for index in self.curt_selected:
+            self.workers_nodes[index].local_train(self.control)
+            self.workers_nodes[index].update_control(self.sca_pace, self.control)
+
+    def info_aggregation(self):
+        x = {}
+        c = {}
+        for k, v in self.workers_nodes[0].cell.access_model().named_parameters():
+            x[k] = torch.zeros_like(v.data)
+            c[k] = torch.zeros_like(v.data)
+
+        for j in self.curt_selected:
+            for k, v in self.workers_nodes[j].cell.access_model().named_parameters():
+                x[k] += self.workers_nodes[j].delta_y[k] / len(self.curt_selected)  # averaging
+                c[k] += self.workers_nodes[j].delta_control[k] / len(self.curt_selected)  # averaging
+
+        for k, v in self.cell.access_model().named_parameters():
+            v.data += x[k].data
+            self.control[k].data += c[k].data * (len(self.curt_selected) / self.workers)
+
+        self.merge.union_dict = deepcopy(self.cell.access_model().state_dict())
+
+
+class MoonMaster(FLMaster):
+
+    def __init__(self, workers: int, activists: int, local_epoch: int,
+                 loader: tdata.dataloader, workers_loaders: dict,
+                 mu: float, T: int):
+        master_cell = SingleCell(loader, Wrapper=MoonWrapper)
+        super().__init__(workers, activists, local_epoch, master_cell)
+
+        workers_cells = [SingleCell(loader, Wrapper=MoonWrapper)
+                         for loader in list(workers_loaders.values())]
+        self.workers_nodes = [MoonWorker(index, cell) for index, cell in enumerate(workers_cells)]
+
+        self.mu = mu
+        self.T = T
+
+    def drive_workers(self):
+        for index in self.curt_selected:
+            self.workers_nodes[index].local_train(deepcopy(self.cell.access_model()),
+                                                  self.mu, self.T)

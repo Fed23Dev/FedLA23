@@ -137,6 +137,13 @@ Conv-FMNIST 最省时任务
 + 威尔科克森符号秩检验或Friedman校验
 + Kullback-Leibler散度或Jensen-Shannon散度
 
+## 待优化实现
+
+FedProx Wrapper 不使用args.mu传值
+
+Scaffold 学习率那里可能有问题
+
+
 ## 优势
 
 精度提升不高，只能考虑其他的了

@@ -4,7 +4,7 @@ import torch.cuda
 from env.running_env import args, global_logger
 from env.support_config import VState
 from federal.federal_util import simulation_federal_process, get_data_ratio
-from federal.simulation.Master import FedAvgMaster, FedProxMaster, FedLAMaster
+from federal.simulation.Master import FedAvgMaster, FedProxMaster, FedLAMaster, ScaffoldMaster, MoonMaster
 from utils.MathTools import js_divergence
 
 
@@ -36,11 +36,19 @@ def test_fedla():
 
 
 def test_scaffold():
-    pass
+    loader, loaders, user_dict = simulation_federal_process()
+    master_node = ScaffoldMaster(workers=args.workers, activists=args.active_workers, local_epoch=args.local_epoch,
+                                 loader=loader, workers_loaders=loaders, local_batch=args.batch_limit)
+    master_node.union_run(args.federal_round)
+    master_node.cell.exit_proc(one_key=f'{args.exp_name}-test_acc')
 
 
 def test_moon():
-    pass
+    loader, loaders, user_dict = simulation_federal_process()
+    master_node = MoonMaster(workers=args.workers, activists=args.active_workers, local_epoch=args.local_epoch,
+                             loader=loader, workers_loaders=loaders, mu=args.mu, T=args.T)
+    master_node.union_run(args.federal_round)
+    master_node.cell.exit_proc(one_key=f'{args.exp_name}-test_acc')
 
 
 def main():
