@@ -141,7 +141,7 @@ class FedLAMaster(FLMaster):
     def schedule_strategy(self):
         self.curt_selected.clear()
 
-        self.sync_matrix()
+        # self.sync_matrix()
 
         if self.curt_round == 0:
             super(FedLAMaster, self).schedule_strategy()
@@ -194,4 +194,4 @@ class FedLAMaster(FLMaster):
         for index in self.curt_selected:
             self.workers_nodes[index].local_train(self.curt_matrix)
 
-        # self.sync_matrix()
+        self.sync_matrix()
