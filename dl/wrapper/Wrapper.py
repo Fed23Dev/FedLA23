@@ -15,7 +15,7 @@ from yacs.config import CfgNode
 
 from dl.compress.DKD import DKD
 from dl.wrapper import DeviceManager
-from dl.wrapper.optimizer import SGD_PruneFL
+from dl.wrapper.optimizer import SGD_PruneFL, ScaffoldOptim
 from dl.wrapper.optimizer.WarmUpCosinLR import WarmUPCosineLR
 from dl.wrapper.optimizer.WarmUpStepLR import WarmUPStepLR
 from env.running_env import *
@@ -138,12 +138,12 @@ class VWrapper:
             pred = self.model(inputs)
 
             if train:
-                loss = self.loss_compute(pred, labels, **kwargs)
+                loss = self.loss_compute(pred, labels, **kwargs, inputs=inputs)
             else:
                 loss = self.test_loss_compute(pred, labels)
 
             if train:
-                self.optim_step(loss)
+                self.optim_step(loss, **kwargs)
 
             _, predicted = pred.max(1)
             _, targets = labels.max(1)
@@ -168,7 +168,7 @@ class VWrapper:
         return correct, total, self.latest_loss
 
     # 优化器步进过程
-    def optim_step(self, loss: torch.Tensor, speedup: bool = False):
+    def optim_step(self, loss: torch.Tensor, speedup: bool = False, **kwargs):
         if speedup:
             self.optimizer.zero_grad()
             self.scaler.scale(loss).backward()
@@ -382,3 +382,65 @@ class LAWrapper(VWrapper):
                          info_matrix: torch.Tensor) -> torch.Tensor:
         target = target.unsqueeze(1).expand(target.size()[0], info_matrix.size()[0])
         return torch.gather(input=info_matrix, dim=0, index=target)
+
+
+class ScaffoldWrapper(VWrapper):
+    ERROR_MESS7 = "Scaffold must provide server_controls parameter."
+    ERROR_MESS8 = "Scaffold must provide mu parameter."
+
+    def __init__(self, model: nn.Module, train_dataloader: tdata.dataloader, optimizer: VOptimizer,
+                 scheduler: VScheduler, loss: VLossFunc):
+        super().__init__(model, train_dataloader, optimizer, scheduler, loss)
+
+    def init_optim(self, learning_rate: float, momentum: float,
+                   weight_decay: float, nesterov: bool):
+        self.optimizer = ScaffoldOptim.ScaffoldOptimizer(self.model.parameters(), lr=learning_rate,
+                                                         weight_decay=weight_decay)
+
+    def optim_step(self, loss: torch.Tensor, **kwargs):
+        assert "server_controls" in kwargs.keys(), self.ERROR_MESS7
+        assert "self_controls" in kwargs.keys(), self.ERROR_MESS8
+        self.optimizer.zero_grad()
+        loss.backward()
+        self.optimizer.step(kwargs["server_controls"], kwargs["self_controls"])
+
+
+class MoonWrapper(VWrapper):
+    ERROR_MESS9 = "Moon must provide global_model parameter."
+    ERROR_MESS10 = "Moon must provide prev_model parameter."
+    ERROR_MESS11 = "Moon must provide mu parameter."
+    ERROR_MESS12 = "Moon must provide T parameter."
+    ERROR_MESS13 = "Moon must provide inputs parameter."
+
+    def __init__(self, model: nn.Module, train_dataloader: tdata.dataloader, optimizer: VOptimizer,
+                 scheduler: VScheduler, loss: VLossFunc):
+        super().__init__(model, train_dataloader, optimizer, scheduler, loss)
+        self.cos = torch.nn.CosineSimilarity(dim=-1)
+
+    def loss_compute(self, pred: torch.Tensor, targets: torch.Tensor, **kwargs) -> torch.Tensor:
+        assert "global_model" in kwargs.keys(), self.ERROR_MESS9
+        assert "prev_model" in kwargs.keys(), self.ERROR_MESS10
+        assert "mu" in kwargs.keys(), self.ERROR_MESS11
+        assert "T" in kwargs.keys(), self.ERROR_MESS12
+        assert "inputs" in kwargs.keys(), self.ERROR_MESS13
+
+        global_model = kwargs["global_model"]
+        prev_model = kwargs["prev_model"]
+        inputs = kwargs["inputs"]
+        mu = torch.tensor(kwargs["mu"]).long()
+
+        global_out = global_model(inputs)
+
+        posi = self.cos(pred, global_out)
+        logits = posi.reshape(-1)
+
+        prev_out = prev_model(inputs)
+        nega = self.cos(pred, prev_out)
+        logits = logits + posi.reshape(-1)
+
+        logits /= kwargs["T"]
+        labels = torch.zeros(inputs.size(0)).cuda()
+
+        loss2 = mu * self.loss_func(logits, labels)
+
+        return self.loss_func(pred, targets) + loss2

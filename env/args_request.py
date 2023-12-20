@@ -40,7 +40,7 @@ DEFAULT_ARGS = {
     "test_batch_limit": 10,
     "logits_batch_limit": 50,
     "loss_back": 3,
-    "mu": 0.01,
+    "mu": 0.3,
 
     "CE_WEIGHT": 1.0,
     "ALPHA": 1.0,

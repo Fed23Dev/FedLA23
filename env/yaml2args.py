@@ -145,6 +145,10 @@ class ArgRepo:
         self.drag = None
         self.threshold = None
 
+        self.mu = None
+        self.T = None
+
+
     def runtime_attr_placeholder(self):
         self.num_classes = None
         self.in_channels = None
