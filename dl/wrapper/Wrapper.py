@@ -12,6 +12,7 @@ from torch.nn.functional import binary_cross_entropy_with_logits
 from torch.optim import lr_scheduler
 from torch.optim.lr_scheduler import ReduceLROnPlateau
 from yacs.config import CfgNode
+import torch.nn.functional as F
 
 from dl.compress.DKD import DKD
 from dl.wrapper import DeviceManager
@@ -415,7 +416,6 @@ class MoonWrapper(VWrapper):
     def __init__(self, model: nn.Module, train_dataloader: tdata.dataloader, optimizer: VOptimizer,
                  scheduler: VScheduler, loss: VLossFunc):
         super().__init__(model, train_dataloader, optimizer, scheduler, loss)
-        self.cos = torch.nn.CosineSimilarity(dim=-1)
 
     def loss_compute(self, pred: torch.Tensor, targets: torch.Tensor, **kwargs) -> torch.Tensor:
         assert "global_model" in kwargs.keys(), self.ERROR_MESS9
@@ -428,19 +428,13 @@ class MoonWrapper(VWrapper):
         prev_model = kwargs["prev_model"]
         inputs = kwargs["inputs"]
         mu = torch.tensor(kwargs["mu"]).long()
+        T = kwargs["T"]
 
-        global_out = global_model(inputs)
-
-        posi = self.cos(pred, global_out)
-        logits = posi.reshape(-1)
-
-        prev_out = prev_model(inputs)
-        nega = self.cos(pred, prev_out)
-        logits = logits + posi.reshape(-1)
-
-        logits /= kwargs["T"]
-        labels = torch.zeros(inputs.size(0)).cuda()
-
-        loss2 = mu * self.loss_func(logits, labels)
+        rep_old = prev_model(inputs).detach()
+        rep_global = global_model(inputs).detach()
+        loss_con = - torch.log(torch.exp(F.cosine_similarity(pred, rep_global) / T) /
+                               (torch.exp(F.cosine_similarity(pred, rep_global) / T) +
+                                torch.exp(F.cosine_similarity(pred, rep_old) / T)))
+        loss2 = mu * torch.mean(loss_con)
 
         return self.loss_func(pred, targets) + loss2

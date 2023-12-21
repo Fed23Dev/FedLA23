@@ -40,12 +40,12 @@ DEFAULT_ARGS = {
     "test_batch_limit": 10,
     "logits_batch_limit": 50,
     "loss_back": 3,
-    "mu": 0.3,
+    # "mu": 0.3,
 
     "CE_WEIGHT": 1.0,
     "ALPHA": 1.0,
     "BETA": 8.0,
-    "T": 4.0,
+    # "T": 4.0,
     "WARMUP": 20,
     "KD_BATCH": 20,
     "KD_EPOCH": 5,
@@ -53,4 +53,7 @@ DEFAULT_ARGS = {
     "clusters": 10,
     "drag": 0.5,
     "threshold": 0.2,
+
+    "mu": 0.7,
+    "T": 0.5,
 }

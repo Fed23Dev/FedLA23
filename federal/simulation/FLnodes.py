@@ -60,8 +60,8 @@ class FLMaster(ABC):
         for index in self.curt_selected:
             workers_dict.append(self.workers_nodes[index].cell.access_model().state_dict())
         self.merge.merge_dict(workers_dict)
-        for index in self.curt_selected:
-            self.workers_nodes[index].cell.decay_lr(self.pace)
+        # for index in self.curt_selected:
+        #     self.workers_nodes[index].cell.decay_lr(self.pace)
 
     def info_sync(self):
         workers_cells = []

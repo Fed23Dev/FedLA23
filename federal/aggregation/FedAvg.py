@@ -40,7 +40,7 @@ class FedAvg:
         for cell in workers_cells:
             if self.union_dict:
                 cell.access_model().load_state_dict(self.union_dict)
-            cell.decay_lr(epochs)
+            # cell.decay_lr(epochs)
         self.union_dict.clear()
 
     # 撤销本次联邦学习过程，如果学习到的信息比较差
