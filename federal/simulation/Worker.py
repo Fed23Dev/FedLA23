@@ -54,13 +54,17 @@ class ScaffoldWorker(FLWorker):
         self.train_before = deepcopy(self.cell.access_model())
         self.train_before_c = deepcopy(self.control)
 
+        self.prev_batch = 0
+        self.prev_epoch = 0
+
     def local_train(self, server_controls: dict):
         global_logger.info(f'------Train from device: {self.id}------')
         self.train_before = deepcopy(self.cell.access_model())
         self.train_before_c = deepcopy(self.control)
         self.cell.run_model(train=True, server_controls=server_controls, self_controls=self.control)
 
-    def update_control(self, local_steps: int, server_controls: dict):
+    def update_control(self, server_controls: dict):
+        local_steps = self.cell.latest_feed_amount // args.batch_size
         lr = self.cell.wrapper.show_lr()
         temp = {}
         for k, v in self.cell.access_model().named_parameters():

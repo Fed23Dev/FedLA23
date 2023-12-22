@@ -137,12 +137,18 @@ Conv-FMNIST 最省时任务
 + 威尔科克森符号秩检验或Friedman校验
 + Kullback-Leibler散度或Jensen-Shannon散度
 
+12.22 最终方案敲定
+
++ 统计单个分类的精度准确度，观察信息矩阵对应行的JS散度变化
++ 针对信息矩阵每行进行位置编码，然后观察JS散度变化
++ 对角线元素的JS散度可以
++ 测试其他的方案
+
 ## 待优化实现
 
 FedProx Wrapper 不使用args.mu传值
 
 Scaffold 学习率那里可能有问题
-
 
 ## 优势
 

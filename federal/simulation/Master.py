@@ -219,7 +219,6 @@ class ScaffoldMaster(FLMaster):
             self.control[k] = torch.zeros_like(v.data)
             self.delta_control[k] = torch.zeros_like(v.data)
             self.delta_y[k] = torch.zeros_like(v.data)
-        self.sca_pace = local_epoch*local_batch
 
         workers_cells = [SingleCell(loader, Wrapper=ScaffoldWrapper)
                          for loader in list(workers_loaders.values())]
@@ -228,7 +227,7 @@ class ScaffoldMaster(FLMaster):
     def drive_workers(self):
         for index in self.curt_selected:
             self.workers_nodes[index].local_train(self.control)
-            self.workers_nodes[index].update_control(self.sca_pace, self.control)
+            self.workers_nodes[index].update_control(self.control)
 
     def info_aggregation(self):
         x = {}
