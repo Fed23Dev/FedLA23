@@ -95,6 +95,7 @@ class FLWorker(ABC):
     def __init__(self, worker_id: int, worker_cell: SingleCell):
         self.id = worker_id
         self.cell = worker_cell
+        self.cell = worker_cell
 
     @abstractmethod
     def local_train(self, *_args, **kwargs):
