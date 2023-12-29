@@ -3,7 +3,7 @@ exp_name: fmnist-conv2
 
 # checkpoint config
 model: conv2
-alg: moon
+alg: fedla
 gpu_ids: [0, 1]
 
 # dataset config
@@ -30,9 +30,9 @@ local_epoch: 5
 
 # fedla
 clusters: 10
-drag: 0.8
+drag: 0.3
 # threshold: 0.05
-threshold: 0.00000000000000001
+threshold: -0.01
 
 logits_batch_limit: 20
 

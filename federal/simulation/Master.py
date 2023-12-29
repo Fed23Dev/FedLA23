@@ -4,16 +4,17 @@ from copy import deepcopy
 import numpy as np
 import torch
 import torch.utils.data as tdata
+from scipy.spatial.distance import jensenshannon
 from sklearn.cluster import AgglomerativeClustering
 
 from dl.SingleCell import SingleCell
 from dl.wrapper.Wrapper import ProxWrapper, LAWrapper, ScaffoldWrapper, MoonWrapper
-from env.running_env import global_container
+from env.running_env import global_container, global_logger
 from federal.aggregation.FedLA import FedLA
 
 from federal.simulation.FLnodes import FLMaster
 from federal.simulation.Worker import FedAvgWorker, FedProxWorker, FedLAWorker, ScaffoldWorker, MoonWorker
-from utils.MathTools import js_divergence
+from utils.MathTools import js_divergence, remove_top_k_elements
 
 
 class FedAvgMaster(FLMaster):
@@ -82,13 +83,16 @@ class FedLAMaster(FLMaster):
         self.curt_matrix = torch.zeros(num_classes, num_classes)
 
         self.num_clusters = self.workers // 2  # [2, M/2]
-        self.threshold = threshold
         self.drag = drag
+
+        self.fix = clusters
+        self.clusters = 0
         self.pipeline_status = 0
         self.clusters_indices = []
 
-        self.cut_off = 1
-        self.fix = clusters
+        self.start_matrix = None
+        self.cft = 0.3
+        self.threshold = threshold
 
     def single_select(self):
         js_dists = []
@@ -98,21 +102,10 @@ class FedLAMaster(FLMaster):
         self.curt_selected = [js_dists.index(max(js_dists))]
 
     def adaptive_clusters(self):
-        if self.num_clusters == self.cut_off:
-            return self.num_clusters
-
-        IM_diff = torch.abs(self.curt_matrix - self.prev_matrix)
-        IM_ratio = IM_diff / self.prev_matrix
-
-        average_ratio = torch.mean(IM_ratio)
-        global_container.flash("average_delta_ratio", average_ratio.numpy())
-        global_container.flash("delta_ratio", IM_ratio.numpy())
-
-        if average_ratio > self.threshold:
-            self.num_clusters = self.num_clusters // 2 if self.num_clusters // 2 > 2 else 2
-        else:
-            self.num_clusters = self.cut_off
+        self.num_clusters = self.num_clusters // 2 if self.num_clusters // 2 > 2 else 2
         return self.num_clusters
+
+        # self.delta_critical_period()
         # return self.fix
 
     def sync_matrix(self):
@@ -125,7 +118,14 @@ class FedLAMaster(FLMaster):
             self.workers_matrix.append(self.workers_nodes[i].cell.wrapper.get_logits_matrix())
 
         self.curt_matrix = torch.div(sum(self.workers_matrix), len(self.workers_matrix))
+
+        if self.start_matrix is None:
+            self.start_matrix = deepcopy(self.curt_matrix)
         global_container.flash('avg_matrix', deepcopy(self.curt_matrix).numpy())
+
+        # global_logger.info(f"======curt: {self.curt_matrix}======")
+        # global_logger.info(f"======prev: {self.prev_matrix}======")
+        # global_logger.info(f"======start: {self.start_matrix}======")
 
     def info_aggregation(self):
         workers_dict = []
@@ -145,53 +145,33 @@ class FedLAMaster(FLMaster):
     def schedule_strategy(self):
         self.curt_selected.clear()
 
-        # self.sync_matrix()
-
         if self.curt_round == 0:
             super(FedLAMaster, self).schedule_strategy()
             return
 
-        clusters = self.adaptive_clusters()
-        if clusters == self.cut_off:
+        if not self.delta_critical_period():
             self.single_select()
             return
 
         if self.pipeline_status == 0:
+            self.clusters = self.adaptive_clusters()
             X = torch.stack(self.workers_matrix, dim=0).numpy()
             n_samples, dim1, dim2 = X.shape
             flattened_X = X.reshape(n_samples, dim1 * dim2)
-            clustering = AgglomerativeClustering(n_clusters=clusters).fit(flattened_X)
+            clustering = AgglomerativeClustering(n_clusters=self.clusters).fit(flattened_X)
             self.clusters_indices = clustering.labels_
 
         # doing: to modify
         self.curt_selected = np.where(self.clusters_indices == self.pipeline_status)[0].tolist()
 
-        self.pipeline_status += 1
+        self.pipeline_status = (self.pipeline_status + 1) % self.clusters
 
-        if self.pipeline_status == clusters:
-            self.pipeline_status = 0
-
-        if len(self.curt_selected) == 1:
-            return
-
-        if len(self.curt_selected) > self.plan:
-            self.curt_selected = random.sample(self.curt_selected, self.plan)
-
-        # node_cnt = len(self.curt_selected) if len(self.curt_selected) < self.plan else self.plan
-        # all_indices = set(list(range(len(self.workers_nodes))))
-        # la_indices = set(self.curt_selected)
-        # difference = list(all_indices - la_indices)
+        # # to modify
+        # if len(self.curt_selected) == 1:
+        #     return
         #
-        # half1 = random.sample(self.curt_selected, node_cnt // 2 + 1)
-        # half2 = random.sample(difference, node_cnt // 2 + 1)
-        # half1.extend(half2)
-        # self.curt_selected = deepcopy(half1)
-
-        # # debug switch: selection
-        # self.sync_matrix()
-
-        # # debug switch: selection
-        # super(FedLAMaster, self).schedule_strategy()
+        # if len(self.curt_selected) > self.plan:
+        #     self.curt_selected = random.sample(self.curt_selected, self.plan)
 
     def drive_workers(self, *_args, **kwargs):
         global_container.flash('selected_workers', deepcopy(self.curt_selected))
@@ -199,6 +179,28 @@ class FedLAMaster(FLMaster):
             self.workers_nodes[index].local_train(self.curt_matrix)
 
         self.sync_matrix()
+
+    def delta_critical_period(self):
+        start_matrix = self.start_matrix.numpy()
+        curt_matrix = self.curt_matrix.numpy()
+        prev_matrix = self.prev_matrix.numpy()
+
+        js_div_row = []
+        for row in range(len(start_matrix)):
+            row1 = remove_top_k_elements(start_matrix[row], 1)
+            row2 = remove_top_k_elements(curt_matrix[row], 1)
+            js_div_row.append(jensenshannon(row1, row2))
+        mean_values_row = np.mean(np.array(js_div_row))
+        js_divergences1 = -mean_values_row
+
+        diagonal1 = np.diag(prev_matrix)
+        diagonal2 = np.diag(curt_matrix)
+
+        js_divergences2 = jensenshannon(diagonal1, diagonal2)
+        adapt_dist = self.cft * js_divergences1 + js_divergences2
+        global_logger.info(f"======adapt_dist: {adapt_dist}======")
+        global_container.flash('adapt_dist', adapt_dist)
+        return (np.isnan(adapt_dist)) or (adapt_dist >= self.threshold)
 
 
 class ScaffoldMaster(FLMaster):

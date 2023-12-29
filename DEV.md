@@ -104,7 +104,9 @@ distance_threshold：距离阈值参数，用于指定聚类过程中的合并�
 
 #### 自适应选择数目
 
-M个节点 >> 簇数目n范围为[2, M/2]
+M个节点 >> 簇数目n范围为[2, M/2] >> 2*2^t -> M//2
+
+调小local_epoch和local_batch
 
 $$
 \frac{\overline{IM(t)} -\overline{IM(t-1)}}{\overline{IM(t)}} \geq \delta \\
@@ -167,15 +169,15 @@ F为模型的优化函数，w为权重，d为数据集
 F函数涉及求导，针对交叉熵损失函数和SGD的形式为（针对单一参数和单一数据样本有）：
 
 $$
-F = \Theta - \eta(-\frac{1}{n}\sum^n_{i=1}P_{i}log(h_{\Theta}(x_i)))'
+F = \theta - \eta(-\frac{1}{n}\sum^n_{i=1}P_{i}log(h_{\theta}(x_i)))'
 $$
 
 $$
-P_ilog(h_{\Theta}(x_i)) = P_{i_{t}}log(h_{\Theta}(x_{i_t}))
+P_ilog(h_{\theta}(x_i)) = P_{i_{t}}log(h_{\theta}(x_{i_t}))
 $$
 
 $$
-h_{\Theta}(x)=\sum^{m}_{i=1}\Theta_ix_i
+h_{\theta}(x)=\sum^{m}_{i=1}\theta_ix_i
 $$
 
 $$
