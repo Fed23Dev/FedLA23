@@ -153,6 +153,10 @@ FedProx Wrapper 不使用args.mu传值
 
 Scaffold 学习率那里可能有问题
 
+FedLA 选每一个簇中的客户端进行组合
+
+FedLA 数学公式那里分iid和non-iid.形式进行推导
+
 ## 优势
 
 精度提升不高，只能考虑其他的了

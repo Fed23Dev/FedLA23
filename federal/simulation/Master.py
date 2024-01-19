@@ -88,6 +88,7 @@ class FedLAMaster(FLMaster):
         self.fix = clusters
         self.clusters = 0
         self.pipeline_status = 0
+        self.dis_status = 0
         self.clusters_indices = []
 
         self.start_matrix = None
@@ -149,9 +150,10 @@ class FedLAMaster(FLMaster):
             super(FedLAMaster, self).schedule_strategy()
             return
 
-        if not self.delta_critical_period():
-            self.single_select()
-            return
+        # # CLP shrink
+        # if not self.delta_critical_period():
+        #     self.single_select()
+        #     return
 
         if self.pipeline_status == 0:
             self.clusters = self.adaptive_clusters()
@@ -161,10 +163,20 @@ class FedLAMaster(FLMaster):
             clustering = AgglomerativeClustering(n_clusters=self.clusters).fit(flattened_X)
             self.clusters_indices = clustering.labels_
 
-        # doing: to modify
+        # CFL - sim
         self.curt_selected = np.where(self.clusters_indices == self.pipeline_status)[0].tolist()
-
         self.pipeline_status = (self.pipeline_status + 1) % self.clusters
+
+        # # CFL - dis
+        # for i in range(self.clusters):
+        #     cls = np.where(self.clusters_indices == i)[0].tolist()
+        #     if self.dis_status < len(cls):
+        #         self.curt_selected.append(deepcopy(cls[self.dis_status]))
+        # self.dis_status += 1
+
+        # boundary case
+
+        global_logger.info(f"======Round{self.curt_round}>>{self.curt_selected}======")
 
         # # to modify
         # if len(self.curt_selected) == 1:
