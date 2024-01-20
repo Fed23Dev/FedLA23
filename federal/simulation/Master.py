@@ -87,9 +87,11 @@ class FedLAMaster(FLMaster):
 
         self.fix = clusters
         self.clusters = 0
+        self.pipeline = [[]]
         self.pipeline_status = 0
-        self.dis_status = 0
+        self.max_round = 0
         self.clusters_indices = []
+
 
         self.start_matrix = None
         self.cft = 0.3
@@ -157,26 +159,30 @@ class FedLAMaster(FLMaster):
 
         if self.pipeline_status == 0:
             self.clusters = self.adaptive_clusters()
+            global_logger.info(f"======Round{self.curt_round} >> Clusters:{self.clusters}======")
             X = torch.stack(self.workers_matrix, dim=0).numpy()
             n_samples, dim1, dim2 = X.shape
             flattened_X = X.reshape(n_samples, dim1 * dim2)
             clustering = AgglomerativeClustering(n_clusters=self.clusters).fit(flattened_X)
             self.clusters_indices = clustering.labels_
 
-        # CFL - sim
-        self.curt_selected = np.where(self.clusters_indices == self.pipeline_status)[0].tolist()
-        self.pipeline_status = (self.pipeline_status + 1) % self.clusters
+            # debug
+            cnt = np.unique(self.clusters_indices, return_counts=True)[1]
+            global_logger.info(f"======Round{self.curt_round} >> Cluster Ret:{len(cnt)}======")
 
-        # # CFL - dis
-        # for i in range(self.clusters):
-        #     cls = np.where(self.clusters_indices == i)[0].tolist()
-        #     if self.dis_status < len(cls):
-        #         self.curt_selected.append(deepcopy(cls[self.dis_status]))
-        # self.dis_status += 1
+            # # CFL - diff
+            # boundary case avg_lea
+            self.diff_cluster_case()
 
-        # boundary case
+        # # CFL - sim
+        # self.curt_selected = np.where(self.clusters_indices == self.pipeline_status)[0].tolist()
+        # self.pipeline_status = (self.pipeline_status + 1) % self.clusters
 
-        global_logger.info(f"======Round{self.curt_round}>>{self.curt_selected}======")
+        self.curt_selected = deepcopy(self.pipeline[self.pipeline_status])
+
+        self.pipeline_status = (self.pipeline_status + 1) % self.max_round
+
+        global_logger.info(f"======Round{self.curt_round} >> Select Index:{self.curt_selected}======")
 
         # # to modify
         # if len(self.curt_selected) == 1:
@@ -184,6 +190,24 @@ class FedLAMaster(FLMaster):
         #
         # if len(self.curt_selected) > self.plan:
         #     self.curt_selected = random.sample(self.curt_selected, self.plan)
+
+    def diff_cluster_case(self):
+        # 计算每个唯一元素的出现次数
+        unique_elements, counts = np.unique(self.clusters_indices, return_counts=True)
+
+        # 确定平均出现次数
+        self.max_round = (np.min(counts) + np.max(counts)) // 2
+
+        # 初始化分组
+        self.pipeline = [[] for _ in range(self.max_round)]
+
+        # 分配索引到不同的组
+        for element in unique_elements:
+            indices = np.where(self.clusters_indices == element)[0]
+            split_indices = np.array_split(indices, self.max_round)
+            for group_idx in range(self.max_round):
+                self.pipeline[group_idx].extend(split_indices[group_idx] if group_idx < len(split_indices) else [])
+
 
     def drive_workers(self, *_args, **kwargs):
         global_container.flash('selected_workers', deepcopy(self.curt_selected))
