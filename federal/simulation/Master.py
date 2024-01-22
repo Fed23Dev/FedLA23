@@ -92,7 +92,6 @@ class FedLAMaster(FLMaster):
         self.max_round = 0
         self.clusters_indices = []
 
-
         self.start_matrix = None
         self.cft = 0.3
         self.threshold = threshold
@@ -172,7 +171,7 @@ class FedLAMaster(FLMaster):
 
             # # CFL - diff
             # boundary case avg_lea
-            self.diff_cluster_case()
+            self.diff_cluster_most_case()
 
         # # CFL - sim
         # self.curt_selected = np.where(self.clusters_indices == self.pipeline_status)[0].tolist()
@@ -191,7 +190,7 @@ class FedLAMaster(FLMaster):
         # if len(self.curt_selected) > self.plan:
         #     self.curt_selected = random.sample(self.curt_selected, self.plan)
 
-    def diff_cluster_case(self):
+    def diff_cluster_lea_case(self):
         # 计算每个唯一元素的出现次数
         unique_elements, counts = np.unique(self.clusters_indices, return_counts=True)
 
@@ -208,6 +207,22 @@ class FedLAMaster(FLMaster):
             for group_idx in range(self.max_round):
                 self.pipeline[group_idx].extend(split_indices[group_idx] if group_idx < len(split_indices) else [])
 
+    def diff_cluster_most_case(self):
+        # 计算每个唯一元素的出现次数
+        unique_elements, counts = np.unique(self.clusters_indices, return_counts=True)
+
+        # 确定最大出现次数
+        self.max_round = np.max(counts)
+
+        # 初始化分组
+        self.pipeline = [[] for _ in range(self.max_round)]
+
+        # 分配索引到不同的组
+        for element in unique_elements:
+            indices = np.where(self.clusters_indices == element)[0]
+            extended_indices = list(np.resize(indices, self.max_round))
+            for group_idx in range(self.max_round):
+                self.pipeline[group_idx].append(extended_indices[group_idx])
 
     def drive_workers(self, *_args, **kwargs):
         global_container.flash('selected_workers', deepcopy(self.curt_selected))
