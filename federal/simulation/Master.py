@@ -183,12 +183,12 @@ class FedLAMaster(FLMaster):
 
         global_logger.info(f"======Round{self.curt_round} >> Select Index:{self.curt_selected}======")
 
-        # # to modify
-        # if len(self.curt_selected) == 1:
-        #     return
-        #
-        # if len(self.curt_selected) > self.plan:
-        #     self.curt_selected = random.sample(self.curt_selected, self.plan)
+        # to optim FedLA
+        if len(self.curt_selected) == 1:
+            return
+
+        if len(self.curt_selected) > self.plan:
+            self.curt_selected = random.sample(self.curt_selected, self.plan)
 
     def diff_cluster_lea_case(self):
         # 计算每个唯一元素的出现次数
@@ -229,6 +229,7 @@ class FedLAMaster(FLMaster):
         for index in self.curt_selected:
             self.workers_nodes[index].local_train(self.curt_matrix)
 
+        # todo: optim cnt
         self.sync_matrix()
 
     def delta_critical_period(self):
