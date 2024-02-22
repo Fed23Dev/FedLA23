@@ -9,18 +9,7 @@ from dl.data.datasets import get_data
 from env.running_env import global_logger
 from env.support_config import VDataSet
 
-
-def specify_class_simple(targets: list, class_idx: int, simple_num: int) -> list:
-    data_indices = []
-    add_num = 0
-    for idx, label in enumerate(targets):
-        if label == class_idx:
-            add_num += 1
-            data_indices.append(idx)
-        if add_num == simple_num:
-            break
-    return data_indices
-
+dir_alpha = 0.3
 
 def iid(targets, num_clients: int) -> dict:
     client_dict = dict()
@@ -46,7 +35,7 @@ def dataset_user_indices(dataset_type: VDataSet, num_slices, non_iid: str, seed:
             if non_iid == 'hetero':
                 client_dict = CIFAR10Partitioner(dataset.targets, num_slices,
                                                  balance=None, partition="dirichlet",
-                                                 dir_alpha=0.3, seed=seed).client_dict
+                                                 dir_alpha=dir_alpha, seed=seed).client_dict
             else:
                 client_dict = CIFAR10Partitioner(dataset.targets, num_slices,
                                                  balance=None, partition="shards",
@@ -55,20 +44,27 @@ def dataset_user_indices(dataset_type: VDataSet, num_slices, non_iid: str, seed:
             if non_iid == 'hetero':
                 client_dict = CIFAR100Partitioner(dataset.targets, num_slices,
                                                   balance=None, partition="dirichlet",
-                                                  dir_alpha=0.3, seed=seed).client_dict
+                                                  dir_alpha=dir_alpha, seed=seed).client_dict
             else:
                 client_dict = CIFAR100Partitioner(dataset.targets, num_slices,
                                                   balance=None, partition="shards",
-                                                  num_shards=200, seed=seed).client_dict
+                                                  num_shards=2000, seed=seed).client_dict
         elif dataset_type == VDataSet.FMNIST:
             if non_iid == 'hetero':
                 client_dict = FMNISTPartitioner(dataset.targets, num_slices,
                                                 partition="noniid-labeldir",
-                                                dir_alpha=0.5, seed=seed).client_dict
+                                                dir_alpha=dir_alpha, seed=seed).client_dict
             else:
                 client_dict = FMNISTPartitioner(dataset.targets, num_slices,
                                                 partition="noniid-#label",
                                                 major_classes_num=2).client_dict
+        elif dataset_type == VDataSet.TinyImageNet:
+            if non_iid == 'hetero':
+                client_dict = _hetero_non_iid(dataset.targets, 200,
+                                              num_slices, dir_alpha, seed=seed)
+            else:
+                client_dict = _shards_non_iid(dataset.targets, 4000,
+                                              num_slices, seed, 200)
         else:
             global_logger.error("Not supported dataset type.")
             client_dict = None
@@ -79,19 +75,10 @@ def dataset_user_indices(dataset_type: VDataSet, num_slices, non_iid: str, seed:
 # dict {int: ndarray[dtype(int64)]}
 def _shards_non_iid(targets: list, nums_shards: int, num_clients: int,
                     seed: int, num_classes: int) -> dict:
-    client_dict = dict()
-    random.seed(seed)
     assert nums_shards % num_classes == 0, "num_shards must be times of num_classes."
-
-    total_nums = len(targets)
-    shard_nums = total_nums // nums_shards
-    client_shard_nums = shard_nums // num_clients
-    for i in range(num_clients):
-        indices = []
-        for j in range(client_shard_nums):
-            class_idx = random.randint(0, num_classes - 1)
-            indices.extend(specify_class_simple(targets, class_idx, shard_nums))
-        client_dict[i] = indices
+    assert nums_shards % num_clients == 0, "num_shards must be times of num_clients."
+    groups = _distribute_indices(targets, num_groups=nums_shards)
+    client_dict = _random_group_pairs(groups, n=nums_shards//num_clients, seed=seed)
     return client_dict
 
 
@@ -231,3 +218,24 @@ def _build_non_iid_by_dirichlet(seed, indices2targets, non_iid_alpha, num_classe
             idx_batch += _idx_batch
 
     return idx_batch
+
+def _distribute_indices(array, num_groups):
+    unique_elements = np.unique(array)
+    groups = [[] for _ in range(num_groups)]
+    group_index = 0
+
+    for element in unique_elements:
+        indices = np.where(array == element)[0]
+        half = len(indices) // 2
+        groups[group_index].extend(indices[:half])
+        group_index += 1
+        groups[group_index].extend(indices[half:])
+        group_index += 1
+    return groups
+
+def _random_group_pairs(groups, n=2, seed=2024):
+    np.random.seed(seed)  # 确保随机组合是可重现的
+    np.random.shuffle(groups)  # 随机打散所有组
+    combined_groups = [sum(groups[i:i + n], []) for i in range(0, len(groups), n)]
+    groups_dict = {i: combined_groups[i] for i in range(len(combined_groups))}
+    return groups_dict

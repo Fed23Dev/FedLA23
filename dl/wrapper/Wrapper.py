@@ -333,10 +333,14 @@ class LAWrapper(VWrapper):
         info_matrix = next(self.device.on_tensor(info_matrix))
         labels = torch.argmax(targets, -1)
         constraint_matrix = self.get_optim_matrix(labels, info_matrix)
-        losses_dict = {"loss_ce": super().loss_compute(pred, targets),
-                       "loss_im": super().loss_compute(pred, constraint_matrix)}
 
-        return sum([ls.mean() for ls in losses_dict.values()])
+        # losses_dict = {"loss_ce": super().loss_compute(pred, targets),
+        #                "loss_im": super().loss_compute(pred, constraint_matrix)}
+        # loss = sum([ls.mean() for ls in losses_dict.values()])
+
+        return super().loss_compute(pred, targets) + super().loss_compute(pred, constraint_matrix)
+
+        # # TODO: Ablation
         # return super().loss_compute(pred, targets, **kwargs)
 
     # Tensor Size: classes * classes

@@ -147,6 +147,10 @@ class FedLAMaster(FLMaster):
     def schedule_strategy(self):
         self.curt_selected.clear()
 
+        # # TODO: Ablation
+        # super(FedLAMaster, self).schedule_strategy()
+        # return
+
         if self.curt_round == 0:
             super(FedLAMaster, self).schedule_strategy()
             return
@@ -170,8 +174,9 @@ class FedLAMaster(FLMaster):
             global_logger.info(f"======Round{self.curt_round} >> Cluster Ret:{len(cnt)}======")
 
             # # CFL - diff
-            # boundary case avg_lea
-            self.diff_cluster_most_case()
+            # TODO: CFL-diff
+            # self.diff_cluster_most_case()
+            self.diff_cluster_lea_case()
 
         # # CFL - sim
         # self.curt_selected = np.where(self.clusters_indices == self.pipeline_status)[0].tolist()
@@ -229,7 +234,7 @@ class FedLAMaster(FLMaster):
         for index in self.curt_selected:
             self.workers_nodes[index].local_train(self.curt_matrix)
 
-        # todo: optim cnt
+        # TODO: optim cnt
         self.sync_matrix()
 
     def delta_critical_period(self):

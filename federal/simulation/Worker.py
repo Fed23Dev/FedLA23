@@ -39,6 +39,7 @@ class FedLAWorker(FLWorker):
         global_logger.info(f'------Train from device: {self.id}------')
         self.cell.run_model(train=True, info_matrix=info_matrix)
 
+
     def local_distill(self, teacher_model: torch.nn.Module):
         self.cell.wrapper.dkd_loss_optim(teacher_model)
 
