@@ -1,14 +1,14 @@
-# resource :config
-exp_name: cifar100-resnet110
+# experiment config
+exp_name: tinyimagenet-shufflenet
 
 # checkpoint config
-model: resnet110
+model: shufflenetV2
 alg: fedavg
 gpu_ids: [0, 1]
 # pre_train: True
 
 # dataset config
-dataset: cifar100
+dataset: tinyimagenet
 batch_size: 32
 
 # optimizer config

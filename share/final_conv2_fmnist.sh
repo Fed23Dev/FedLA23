@@ -1,14 +1,18 @@
 #!/usr/bin/env zsh
 
-config_path='share/configs/fmnist-conv2.yml'
-log_path='logs/exps/fmnist_conv2.log'
+config_path='share/configs/fmnist-conv2-final.yml'
 
-if [ -f $log_path ]; then
-  echo "Created file will be cleared."
-  echo -n "" > $log_path
-fi
+for alpha in 20
 
-nohup python main.py -y $config_path > $log_path 2>&1 &
+do
+  echo "The value is: $alpha"
+  sed -i "s/logits_batch_limit: *.*/logits_batch_limit: $alpha/g" $config_path
+  sed -n '37p' $config_path
 
-# python -m pdb main.py -y 'share/configs/fmnist-conv2.yml'
-# python main.py -y /home/xd/la/projects/FedLA/share/configs/fmnist-conv2.yml
+  for loop in 1 2 3 4 5
+  do
+    log_path="logs/super/alpha$alpha.log$loop"
+    nohup python main.py -y $config_path > $log_path 2>&1 && sleep 1
+    wait
+  done
+done

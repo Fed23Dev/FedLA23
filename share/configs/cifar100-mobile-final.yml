@@ -1,22 +1,24 @@
-# resource config
-exp_name: cifar10-vgg16
+# resource :config
+exp_name: cifar100-mobilenet
 
-model: vgg16
+# checkpoint config
+model: mobilenetV2
 alg: fedavg
 gpu_ids: [0, 1]
+# pre_train: True
 
 # dataset config
-dataset: cifar10
+dataset: cifar100
 batch_size: 32
 
 # optimizer config
 # optim: sgd
 optim: sgd
-learning_rate: 0.1
+learning_rate: 0.01
 
 # scheduler config
 scheduler: warmup_cos_lr
-warm_steps: 20
+warm_steps: 50
 min_lr: 0.0
 
 # federal config
@@ -24,13 +26,7 @@ federal: True
 non_iid: hetero
 workers: 100
 active_workers: 10
-federal_round: 150
+federal_round: 500
+
 local_epoch: 10
-
-# fedla
-clusters: 10
-drag: 0.5
-threshold: 0.2
-
-logits_batch_limit: 20
-
+test_batch_limit: 5

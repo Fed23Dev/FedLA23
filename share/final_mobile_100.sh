@@ -1,7 +1,6 @@
 #!/usr/bin/env zsh
 
-config_path='share/configs/cifa10-vgg16-final#.yml'
-# config_path='share/configs/cifa10-vgg16-final@.yml'
+config_path='share/configs/cifar100-mobile-final.yml'
 
 for alpha in 20
 

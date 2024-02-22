@@ -4,9 +4,10 @@
 import argparse
 import os
 
-exp1_config = r'share/cifar10-vgg16.yml'
+# deprecated
+exp1_config = r'share/cifar10-vgg16-final.yml'
 exp2_config = r'share/cifar10-resnet56.yml'
-exp3_config = r'share/cifar100-resnet110.yml'
+exp3_config = r'share/cifar100-mobile-final.yml'
 exp4_config = r'share/cifar100-mobilenetV2.yml'
 
 ###
