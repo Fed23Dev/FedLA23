@@ -1,18 +1,12 @@
 #!/usr/bin/env zsh
 
-config_path='share/configs/cifa10-vgg16-final#.yml'
-# config_path='share/configs/cifa10-vgg16-final@.yml'
-
-for alpha in 20
+config_path='share/configs/cifar10-vgg16-final#.yml'
+# config_path='share/configs/cifar10-vgg16-final@.yml'
 
 do
-  echo "The value is: $alpha"
-  sed -i "s/logits_batch_limit: *.*/logits_batch_limit: $alpha/g" $config_path
-  sed -n '37p' $config_path
-
   for loop in 1 2 3 4 5
   do
-    log_path="logs/super/alpha$alpha.log$loop"
+    log_path="logs/exps/vgg16$loop.log"
     nohup python main.py -y $config_path > $log_path 2>&1 && sleep 1
     wait
   done

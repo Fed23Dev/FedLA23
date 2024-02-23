@@ -6,7 +6,7 @@ import torch
 
 from dl.data.dataProvider import get_data_loaders, get_data_loader
 from dl.data.datasets import get_data
-from dl.data.samplers import dataset_user_indices, specify_class_simple
+from dl.data.samplers import dataset_user_indices
 from env.running_env import args
 
 
