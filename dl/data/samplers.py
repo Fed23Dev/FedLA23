@@ -9,7 +9,7 @@ from dl.data.datasets import get_data
 from env.running_env import global_logger
 from env.support_config import VDataSet
 
-dir_alpha = 0.3
+dir_alpha = 0.2
 
 def iid(targets, num_clients: int) -> dict:
     client_dict = dict()
