@@ -72,7 +72,7 @@ def test_lis():
 
 
 if __name__ == "__main__":
-    # from utils.test_unit import main
-    # main()
-    test_lis()
+    from utils.test_unit import main
+    main()
+    # test_lis()
     print("----------------------")

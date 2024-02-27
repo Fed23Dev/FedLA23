@@ -12,8 +12,7 @@
 ```shell
 conda create -n fedla python=3.8
 conda activate fedla
-pip install torch torchvision fedlab torchsummary thop
-pip install yacs ruamel.yaml matplotlib
+pip install torch torchvision fedlab torchsummary thop yacs ruamel.yaml matplotlib
 ```
 
 2. 在当前目录'~/la/datasets'下的目录树(tree -a -L 2)为:
