@@ -51,14 +51,28 @@ def timestamp():
 
 
 def test_lis():
-    sample = [2, 1, 0, 1]
+    clusters_indices = [2, 1, 0, 1]
+    # 计算每个唯一元素的出现次数
+    unique_elements, counts = np.unique(clusters_indices, return_counts=True)
+
+    # 确定平均出现次数
+    max_round = (np.min(counts) + np.max(counts)) // 2
+
+    # 初始化分组
+    pipeline = [[] for _ in range(max_round)]
+
+    # 分配索引到不同的组
+    for element in unique_elements:
+        indices = np.where(clusters_indices == element)[0]
+        split_indices = np.array_split(indices, max_round)
+        for group_idx in range(max_round):
+            pipeline[group_idx].extend(split_indices[group_idx] if group_idx < len(split_indices) else [])
+
+    print(pipeline)
 
 
 if __name__ == "__main__":
-    from utils.AccExtractor import AccExtractor
-    path = "logs/super"
-    extractor = AccExtractor(path)
-    extractor.extract_acc_data()
-    extractor.show_detail_rets()
-    extractor.show_avg_rets()
+    # from utils.test_unit import main
+    # main()
+    test_lis()
     print("----------------------")

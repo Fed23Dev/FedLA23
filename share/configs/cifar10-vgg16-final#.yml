@@ -1,5 +1,5 @@
 # resource config
-exp_name: cifar10-vgg16-ult
+exp_name: cifar10-vgg16
 
 # checkpoint config
 model: vgg16

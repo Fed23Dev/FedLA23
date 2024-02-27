@@ -5,7 +5,7 @@ import torch
 from utils.Cleaner import FileCleaner
 from env.running_env import args, global_file_repo, global_container
 from utils.MathTools import kl_divergence, js_divergence, _kl_divergence
-
+from utils.AccExtractor import AccExtractor
 
 def random_list(length=100):
     random_int_list = []
@@ -62,6 +62,13 @@ def kl_and_js():
     print(f"KL:{kl_divergence(b, c)}")
 
 
+def extract():
+    path = "logs/super"
+    extractor = AccExtractor(path)
+    extractor.extract_acc_data()
+    extractor.show_detail_rets()
+    extractor.show_avg_rets()
+
 def main():
-    kl_and_js()
+    extract()
 

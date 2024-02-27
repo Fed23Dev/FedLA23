@@ -1,8 +1,6 @@
 #!/usr/bin/env zsh
 
 config_path='share/configs/hyper-exps.yml' # hetero fmnist
-# config_path='share/configs/noniid-hyper-exps.yml' # shards fmnist
-# config_path='share/configs/task-hyper-exps.yml' # cifar10
 
 # super-parameter option
 # 修改 line:15 超参数的取值 0.1 0.2 ~ 1.0
