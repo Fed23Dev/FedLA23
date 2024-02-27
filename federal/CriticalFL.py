@@ -23,6 +23,10 @@ class SimpleCNN(nn.Module):
         x = torch.relu(self.fc1(x))
         return self.fc2(x)
 
+<<<<<<< HEAD
+=======
+
+>>>>>>> 24d029b531d1d1f52d8aac2754f90a42a8268306
 # 模型聚合函数
 
 ## CriticalFL ep
@@ -38,7 +42,11 @@ def aggregate_models_true(global_model, client_models, gradients, L, weights):
         _, indice = torch.topk(norms, round(len(gradient) * L))
         indice = [int(x) for x in indice]
         indices.append(indice)
+<<<<<<< HEAD
     
+=======
+
+>>>>>>> 24d029b531d1d1f52d8aac2754f90a42a8268306
     for index, weight in enumerate(weights):
         for i in range(len(gradients[0])):
             if i in indices[index]:
@@ -49,9 +57,17 @@ def aggregate_models_true(global_model, client_models, gradients, L, weights):
             if i not in indices[index]:
                 continue
             global_dict[k] += weight / total[i] * model.state_dict()[k].float()
+<<<<<<< HEAD
     
     global_model.load_state_dict(global_dict)
     return global_model
+=======
+
+    global_model.load_state_dict(global_dict)
+    return global_model
+
+
+>>>>>>> 24d029b531d1d1f52d8aac2754f90a42a8268306
 ## CriticalFL ep
 
 # 不处于CLP时，采用FedAvg聚合方式
@@ -66,6 +82,10 @@ def aggregate_models_false(global_model, client_models, weights):
     global_model.load_state_dict(global_dict)
     return global_model
 
+<<<<<<< HEAD
+=======
+
+>>>>>>> 24d029b531d1d1f52d8aac2754f90a42a8268306
 ## CriticalFL sp
 # 判断是否处于CLP, True代表处于CLP， False代表不处于CLP
 def check_clp(last_fgn, weights, gradients, eta, delta):
@@ -74,6 +94,10 @@ def check_clp(last_fgn, weights, gradients, eta, delta):
         return True, now_fgn
     return False, now_fgn
 
+<<<<<<< HEAD
+=======
+
+>>>>>>> 24d029b531d1d1f52d8aac2754f90a42a8268306
 # 计算FGN
 def cal_fgn(weights, gradients, eta):
     total = sum(weights)
@@ -81,13 +105,22 @@ def cal_fgn(weights, gradients, eta):
     for weight, gradient in zip(weights, gradients):
         res = res + weight / total * -eta * (torch.norm(torch.tensor([torch.norm(x) for x in gradient])) ** 2)
     return res
+<<<<<<< HEAD
+=======
+
+
+>>>>>>> 24d029b531d1d1f52d8aac2754f90a42a8268306
 ## CriticalFL ep
 
 # 客户端训练函数
 def train_client(model, dataloader, criterion, optimizer, device, rounds):
     last_model = copy.deepcopy(model)
 
+<<<<<<< HEAD
     #更新优化器的参数
+=======
+    # 更新优化器的参数
+>>>>>>> 24d029b531d1d1f52d8aac2754f90a42a8268306
     for param_group in optimizer.param_groups:
         param_group['params'] = list(model.parameters())
 
@@ -114,15 +147,26 @@ def train_client(model, dataloader, criterion, optimizer, device, rounds):
 def select_clients(num_clients, part_clients, client_models, client_optimizers, client_dataloaders, weights):
     selected_clients = random.sample(range(num_clients), part_clients)
     return [client_models[i] for i in selected_clients], \
+<<<<<<< HEAD
            [client_optimizers[i] for i in selected_clients], \
            [client_dataloaders[i] for i in selected_clients], \
             [weights[i] for i in selected_clients]
+=======
+        [client_optimizers[i] for i in selected_clients], \
+        [client_dataloaders[i] for i in selected_clients], \
+        [weights[i] for i in selected_clients]
+
+>>>>>>> 24d029b531d1d1f52d8aac2754f90a42a8268306
 
 # 获取每个客户端的权重
 def get_weights(dataloaders):
     total = sum([len(dataloader) for dataloader in dataloaders])
     return [len(dataloader) / total for dataloader in dataloaders]
 
+<<<<<<< HEAD
+=======
+
+>>>>>>> 24d029b531d1d1f52d8aac2754f90a42a8268306
 # 创建数据加载器
 def create_loaders(args):
     # 加载MNIST数据集
@@ -133,6 +177,10 @@ def create_loaders(args):
     client_datasets = split_data_dirichlet(mnist_dataset, args.num_clients, args.dirichlet_alpha)
     return [DataLoader(dataset, batch_size=args.batch_size, shuffle=True) for dataset in client_datasets]
 
+<<<<<<< HEAD
+=======
+
+>>>>>>> 24d029b531d1d1f52d8aac2754f90a42a8268306
 # 使用Dirichlet分布划分数据集
 def split_data_dirichlet(mnist_dataset, num_clients, alpha):
     labels = mnist_dataset.targets.numpy()
@@ -143,7 +191,12 @@ def split_data_dirichlet(mnist_dataset, num_clients, alpha):
             idx_k = np.where(labels == k)[0]
             np.random.shuffle(idx_k)
             proportions = np.random.dirichlet(np.repeat(alpha, num_clients))
+<<<<<<< HEAD
             proportions = np.array([p * (len(idx_j) < len(mnist_dataset) / num_clients) for p, idx_j in zip(proportions, idx_batch)])
+=======
+            proportions = np.array(
+                [p * (len(idx_j) < len(mnist_dataset) / num_clients) for p, idx_j in zip(proportions, idx_batch)])
+>>>>>>> 24d029b531d1d1f52d8aac2754f90a42a8268306
             proportions = proportions / proportions.sum()
             proportions = (np.cumsum(proportions) * len(idx_k)).astype(int)[:-1]
             idx_batch = [idx_j + idx.tolist() for idx_j, idx in zip(idx_batch, np.split(idx_k, proportions))]
@@ -151,24 +204,45 @@ def split_data_dirichlet(mnist_dataset, num_clients, alpha):
 
     return [Subset(mnist_dataset, idx_j) for idx_j in idx_batch]
 
+<<<<<<< HEAD
 # 解析命令行参数
 def parse_arguments():
     parser = argparse.ArgumentParser(description='CriticalFL with PyTorch and MNIST')
     
+=======
+
+# 解析命令行参数
+def parse_arguments():
+    parser = argparse.ArgumentParser(description='CriticalFL with PyTorch and MNIST')
+
+>>>>>>> 24d029b531d1d1f52d8aac2754f90a42a8268306
     parser.add_argument('--L', type=float, default=0.5, help='Fraction of dimensions of the gradient to be transferred')
     parser.add_argument('--M', type=int, default=96, help='Most number of clients in federated learning')
     parser.add_argument('--m', type=int, default=32, help='Least number of clients in federated learning')
     parser.add_argument('--threshold', type=float, default=0.01, help='Threshold of the FGN')
 
     parser.add_argument('--num_clients', type=int, default=128, help='Number of clients in federated learning')
+<<<<<<< HEAD
     parser.add_argument('--part_clients', type=int, default=64, help='Number of clients participated in federated learning')
+=======
+    parser.add_argument('--part_clients', type=int, default=64,
+                        help='Number of clients participated in federated learning')
+>>>>>>> 24d029b531d1d1f52d8aac2754f90a42a8268306
     parser.add_argument('--client_rounds', type=int, default=2, help='Number of local rounds for client training')
     parser.add_argument('--num_rounds', type=int, default=200, help='Number of federated learning rounds')
     parser.add_argument('--lr', type=float, default=0.01, help='Learning rate for SGD optimizer')
     parser.add_argument('--batch_size', type=int, default=64, help='Batch size for client training')
+<<<<<<< HEAD
     parser.add_argument('--dirichlet_alpha', type=float, default=0.5, help='Concentration parameter for Dirichlet distribution')
     return parser.parse_args()
 
+=======
+    parser.add_argument('--dirichlet_alpha', type=float, default=0.5,
+                        help='Concentration parameter for Dirichlet distribution')
+    return parser.parse_args()
+
+
+>>>>>>> 24d029b531d1d1f52d8aac2754f90a42a8268306
 def main():
     args = parse_arguments()
     device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
@@ -191,10 +265,18 @@ def main():
         gradients = []
         for model, dataloader, optim in zip(selected_clients, selected_dataloaders, selected_optims):
             model.to(device)
+<<<<<<< HEAD
             train_loss, gradient = train_client(model, dataloader, criterion, optim, device, args.client_rounds) #客户端训练 这里需要返回梯度值给后面进行CLP判断
             # print(f"Client Loss: {train_loss}")
             round_loss += train_loss 
             gradients.append(gradient)    
+=======
+            train_loss, gradient = train_client(model, dataloader, criterion, optim, device,
+                                                args.client_rounds)  # 客户端训练 这里需要返回梯度值给后面进行CLP判断
+            # print(f"Client Loss: {train_loss}")
+            round_loss += train_loss
+            gradients.append(gradient)
+>>>>>>> 24d029b531d1d1f52d8aac2754f90a42a8268306
         round_loss /= args.part_clients
         all_loss.append(round_loss)
         print(f"Round {_ + 1}, Num of Clients {args.part_clients}, Loss: {round_loss}")
@@ -216,8 +298,14 @@ def main():
         # 更新客户端模型
         client_models = [copy.deepcopy(global_model) for _ in client_models]
 
+<<<<<<< HEAD
 
     # print("Final global model parameters:", global_model.state_dict())
 
+=======
+    # print("Final global model parameters:", global_model.state_dict())
+
+
+>>>>>>> 24d029b531d1d1f52d8aac2754f90a42a8268306
 if __name__ == "__main__":
     main()

@@ -19,7 +19,7 @@ class TinyImageNet(Dataset):
     def __init__(self, root, train=True,
                  transform=None, target_transform=None):
         self.Train = train
-        self.root_dir = root
+        self.root_dir = os.path.expanduser(root)
         self.transform = transform
         self.target_transform = target_transform
         self.train_dir = os.path.join(self.root_dir, "train")
@@ -49,6 +49,8 @@ class TinyImageNet(Dataset):
                 words = entry.split("\t")
                 if words[0] in self.set_nids:
                     self.class_to_label[words[0]] = (words[1].strip("\n").split(","))[0]
+
+        self.targets = [item[1] for item in self.images]
 
     def _create_class_idx_dict_train(self):
         if sys.version_info >= (3, 5):
