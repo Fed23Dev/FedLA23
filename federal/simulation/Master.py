@@ -171,7 +171,8 @@ class FedLAMaster(FLMaster):
 
             # # CFL - diff
             # boundary case avg_lea
-            self.diff_cluster_most_case()
+            # self.diff_cluster_most_case()
+            self.diff_cluster_lea_case()
 
         # # CFL - sim
         # self.curt_selected = np.where(self.clusters_indices == self.pipeline_status)[0].tolist()
