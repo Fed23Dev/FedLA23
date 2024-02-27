@@ -1,6 +1,7 @@
 import math
 from typing import Any
 
+import torch
 import torch.nn as nn
 import torch.utils.data as tdata
 
@@ -23,6 +24,8 @@ class SingleCell:
         """
         # 训练数据个数
         self.latest_feed_amount = 0
+        self.latest_grad = []
+
         # 当前训练的批次
         self.train_epoch = 1
 
@@ -69,6 +72,7 @@ class SingleCell:
         """
         sum_loss = 0.0
         self.latest_feed_amount = 0
+        self.latest_grad.clear()
 
         if train:
             for i in range(args.local_epoch):
@@ -79,12 +83,17 @@ class SingleCell:
                     cort, total, loss = self.wrapper.step_run(batch_limit, train, **kwargs)
                 sum_loss += loss
                 self.latest_feed_amount += total
-                self.wrapper.show_lr()
+                if len(self.latest_grad) == 0:
+                    self.latest_grad = self.wrapper.get_last_grad()
+                else:
+                    self.latest_grad += self.wrapper.get_last_grad()
+                self.show_lr()
             self.train_epoch += args.local_epoch
             return sum_loss / args.local_epoch
         else:
             assert batch_limit != 0, self.ERROR_MESS1
             cort, total, loss = self.wrapper.step_run(batch_limit, train=False)
+            global_logger.info("======Current Test Acc: %.3f%% (%d/%d)======" % (cort / total * 100, cort, total))
             global_container.flash(f'{args.exp_name}-test_acc', cort / total * 100)
             return loss
 
@@ -98,7 +107,7 @@ class SingleCell:
 
     # 查看学习率
     def show_lr(self):
-        self.wrapper.show_lr()
+        global_logger.info(f"The current learning rate: {self.wrapper.get_lr()}======>")
 
     # 程序退出时保存关键度量指标、配置信息和模型参数
     def exit_proc(self, check: bool = False, one_key: str = None):

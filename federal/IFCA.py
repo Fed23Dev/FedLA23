@@ -10,7 +10,6 @@ import random
 import numpy as np
 from time import time
 
-
 # 神经网络模型定义
 class SimpleCNN(nn.Module):
     def __init__(self):
@@ -27,10 +26,6 @@ class SimpleCNN(nn.Module):
         x = torch.relu(self.fc1(x))
         return self.fc2(x)
 
-<<<<<<< HEAD
-=======
-
->>>>>>> 24d029b531d1d1f52d8aac2754f90a42a8268306
 ## IFCA sp
 # 模型聚合函数
 def aggregate_models(global_model, gradients, indexes, lr, m):
@@ -38,20 +33,13 @@ def aggregate_models(global_model, gradients, indexes, lr, m):
         for param, grad in zip(global_model[index].parameters(), gradient):
             param.data.sub_(lr * grad / m)
 
-<<<<<<< HEAD
 # 客户端训练函数
 def train_client(model, global_model, dataloader, criterion, optimizer, rounds):
-=======
-
-# 客户端训练函数
-def train_client(model, global_model, dataloader, criterion, optimizer):
->>>>>>> 24d029b531d1d1f52d8aac2754f90a42a8268306
     model = copy.deepcopy(global_model)
 
     # 更新优化器的参数
     for param_group in optimizer.param_groups:
         param_group['params'] = list(model.parameters())
-<<<<<<< HEAD
     
     model.train()
     total_loss = 0
@@ -70,26 +58,6 @@ def train_client(model, global_model, dataloader, criterion, optimizer):
         lr = param_group['lr']
     gra = [(param2 - param1) / lr for param1, param2 in zip(model.parameters(), global_model.parameters())]
     return gra, total_loss / len(dataloader) / rounds
-=======
-
-    model.train()
-    total_loss = 0
-    for data, labels in dataloader:
-        data, labels = data.to(device), labels.to(device)
-        optimizer.zero_grad()
-        outputs = model(data)
-        loss = criterion(outputs, labels)
-        loss.backward()
-        optimizer.step()
-        total_loss += loss.item()
-
-    # 计算梯度。这里也可以看出，在梯度平均的方法下，客户端学习率对结果没有影响
-    for param_group in optimizer.param_groups:
-        lr = param_group['lr']
-    gra = [(param2 - param1) / lr for param1, param2 in zip(model.parameters(), global_model.parameters())]
-    return gra, total_loss / len(dataloader)
-
->>>>>>> 24d029b531d1d1f52d8aac2754f90a42a8268306
 
 # group选择函数，找到loss值最小的group
 def select_group(models, dataloaders, criterion):
@@ -104,25 +72,14 @@ def select_group(models, dataloaders, criterion):
                 loss[-1] += criterion(outputs, labels).item()
         indexes.append(loss.index(min(loss)))
     return indexes
-<<<<<<< HEAD
-=======
-
-
->>>>>>> 24d029b531d1d1f52d8aac2754f90a42a8268306
 ## IFCA ep
 
 # 客户端选择函数
 def select_clients(num_clients, fraction, client_models, client_optimizers, client_dataloaders):
     selected_clients = random.sample(range(num_clients), int(num_clients * fraction))
     return [client_models[i] for i in selected_clients], \
-<<<<<<< HEAD
            [client_optimizers[i] for i in selected_clients], \
            [client_dataloaders[i] for i in selected_clients]
-=======
-        [client_optimizers[i] for i in selected_clients], \
-        [client_dataloaders[i] for i in selected_clients]
-
->>>>>>> 24d029b531d1d1f52d8aac2754f90a42a8268306
 
 # 创建数据加载器
 def create_loaders(args):
@@ -135,10 +92,6 @@ def create_loaders(args):
         mnist_dataset, args.num_clients, args.dirichlet_alpha)
     return [DataLoader(dataset, batch_size=args.batch_size, shuffle=True) for dataset in client_datasets]
 
-<<<<<<< HEAD
-=======
-
->>>>>>> 24d029b531d1d1f52d8aac2754f90a42a8268306
 # 使用Dirichlet分布划分数据集
 def split_data_dirichlet(mnist_dataset, num_clients, alpha):
     labels = mnist_dataset.targets.numpy()
@@ -150,34 +103,21 @@ def split_data_dirichlet(mnist_dataset, num_clients, alpha):
             np.random.shuffle(idx_k)
             proportions = np.random.dirichlet(np.repeat(alpha, num_clients))
             proportions = np.array([p * (len(idx_j) < len(mnist_dataset) / num_clients)
-<<<<<<< HEAD
                                    for p, idx_j in zip(proportions, idx_batch)])
-=======
-                                    for p, idx_j in zip(proportions, idx_batch)])
->>>>>>> 24d029b531d1d1f52d8aac2754f90a42a8268306
             proportions = proportions / proportions.sum()
             proportions = (np.cumsum(proportions) *
                            len(idx_k)).astype(int)[:-1]
             idx_batch = [idx_j + idx.tolist() for idx_j,
-<<<<<<< HEAD
                          idx in zip(idx_batch, np.split(idx_k, proportions))]
             min_size = min([len(idx_j) for idx_j in idx_batch])
     return [Subset(mnist_dataset, idx_j) for idx_j in idx_batch]
 
-=======
-            idx in zip(idx_batch, np.split(idx_k, proportions))]
-            min_size = min([len(idx_j) for idx_j in idx_batch])
-    return [Subset(mnist_dataset, idx_j) for idx_j in idx_batch]
-
-
->>>>>>> 24d029b531d1d1f52d8aac2754f90a42a8268306
 # 解析命令行参数
 def parse_arguments():
     ## IFCA sp
     parser = argparse.ArgumentParser(description='IFCA with PyTorch and MNIST')
 
     # group数量
-<<<<<<< HEAD
     parser.add_argument('--num_groups', type=int, default=4, help='Number of groups in IFCA')
     
     # 全局学习率
@@ -196,37 +136,13 @@ def parse_arguments():
     
     return parser.parse_args()
 
-=======
-    parser.add_argument('--num_groups', type=int, default=3, help='Number of groups in IFCA')
-
-    # 客户端学习率，这里使用的梯度平均，所以该值对结果不起作用
-    parser.add_argument('--client_lr', type=float, default=0.01, help='Learning rate for client training')
-    ## IFCA ep
-
-    parser.add_argument('--num_clients', type=int, default=4, help='Number of clients in federated learning')
-    parser.add_argument('--num_rounds', type=int, default=50, help='Number of federated learning rounds')
-    parser.add_argument('--lr', type=float, default=0.01, help='Learning rate for server aggregation')
-    parser.add_argument('--batch_size', type=int, default=64, help='Batch size for client training')
-    parser.add_argument('--client_fraction', type=float, default=0.75,
-                        help='Fraction of clients to be selected each round')
-    parser.add_argument('--dirichlet_alpha', type=float, default=0.5,
-                        help='Concentration parameter for Dirichlet distribution')
-
-    return parser.parse_args()
-
-
->>>>>>> 24d029b531d1d1f52d8aac2754f90a42a8268306
 def main():
     args = parse_arguments()
     random.seed(int(time()))
 
     # 创建数据加载器
     dataloaders = create_loaders(args)
-<<<<<<< HEAD
     
-=======
-
->>>>>>> 24d029b531d1d1f52d8aac2754f90a42a8268306
     ## IFCA sp
     # 创建全局模型，每个group分配一个model；创建客户端模型，每个工作机一个模型和一个优化器
     global_model = [SimpleCNN().to(device) for _ in range(args.num_groups)]
@@ -241,7 +157,6 @@ def main():
     for round in range(args.num_rounds):
         # print("~~~~~~~~~~~~~~~~~~~~~~~~~~~~~Round", round + 1, "~~~~~~~~~~~~~~~~~~~~~~~~~~~~~")
         # 选择工作机
-<<<<<<< HEAD
         selceted_models, selected_dataloaders, selected_optims = select_clients(args.num_clients, args.client_fraction, client_models, dataloaders, optims)
         
         # 找到每个选中的工作机属于哪个group
@@ -251,19 +166,6 @@ def main():
         round_loss = 0.0
         for group_index, client_model, dataloader, optim in zip(group_indexes, selceted_models, selected_dataloaders, selected_optims):
             gradient, train_loss = train_client(client_model, global_model[group_index], dataloader, criterion, optim, args.client_rounds)
-=======
-        selceted_models, selected_dataloaders, selected_optims = select_clients(args.num_clients, args.client_fraction,
-                                                                                client_models, dataloaders, optims)
-
-        # 找到每个选中的工作机属于哪个group
-        group_indexes = select_group(global_model, selected_dataloaders, criterion)
-
-        gradients = []
-        round_loss = 0.0
-        for group_index, client_model, dataloader, optim in zip(group_indexes, selceted_models, selected_dataloaders,
-                                                                selected_optims):
-            gradient, train_loss = train_client(client_model, global_model[group_index], dataloader, criterion, optim)
->>>>>>> 24d029b531d1d1f52d8aac2754f90a42a8268306
             # print(f"Gradient: {gradient}")
             # print(f"Client Loss: {train_loss}")
             gradients.append(gradient)
@@ -272,11 +174,7 @@ def main():
         all_loss.append(round_loss / len(group_indexes))
         aggregate_models(global_model, gradients, group_indexes, args.lr, args.num_clients)
     ## IFCA ep
-<<<<<<< HEAD
     
-=======
-
->>>>>>> 24d029b531d1d1f52d8aac2754f90a42a8268306
     # for i, model in enumerate(global_model):
     #     print(f"Final global model parameters of group {i}:", model.state_dict())
 

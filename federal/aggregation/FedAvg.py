@@ -23,6 +23,7 @@ class FedAvg:
     def merge_dict(self, clients_dicts: List[dict], speech_right: List[int] = None) -> dict:
         if speech_right is not None:
             assert len(clients_dicts) == len(speech_right), self.ERROR_MESS1
+            speech_right = [right/sum(speech_right) for right in speech_right]
         else:
             speech_right = get_speech_right(len(clients_dicts))
 

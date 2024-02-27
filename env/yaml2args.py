@@ -84,6 +84,10 @@ def alg_str2enum(value: str) -> VState:
         ret = VState.SCAFFOLD
     elif value == 'moon':
         ret = VState.MOON
+    elif value == 'criticalfl':
+        ret = VState.CriticalFL
+    elif value == 'ifca':
+        ret = VState.IFCA
     elif value == 'single':
         ret = VState.Single
     else:

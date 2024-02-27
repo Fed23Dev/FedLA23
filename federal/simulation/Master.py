@@ -13,7 +13,8 @@ from env.running_env import global_container, global_logger
 from federal.aggregation.FedLA import FedLA
 
 from federal.simulation.FLnodes import FLMaster
-from federal.simulation.Worker import FedAvgWorker, FedProxWorker, FedLAWorker, ScaffoldWorker, MoonWorker
+from federal.simulation.Worker import FedAvgWorker, FedProxWorker, FedLAWorker, ScaffoldWorker, MoonWorker, IFCAWorker, \
+    CriticalFLWorker
 from utils.MathTools import js_divergence, remove_top_k_elements
 
 
@@ -34,9 +35,8 @@ class FedAvgMaster(FLMaster):
         workers_cells = [SingleCell(loader) for loader in list(workers_loaders.values())]
         self.workers_nodes = [FedAvgWorker(index, cell) for index, cell in enumerate(workers_cells)]
 
-    def drive_workers(self):
-        for index in self.curt_selected:
-            self.workers_nodes[index].local_train()
+    def drive_worker(self, index: int):
+        self.workers_nodes[index].local_train()
 
 
 class FedProxMaster(FLMaster):
@@ -57,9 +57,8 @@ class FedProxMaster(FLMaster):
                          for loader in list(workers_loaders.values())]
         self.workers_nodes = [FedProxWorker(index, cell) for index, cell in enumerate(workers_cells)]
 
-    def drive_workers(self):
-        for index in self.curt_selected:
-            self.workers_nodes[index].local_train(self.cell.access_model().parameters())
+    def drive_worker(self, index: int):
+        self.workers_nodes[index].local_train(self.cell.access_model().parameters())
 
 
 class FedLAMaster(FLMaster):
@@ -130,6 +129,9 @@ class FedLAMaster(FLMaster):
         # global_logger.info(f"======start: {self.start_matrix}======")
 
     def info_aggregation(self):
+        # TODO: optim cnt
+        self.sync_matrix()
+
         workers_dict = []
         drag_cnt = int(self.drag * len(self.curt_selected))
 
@@ -199,6 +201,8 @@ class FedLAMaster(FLMaster):
         if len(self.curt_selected) > self.plan:
             self.curt_selected = random.sample(self.curt_selected, self.plan)
 
+        global_container.flash('selected_workers', deepcopy(self.curt_selected))
+
     def diff_cluster_lea_case(self):
         # 计算每个唯一元素的出现次数
         unique_elements, counts = np.unique(self.clusters_indices, return_counts=True)
@@ -233,13 +237,8 @@ class FedLAMaster(FLMaster):
             for group_idx in range(self.max_round):
                 self.pipeline[group_idx].append(extended_indices[group_idx])
 
-    def drive_workers(self, *_args, **kwargs):
-        global_container.flash('selected_workers', deepcopy(self.curt_selected))
-        for index in self.curt_selected:
-            self.workers_nodes[index].local_train(self.curt_matrix)
-
-        # TODO: optim cnt
-        self.sync_matrix()
+    def drive_worker(self, index: int):
+        self.workers_nodes[index].local_train(self.curt_matrix)
 
     def delta_critical_period(self):
         start_matrix = self.start_matrix.numpy()
@@ -287,10 +286,9 @@ class ScaffoldMaster(FLMaster):
                          for loader in list(workers_loaders.values())]
         self.workers_nodes = [ScaffoldWorker(index, cell) for index, cell in enumerate(workers_cells)]
 
-    def drive_workers(self):
-        for index in self.curt_selected:
-            self.workers_nodes[index].local_train(self.control)
-            self.workers_nodes[index].update_control(self.control)
+    def drive_worker(self, index: int):
+        self.workers_nodes[index].local_train(self.control)
+        self.workers_nodes[index].update_control(self.control)
 
     def info_aggregation(self):
         x = {}
@@ -326,7 +324,92 @@ class MoonMaster(FLMaster):
         self.mu = mu
         self.T = T
 
-    def drive_workers(self):
+    def drive_worker(self, index: int):
+        self.workers_nodes[index].local_train(deepcopy(self.cell.access_model()),
+                                              self.mu, self.T)
+
+
+class CriticalFLMaster(FLMaster):
+    def __init__(self, workers: int, activists: int, local_epoch: int,
+                 loader: tdata.dataloader, workers_loaders: dict,
+                 gradient_fraction: float = 0.5, most_clients: int = 96,
+                 least_clients: int = 32, threshold: float = 0.01):
+        master_cell = SingleCell(loader)
+        super().__init__(workers, activists, local_epoch, master_cell)
+
+        workers_cells = [SingleCell(loader) for loader in list(workers_loaders.values())]
+        self.workers_nodes = [CriticalFLWorker(index, cell) for index, cell in enumerate(workers_cells)]
+
+        self.gradient_fraction = gradient_fraction
+        self.most_clients = most_clients
+        self.least_clients = least_clients
+        self.threshold = threshold
+        self.gradients = []
+        self.last_fgn = 1
+
+    def info_aggregation(self):
+        CLP, last_fgn = self.check_clp(self.last_fgn, self.gradients, self.threshold)
+        CLP = CLP or self.curt_round < 5
+        # 如果处在CLP，则只传更新参数的部分，然后对part_clients进行调整
+        if CLP:
+            self.aggregate_models_cfl()
+            self.plan = min(self.most_clients, self.plan * 2)
+
+        # 如果不处在，则跟FedAvg一样。但是仍需要对part_clients进行调整
+        else:
+            super(CriticalFLMaster, self).info_aggregation()
+            self.plan = round(max(0.5 * self.plan, self.least_clients))
+
+    def aggregate_models_cfl(self):
+        total = [0 for _ in range(len(self.gradients[0]))]
+        indices = []
+        for gradient in self.gradients:
+            norms = torch.tensor([torch.norm(x) for x in gradient])
+            _, indice = torch.topk(norms, round(len(gradient) * self.gradient_fraction))
+            indice = [int(x) for x in indice]
+            indices.append(indice)
+
+        for index, weight in enumerate(self.agg_weights):
+            for i in range(len(self.gradients[0])):
+                if i in indices[index]:
+                    total[i] += weight
+
+        super().info_aggregation()
+
+    def check_clp(self, last_fgn, gradients, delta):
+        now_fgn = self.cal_fgn(gradients)
+        if (now_fgn - last_fgn) / last_fgn >= delta:
+            return True, now_fgn
+        return False, now_fgn
+
+    # 计算FGN
+    def cal_fgn(self, gradients):
+        total = sum(self.agg_weights)
+        res = 0
+        for weight, gradient in zip(self.agg_weights, gradients):
+            res = res + weight / total * - self.get_avg_lr() * \
+                  (torch.norm(torch.tensor([torch.norm(x) for x in gradient])) ** 2)
+        return res
+
+    def get_avg_lr(self) -> float:
+        avg_lr = 0.
         for index in self.curt_selected:
-            self.workers_nodes[index].local_train(deepcopy(self.cell.access_model()),
-                                                  self.mu, self.T)
+            avg_lr += self.workers_nodes[index].cell.wrapper.get_lr()
+        return avg_lr / len(self.curt_selected)
+
+    def drive_worker(self, index: int):
+        self.workers_nodes[index].local_train()
+        self.gradients.append(self.workers_nodes[index].get_latest_grad())
+
+
+class IFCAMaster(FLMaster):
+    def __init__(self, workers: int, activists: int, local_epoch: int,
+                 loader: tdata.dataloader, workers_loaders: dict,):
+        master_cell = SingleCell(loader)
+        super().__init__(workers, activists, local_epoch, master_cell)
+
+        workers_cells = [SingleCell(loader) for loader in list(workers_loaders.values())]
+        self.workers_nodes = [IFCAWorker(index, cell) for index, cell in enumerate(workers_cells)]
+
+    def drive_worker(self, index: int):
+        pass

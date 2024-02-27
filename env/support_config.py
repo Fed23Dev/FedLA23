@@ -61,4 +61,6 @@ class VState(Enum):
     SCAFFOLD = 3
     FedLA = 4
     MOON = 5
-    Single = 6
+    CriticalFL = 6
+    IFCA = 7
+    Single = 8

@@ -60,6 +60,11 @@ class VWrapper:
         self.seed = 2022
         self.scaler = GradScaler()
 
+        self.last_grad = []
+
+    def get_last_grad(self) -> List[torch.Tensor]:
+        return deepcopy(self.last_grad)
+
     # to impl
     def default_config(self):
         pass
@@ -179,6 +184,8 @@ class VWrapper:
             self.optimizer.zero_grad()
             loss.backward()
             self.optimizer.step()
+            for param in self.model.parameters():
+                self.last_grad.append(param.grad)
 
     # 学习率调度器步进过程
     def scheduler_step(self):
@@ -197,10 +204,8 @@ class VWrapper:
             param_group["lr"] *= factor
 
     # 获取展示最新的的学习率
-    def show_lr(self) -> float:
-        lr = self.optimizer.state_dict()['param_groups'][0]['lr']
-        global_logger.info(f"The current learning rate: {lr}======>")
-        return lr
+    def get_lr(self) -> float:
+        return self.optimizer.state_dict()['param_groups'][0]['lr']
 
     # 将tensor与模型处于的设备调整一致
     def sync_tensor(self, tensor: torch.Tensor) -> torch.Tensor:

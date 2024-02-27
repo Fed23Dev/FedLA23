@@ -51,6 +51,14 @@ def test_moon():
     master_node.cell.exit_proc(one_key=f'{args.exp_name}-test_acc')
 
 
+def test_criticalfl():
+    pass
+
+
+def test_ifca():
+    pass
+
+
 def main():
     global_logger.info(f"#####{args.exp_name}#####")
 
@@ -64,6 +72,10 @@ def main():
         test_scaffold()
     elif args.curt_mode == VState.MOON:
         test_moon()
+    elif args.curt_mode == VState.CriticalFL:
+        test_criticalfl()
+    elif args.curt_mode == VState.IFCA:
+        test_ifca()
     else:
         global_logger.info(f"#####Default#####")
         simulation_federal_process()

@@ -39,7 +39,6 @@ class FedLAWorker(FLWorker):
         global_logger.info(f'------Train from device: {self.id}------')
         self.cell.run_model(train=True, info_matrix=info_matrix)
 
-
     def local_distill(self, teacher_model: torch.nn.Module):
         self.cell.wrapper.dkd_loss_optim(teacher_model)
 
@@ -66,7 +65,7 @@ class ScaffoldWorker(FLWorker):
 
     def update_control(self, server_controls: dict):
         local_steps = self.cell.latest_feed_amount // args.batch_size
-        lr = self.cell.wrapper.show_lr()
+        lr = self.cell.wrapper.get_lr()
         temp = {}
         for k, v in self.cell.access_model().named_parameters():
             temp[k] = v.data.clone()
@@ -96,3 +95,23 @@ class MoonWorker(FLWorker):
                             prev_model=self.prev_model,
                             mu=mu,
                             T=T)
+
+
+class CriticalFLWorker(FLWorker):
+    def __init__(self, worker_id: int, worker_cell: SingleCell):
+        super().__init__(worker_id, worker_cell)
+
+    def local_train(self, *_args, **kwargs):
+        global_logger.info(f'------Train from device: {self.id}------')
+        self.cell.run_model(train=True)
+
+    def get_latest_grad(self) -> List[torch.Tensor]:
+        return self.cell.latest_grad
+
+
+class IFCAWorker(FLWorker):
+    def __init__(self, worker_id: int, worker_cell: SingleCell):
+        super().__init__(worker_id, worker_cell)
+
+    def local_train(self, *_args, **kwargs):
+        pass

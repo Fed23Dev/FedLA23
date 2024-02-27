@@ -1,10 +1,6 @@
 import os
 import random
 from abc import ABC, abstractmethod
-from collections import OrderedDict
-from functools import singledispatchmethod
-from typing import List, Iterator
-import torch.utils.data as tdata
 from timeit import default_timer as timer
 
 from dl.SingleCell import SingleCell
@@ -30,6 +26,7 @@ class FLMaster(ABC):
         self.des_size = []
         self.curt_selected = []
         self.workers_nodes = []
+        self.agg_weights = []
 
         self.pre_dict = self.cell.access_model().state_dict()
         self.curt_dict = self.cell.access_model().state_dict()
@@ -59,7 +56,8 @@ class FLMaster(ABC):
         workers_dict = []
         for index in self.curt_selected:
             workers_dict.append(self.workers_nodes[index].cell.access_model().state_dict())
-        self.merge.merge_dict(workers_dict)
+        # todo: maybe no self.agg_weights better???
+        self.merge.merge_dict(workers_dict, self.agg_weights)
         # for index in self.curt_selected:
         #     self.workers_nodes[index].cell.decay_lr(self.pace)
 
@@ -75,7 +73,7 @@ class FLMaster(ABC):
             global_logger.info(f"======Federal Round: {i + 1}======")
             self.schedule_strategy()
             self.info_sync()
-            self.drive_workers()
+            self.notify_workers()
             self.info_aggregation()
             self.weight_redo()
             self.curt_round = self.curt_round + 1
@@ -86,15 +84,21 @@ class FLMaster(ABC):
         global_logger.info(f"Federal train finished======>")
         self.global_performance_detail()
 
+    def notify_workers(self):
+        self.agg_weights.clear()
+        for index in self.curt_selected:
+            self.drive_worker(index)
+            self.agg_weights.append(self.workers_nodes[index].cell.latest_feed_amount)
+        global_logger.info(f"======Selected Workers Weights: {self.agg_weights}======")
+
     @abstractmethod
-    def drive_workers(self, *_args, **kwargs):
+    def drive_worker(self, index: int):
         pass
 
 
 class FLWorker(ABC):
     def __init__(self, worker_id: int, worker_cell: SingleCell):
         self.id = worker_id
-        self.cell = worker_cell
         self.cell = worker_cell
 
     @abstractmethod
