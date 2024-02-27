@@ -174,7 +174,11 @@ class FedLAMaster(FLMaster):
             global_logger.info(f"======Round{self.curt_round} >> Cluster Ret:{len(cnt)}======")
 
             # # CFL - diff
+
+            # boundary case avg_lea
+
             # TODO: CFL-diff
+
             # self.diff_cluster_most_case()
             self.diff_cluster_lea_case()
 
