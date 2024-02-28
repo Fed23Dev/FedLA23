@@ -114,4 +114,11 @@ class IFCAWorker(FLWorker):
         super().__init__(worker_id, worker_cell)
 
     def local_train(self, *_args, **kwargs):
-        pass
+        global_logger.info(f'------Train from device: {self.id}------')
+        self.cell.run_model(train=True)
+
+    def get_latest_grad(self) -> List[torch.Tensor]:
+        return self.cell.latest_grad
+
+    def get_group_loss(self, group_models: List[torch.nn.Module]) -> List[torch.Tensor]:
+        return self.cell.wrapper.get_models_loss(group_models)

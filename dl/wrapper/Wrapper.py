@@ -184,6 +184,7 @@ class VWrapper:
             self.optimizer.zero_grad()
             loss.backward()
             self.optimizer.step()
+            self.last_grad.clear()
             for param in self.model.parameters():
                 self.last_grad.append(param.grad)
 
@@ -295,36 +296,6 @@ class LAWrapper(VWrapper):
         self.kd_epoch = args.KD_EPOCH
         self.kd_curt_epoch = 0
         self.distillers = DKD(cfg)
-
-    def dkd_loss_optim(self, teacher_model: nn.Module):
-        self.model.train()
-        teacher_model.eval()
-        for e in range(self.kd_epoch):
-            for batch_idx, (inputs, targets) in enumerate(self.loader):
-                if batch_idx > self.kd_batch:
-                    break
-
-                inputs, labels = self.device.on_tensor(inputs, targets)
-                labels = torch.argmax(labels, -1)
-
-                stu_pred = self.model(inputs)
-                with torch.no_grad():
-                    tea_pred = teacher_model(inputs)
-
-                losses_dict = self.distillers.forward_train(stu_pred, tea_pred, labels, self.kd_curt_epoch)[1]
-
-                loss = sum([ls.mean() for ls in losses_dict.values()])
-
-                self.optim_step(loss)
-
-            self.kd_curt_epoch += 1
-            # self.scheduler_step()
-
-    def global_im_optim(self, info_matrix: torch.Tensor):
-        pass
-
-    def local_im_optim(self, info_matrix: torch.Tensor):
-        pass
 
     def loss_compute(self, pred: torch.Tensor, targets: torch.Tensor, **kwargs) -> torch.Tensor:
         assert "info_matrix" in kwargs.keys(), self.ERROR_MESS8
@@ -447,3 +418,17 @@ class MoonWrapper(VWrapper):
         loss2 = mu * torch.mean(loss_con)
 
         return self.loss_func(pred, targets) + loss2
+
+class IFCAWrapper(VWrapper):
+    def __init__(self, model: nn.Module, train_dataloader: tdata.dataloader, optimizer: VOptimizer,
+                 scheduler: VScheduler, loss: VLossFunc):
+        super().__init__(model, train_dataloader, optimizer, scheduler, loss)
+
+
+    def get_models_loss(self, group_models: List[torch.nn.Module]) -> List[torch.Tensor]:
+        losses = []
+        for model in group_models:
+            for inputs, targets in self.loader:
+                pred = model(inputs)
+                losses.append(self.loss_compute(pred, targets))
+        return losses

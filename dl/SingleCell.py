@@ -1,5 +1,5 @@
 import math
-from typing import Any
+from typing import Any, List
 
 import torch
 import torch.nn as nn
@@ -96,6 +96,19 @@ class SingleCell:
             global_logger.info("======Current Test Acc: %.3f%% (%d/%d)======" % (cort / total * 100, cort, total))
             global_container.flash(f'{args.exp_name}-test_acc', cort / total * 100)
             return loss
+
+    def max_model_performance(self, models: List[torch.nn.Module]) -> torch.nn.Module:
+        optim_model = models[0]
+        min_loss = torch.tensor(1000000000)
+        for model in models:
+            self.sync_model(model)
+            _, _, loss = self.wrapper.step_run(batch_limit=10, train=False)
+            if loss < min_loss:
+                min_loss = loss
+                optim_model = model
+        self.sync_model(optim_model)
+        return optim_model
+
 
     # 测试模型性能
     def test_performance(self):

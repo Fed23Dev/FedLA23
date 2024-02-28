@@ -4,7 +4,8 @@ import torch.cuda
 from env.running_env import args, global_logger
 from env.support_config import VState
 from federal.federal_util import simulation_federal_process, get_data_ratio
-from federal.simulation.Master import FedAvgMaster, FedProxMaster, FedLAMaster, ScaffoldMaster, MoonMaster
+from federal.simulation.Master import FedAvgMaster, FedProxMaster, FedLAMaster, ScaffoldMaster, MoonMaster, \
+    CriticalFLMaster, IFCAMaster
 from utils.MathTools import js_divergence
 
 
@@ -52,11 +53,19 @@ def test_moon():
 
 
 def test_criticalfl():
-    pass
+    loader, loaders, user_dict = simulation_federal_process()
+    master_node = CriticalFLMaster(workers=args.workers, activists=args.active_workers, local_epoch=args.local_epoch,
+                                    loader=loader, workers_loaders=loaders)
+    master_node.union_run(args.federal_round)
+    master_node.cell.exit_proc(one_key=f'{args.exp_name}-test_acc')
 
 
 def test_ifca():
-    pass
+    loader, loaders, user_dict = simulation_federal_process()
+    master_node = IFCAMaster(workers=args.workers, activists=args.active_workers, local_epoch=args.local_epoch,
+                            loader=loader, workers_loaders=loaders)
+    master_node.union_run(args.federal_round)
+    master_node.cell.exit_proc(one_key=f'{args.exp_name}-test_acc')
 
 
 def main():
