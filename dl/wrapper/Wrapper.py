@@ -425,10 +425,12 @@ class IFCAWrapper(VWrapper):
         super().__init__(model, train_dataloader, optimizer, scheduler, loss)
 
 
-    def get_models_loss(self, group_models: List[torch.nn.Module]) -> List[torch.Tensor]:
+    def get_models_loss(self, group_models: List[torch.nn.Module]) -> List[float]:
         losses = []
         for model in group_models:
+            losses.append(0.)
             for inputs, targets in self.loader:
+                inputs, labels = self.device.on_tensor(inputs, targets)
                 pred = model(inputs)
-                losses.append(self.loss_compute(pred, targets))
+                losses[-1] += self.loss_compute(pred, labels).item()
         return losses

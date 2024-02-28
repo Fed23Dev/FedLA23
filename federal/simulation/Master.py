@@ -12,7 +12,7 @@ from dl.wrapper.Wrapper import ProxWrapper, LAWrapper, ScaffoldWrapper, MoonWrap
 from env.running_env import global_container, global_logger
 from federal.aggregation.FedLA import FedLA
 
-from federal.simulation.FLnodes import FLMaster
+from federal.simulation.FLnodes import FLMaster, FLWorker
 from federal.simulation.Worker import FedAvgWorker, FedProxWorker, FedLAWorker, ScaffoldWorker, MoonWorker, IFCAWorker, \
     CriticalFLWorker
 from utils.MathTools import js_divergence, remove_top_k_elements
@@ -423,6 +423,7 @@ class IFCAMaster(FLMaster):
         for worker in self.workers_nodes:
             losses = worker.get_group_loss(self.global_models)
             self.group_indices.append(losses.index(min(losses)))
+
     def info_aggregation(self):
         global_model = self.cell.access_model()
         for gradient, index in zip(self.gradients, self.group_indices):

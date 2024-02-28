@@ -120,5 +120,5 @@ class IFCAWorker(FLWorker):
     def get_latest_grad(self) -> List[torch.Tensor]:
         return self.cell.latest_grad
 
-    def get_group_loss(self, group_models: List[torch.nn.Module]) -> List[torch.Tensor]:
+    def get_group_loss(self, group_models: List[torch.nn.Module]) -> List[float]:
         return self.cell.wrapper.get_models_loss(group_models)
