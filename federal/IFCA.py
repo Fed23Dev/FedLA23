@@ -172,7 +172,7 @@ def main():
             round_loss += train_loss
         print(f"Round {round + 1} average loss: {round_loss / len(group_indexes)}")
         all_loss.append(round_loss / len(group_indexes))
-        aggregate_models(global_model, gradients, group_indexes, args.lr, args.num_clients)
+        aggregate_models(global_model, gradients, group_indexes, args.lr, len(group_indexes))
     ## IFCA ep
     
     # for i, model in enumerate(global_model):
