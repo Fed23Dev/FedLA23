@@ -428,7 +428,7 @@ class IFCAMaster(FLMaster):
     def info_aggregation(self):
         for gradient, index in zip(self.gradients, self.group_indices):
             for param, grad in zip(self.global_models[index].parameters(), gradient):
-                param.data.sub_(self.global_lr * grad / self.workers)
+                param.data.sub_(self.global_lr * grad / len(self.group_indices))
         self.merge.union_dict = self.cell.max_model_performance(self.global_models).state_dict()
 
     def schedule_strategy(self):
