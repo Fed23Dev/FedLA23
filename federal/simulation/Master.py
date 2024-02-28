@@ -406,7 +406,7 @@ class CriticalFLMaster(FLMaster):
 class IFCAMaster(FLMaster):
     def __init__(self, workers: int, activists: int, local_epoch: int,
                  loader: tdata.dataloader, workers_loaders: dict,
-                 groups: int = 4, global_lr : float = 0.01):
+                 groups: int = 4, global_lr: float = 0.01):
         master_cell = SingleCell(loader, Wrapper=IFCAWrapper)
         super().__init__(workers, activists, local_epoch, master_cell)
 
@@ -420,17 +420,16 @@ class IFCAMaster(FLMaster):
         self.global_models = [SingleCell(loader).access_model() for _ in range(groups)]
 
     def select_group(self):
+        self.group_indices.clear()
         for worker in self.workers_nodes:
             losses = worker.get_group_loss(self.global_models)
             self.group_indices.append(losses.index(min(losses)))
 
     def info_aggregation(self):
-        global_model = self.cell.access_model()
         for gradient, index in zip(self.gradients, self.group_indices):
-            for param, grad in zip(global_model[index].parameters(), gradient):
+            for param, grad in zip(self.global_models[index].parameters(), gradient):
                 param.data.sub_(self.global_lr * grad / self.workers)
         self.merge.union_dict = self.cell.max_model_performance(self.global_models).state_dict()
-        self.gradients.clear()
 
     def schedule_strategy(self):
         super().schedule_strategy()
@@ -440,10 +439,7 @@ class IFCAMaster(FLMaster):
         for worker, index in zip(self.workers_nodes, self.group_indices):
             client_dict = self.global_models[index].state_dict()
             worker.cell.access_model().load_state_dict(client_dict)
-        self.group_indices.clear()
 
     def drive_worker(self, index: int):
         self.workers_nodes[index].local_train()
         self.gradients.append(self.workers_nodes[index].get_latest_grad())
-
-
