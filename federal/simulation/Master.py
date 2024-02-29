@@ -82,7 +82,7 @@ class FedLAMaster(FLMaster):
         self.curt_matrix = torch.zeros(num_classes, num_classes)
 
         # self.num_clusters = self.workers // 2  # [2, M/2]
-        self.num_clusters = clusters
+        self.num_clusters = 2*clusters
 
         self.drag = drag
 
