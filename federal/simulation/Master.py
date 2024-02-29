@@ -81,7 +81,9 @@ class FedLAMaster(FLMaster):
         self.prev_matrix = torch.zeros(num_classes, num_classes)
         self.curt_matrix = torch.zeros(num_classes, num_classes)
 
-        self.num_clusters = self.workers // 2  # [2, M/2]
+        # self.num_clusters = self.workers // 2  # [2, M/2]
+        self.num_clusters = clusters
+
         self.drag = drag
 
         self.fix = clusters
@@ -129,9 +131,6 @@ class FedLAMaster(FLMaster):
         # global_logger.info(f"======start: {self.start_matrix}======")
 
     def info_aggregation(self):
-        # TODO: optim cnt
-        self.sync_matrix()
-
         workers_dict = []
         drag_cnt = int(self.drag * len(self.curt_selected))
 
@@ -164,7 +163,10 @@ class FedLAMaster(FLMaster):
 
         if self.pipeline_status == 0:
             self.clusters = self.adaptive_clusters()
-            global_logger.info(f"======Round{self.curt_round} >> Clusters:{self.clusters}======")
+            # todo: optim cnt
+            self.sync_matrix()
+
+            global_logger.info(f"======Round{self.curt_round+1} >> Clusters:{self.clusters}======")
             X = torch.stack(self.workers_matrix, dim=0).numpy()
             n_samples, dim1, dim2 = X.shape
             flattened_X = X.reshape(n_samples, dim1 * dim2)
@@ -173,7 +175,7 @@ class FedLAMaster(FLMaster):
 
             # debug
             cnt = np.unique(self.clusters_indices, return_counts=True)[1]
-            global_logger.info(f"======Round{self.curt_round} >> Cluster Ret:{len(cnt)}======")
+            global_logger.info(f"======Round{self.curt_round+1} >> Cluster Ret:{len(cnt)}======")
 
             # # CFL - diff
 
@@ -183,6 +185,7 @@ class FedLAMaster(FLMaster):
 
             # self.diff_cluster_most_case()
             self.diff_cluster_lea_case()
+            global_logger.info(f"======Round{self.curt_round + 1} >> Rounds:{self.max_round}======")
 
         # # CFL - sim
         # self.curt_selected = np.where(self.clusters_indices == self.pipeline_status)[0].tolist()
@@ -192,7 +195,7 @@ class FedLAMaster(FLMaster):
 
         self.pipeline_status = (self.pipeline_status + 1) % self.max_round
 
-        global_logger.info(f"======Round{self.curt_round} >> Select Index:{self.curt_selected}======")
+        global_logger.info(f"======Round{self.curt_round+1} >> Select Index:{self.curt_selected}======")
 
         # to optim FedLA
         if len(self.curt_selected) == 1:
