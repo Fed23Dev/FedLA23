@@ -29,7 +29,7 @@ federal_round: 50
 local_epoch: 5
 
 # fedla
-clusters: 10
+clusters: 6
 drag: 0.3
 # threshold: 0.05
 threshold: -0.01
