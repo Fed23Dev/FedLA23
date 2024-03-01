@@ -57,7 +57,7 @@ class FLMaster(ABC):
         for index in self.curt_selected:
             workers_dict.append(self.workers_nodes[index].cell.access_model().state_dict())
         # todo: maybe no self.agg_weights better???
-        self.merge.merge_dict(workers_dict)
+        self.merge.merge_dict(workers_dict, self.agg_weights)
         # for index in self.curt_selected:
         #     self.workers_nodes[index].cell.decay_lr(self.pace)
 
