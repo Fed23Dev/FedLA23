@@ -16,16 +16,16 @@ learning_rate: 0.1
 
 # scheduler config
 scheduler: warmup_cos_lr
-warm_steps: 5
+warm_steps: 20
 min_lr: 0.0
 
 
 # federal config
 federal: True
-non_iid: hetero
+non_iid: shards
 workers: 100
 active_workers: 3
-federal_round: 15
+federal_round: 50
 local_epoch: 5
 
 # fedla
