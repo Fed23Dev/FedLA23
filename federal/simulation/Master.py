@@ -173,9 +173,9 @@ class FedLAMaster(FLMaster):
             clustering = AgglomerativeClustering(n_clusters=self.clusters).fit(flattened_X)
             self.clusters_indices = clustering.labels_
 
-            # debug
-            cnt = np.unique(self.clusters_indices, return_counts=True)[1]
-            global_logger.info(f"======Round{self.curt_round+1} >> Cluster Ret:{len(cnt)}======")
+            # # debug
+            # cnt = np.unique(self.clusters_indices, return_counts=True)[1]
+            # global_logger.info(f"======Round{self.curt_round+1} >> Cluster Ret:{len(cnt)}======")
 
             # # CFL - diff
 
