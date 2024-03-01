@@ -13,20 +13,20 @@ batch_size: 64
 
 # optimizer config
 # optim: sgd
-optim: sgd
-learning_rate: 0.1
+optim: rmsprop
+learning_rate: 0.01
 
 # scheduler config
-scheduler: warmup_cos_lr
-warm_steps: 50
+scheduler: step_lr
+warm_steps: 20
 min_lr: 0.0
 
 # federal config
 federal: True
 non_iid: hetero
-workers: 10
+workers: 5
 active_workers: 3
-federal_round: 300
+federal_round: 100
 
-local_epoch: 5
+local_epoch: 10
 test_batch_limit: 5

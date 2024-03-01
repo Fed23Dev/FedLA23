@@ -2,7 +2,7 @@
 exp_name: cifar100-mobilenet
 
 # checkpoint config
-model: mobilenetV2
+model: resnet110
 # model: resnet110
 alg: fedavg
 gpu_ids: [0, 1]

@@ -1,6 +1,6 @@
 #!/usr/bin/env zsh
 
-config_path='share/configs/cifar100-mobile-final.yml'
+config_path='share/configs/cifar100-resnet100-final.yml'
 
 for alpha in 20
 do

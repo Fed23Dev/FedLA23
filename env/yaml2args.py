@@ -44,6 +44,8 @@ def optim_str2enum(value: str) -> VOptimizer:
         ret = VOptimizer.SGD_PFL
     elif value == 'adam':
         ret = VOptimizer.ADAM
+    elif value == "rmsprop":
+        ret = VOptimizer.RMSprop
     else:
         ret = VOptimizer.Init
     return ret

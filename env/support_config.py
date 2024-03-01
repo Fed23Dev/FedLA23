@@ -32,6 +32,7 @@ class VOptimizer(Enum):
     SGD = 1
     SGD_PFL = 2
     ADAM = 3
+    RMSprop = 4
 
 
 # Optimizer Type

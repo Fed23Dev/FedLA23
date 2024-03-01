@@ -85,6 +85,10 @@ class VWrapper:
         elif self.optimizer_type == VOptimizer.ADAM:
             self.optimizer = optim.Adam(self.model.parameters(), lr=learning_rate,
                                         weight_decay=weight_decay)
+        elif self.optimizer_type == VOptimizer.RMSprop:
+            self.optimizer = torch.optim.RMSprop(self.model.parameters(), lr=learning_rate,
+                                                 alpha=0.99, eps=1e-08,
+                                                 weight_decay=1e-5, momentum=0.9, centered=False)
         else:
             assert False, self.ERROR_MESS2
 
@@ -419,11 +423,11 @@ class MoonWrapper(VWrapper):
 
         return self.loss_func(pred, targets) + loss2
 
+
 class IFCAWrapper(VWrapper):
     def __init__(self, model: nn.Module, train_dataloader: tdata.dataloader, optimizer: VOptimizer,
                  scheduler: VScheduler, loss: VLossFunc):
         super().__init__(model, train_dataloader, optimizer, scheduler, loss)
-
 
     def get_models_loss(self, group_models: List[torch.nn.Module]) -> List[float]:
         losses = []

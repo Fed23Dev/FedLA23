@@ -16,6 +16,7 @@ class FedAvgWorker(FLWorker):
     def local_train(self):
         global_logger.info(f'------Train from device: {self.id}------')
         self.cell.run_model(train=True)
+        self.cell.latest_grad.clear()
 
 
 class FedProxWorker(FLWorker):
