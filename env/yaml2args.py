@@ -150,6 +150,7 @@ class ArgRepo:
         self.clusters = None
         self.drag = None
         self.threshold = None
+        self.step_cluster = None
 
         self.mu = None
         self.T = None

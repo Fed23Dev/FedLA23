@@ -1,16 +1,15 @@
 # resource :config
-exp_name: cifar100-mobilenet
+exp_name: cifar100-resnet110
 
 # checkpoint config
 model: resnet110
-# model: resnet110
 alg: fedavg
 gpu_ids: [0, 1]
 # pre_train: True
 
 # dataset config
 dataset: cifar100
-batch_size: 32
+batch_size: 64
 
 # optimizer config
 # optim: sgd

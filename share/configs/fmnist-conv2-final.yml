@@ -19,7 +19,6 @@ scheduler: warmup_cos_lr
 warm_steps: 10
 min_lr: 0.0
 
-
 # federal config
 federal: True
 non_iid: hetero

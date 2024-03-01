@@ -109,7 +109,6 @@ class SingleCell:
         self.sync_model(optim_model)
         return optim_model
 
-
     # 测试模型性能
     def test_performance(self):
         self.wrapper.valid_performance(self.test_dataloader)

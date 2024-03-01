@@ -81,8 +81,8 @@ class FedLAMaster(FLMaster):
         self.prev_matrix = torch.zeros(num_classes, num_classes)
         self.curt_matrix = torch.zeros(num_classes, num_classes)
 
-        # self.num_clusters = self.workers // 2  # [2, M/2]
-        self.num_clusters = 2*clusters
+        self.num_clusters = self.workers // 2  # [2, M/2]
+        # self.num_clusters = 2*clusters
 
         self.drag = drag
 
@@ -195,15 +195,14 @@ class FedLAMaster(FLMaster):
 
         self.pipeline_status = (self.pipeline_status + 1) % self.max_round
 
-        global_logger.info(f"======Round{self.curt_round+1} >> Select Index:{self.curt_selected}======")
+        # # to optim FedLA
+        # if len(self.curt_selected) == 1:
+        #     return
+        #
+        # if len(self.curt_selected) > self.plan:
+        #     self.curt_selected = random.sample(self.curt_selected, self.plan)
 
-        # to optim FedLA
-        if len(self.curt_selected) == 1:
-            return
-
-        if len(self.curt_selected) > self.plan:
-            self.curt_selected = random.sample(self.curt_selected, self.plan)
-
+        global_logger.info(f"======Round{self.curt_round + 1} >> Select Index:{self.curt_selected}======")
         global_container.flash('selected_workers', deepcopy(self.curt_selected))
 
     def diff_cluster_lea_case(self):
@@ -433,6 +432,7 @@ class IFCAMaster(FLMaster):
             for param, grad in zip(self.global_models[index].parameters(), gradient):
                 param.data.sub_(self.global_lr * grad / len(self.group_indices))
         self.merge.union_dict = self.cell.max_model_performance(self.global_models).state_dict()
+        self.gradients.clear()
 
     def schedule_strategy(self):
         super().schedule_strategy()

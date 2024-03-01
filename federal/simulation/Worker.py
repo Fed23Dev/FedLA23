@@ -30,6 +30,7 @@ class FedProxWorker(FLWorker):
         """
         global_logger.info(f'------Train from device: {self.id}------')
         self.cell.run_model(train=True, pre_params=global_params)
+        self.cell.latest_grad.clear()
 
 
 class FedLAWorker(FLWorker):
@@ -39,6 +40,7 @@ class FedLAWorker(FLWorker):
     def local_train(self, info_matrix: torch.Tensor):
         global_logger.info(f'------Train from device: {self.id}------')
         self.cell.run_model(train=True, info_matrix=info_matrix)
+        self.cell.latest_grad.clear()
 
     def local_distill(self, teacher_model: torch.nn.Module):
         self.cell.wrapper.dkd_loss_optim(teacher_model)
@@ -63,6 +65,7 @@ class ScaffoldWorker(FLWorker):
         self.train_before = deepcopy(self.cell.access_model())
         self.train_before_c = deepcopy(self.control)
         self.cell.run_model(train=True, server_controls=server_controls, self_controls=self.control)
+        self.cell.latest_grad.clear()
 
     def update_control(self, server_controls: dict):
         local_steps = self.cell.latest_feed_amount // args.batch_size
@@ -96,6 +99,7 @@ class MoonWorker(FLWorker):
                             prev_model=self.prev_model,
                             mu=mu,
                             T=T)
+        self.cell.latest_grad.clear()
 
 
 class CriticalFLWorker(FLWorker):
