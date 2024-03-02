@@ -26,12 +26,28 @@ class SimpleCNN(nn.Module):
         x = torch.relu(self.fc1(x))
         return self.fc2(x)
 
+def test_models(dataloader, global_model, criterion, device):
+    global_loss = []
+    for model in global_model:
+        loss = 0.0
+        for data, labels in dataloader:
+            data, labels = data.to(device), labels.to(device)
+            outputs = model(data)
+            now_loss = criterion(outputs, labels)    
+            loss += now_loss.item()
+        global_loss.append(loss)
+    return min(global_loss) / len(dataloader)
+
+
 ## IFCA sp
 # 模型聚合函数
 def aggregate_models(global_model, gradients, indexes, lr, m):
+    num = [0 for _ in global_model]
+    for index in indexes:
+        num[index] += 1
     for gradient, index in zip(gradients, indexes):
         for param, grad in zip(global_model[index].parameters(), gradient):
-            param.data.sub_(lr * grad / m)
+            param.data -= lr * grad / num[index]
 
 # 客户端训练函数
 def train_client(model, global_model, dataloader, criterion, optimizer, rounds):
@@ -65,6 +81,7 @@ def select_group(models, dataloaders, criterion):
     for dataloader in dataloaders:
         loss = []
         for model in models:
+            model.eval()
             loss.append(0.0)
             for data, labels in dataloader:
                 data, labels = data.to(device), labels.to(device)
@@ -81,6 +98,7 @@ def select_clients(num_clients, fraction, client_models, client_optimizers, clie
            [client_optimizers[i] for i in selected_clients], \
            [client_dataloaders[i] for i in selected_clients]
 
+
 # 创建数据加载器
 def create_loaders(args):
     # 加载MNIST数据集
@@ -89,8 +107,9 @@ def create_loaders(args):
 
     # 使用Dirichlet分布划分数据集
     client_datasets = split_data_dirichlet(
-        mnist_dataset, args.num_clients, args.dirichlet_alpha)
-    return [DataLoader(dataset, batch_size=args.batch_size, shuffle=True) for dataset in client_datasets]
+        mnist_dataset, args.num_clients + 1, args.dirichlet_alpha)
+    dataloader = DataLoader(client_datasets[-1], batch_size=args.batch_size, shuffle=True)
+    return [DataLoader(dataset, batch_size=args.batch_size, shuffle=True) for dataset in client_datasets[:-1]], dataloader
 
 # 使用Dirichlet分布划分数据集
 def split_data_dirichlet(mnist_dataset, num_clients, alpha):
@@ -141,8 +160,9 @@ def main():
     random.seed(int(time()))
 
     # 创建数据加载器
-    dataloaders = create_loaders(args)
-    
+    dataloaders, loader = create_loaders(args)
+
+
     ## IFCA sp
     # 创建全局模型，每个group分配一个model；创建客户端模型，每个工作机一个模型和一个优化器
     global_model = [SimpleCNN().to(device) for _ in range(args.num_groups)]
@@ -154,10 +174,11 @@ def main():
     ## IFCA sp
     # 训练和聚合
     all_loss = []
+    test_loss = []
     for round in range(args.num_rounds):
         # print("~~~~~~~~~~~~~~~~~~~~~~~~~~~~~Round", round + 1, "~~~~~~~~~~~~~~~~~~~~~~~~~~~~~")
         # 选择工作机
-        selceted_models, selected_dataloaders, selected_optims = select_clients(args.num_clients, args.client_fraction, client_models, dataloaders, optims)
+        selceted_models, selected_optims, selected_dataloaders= select_clients(args.num_clients, args.client_fraction, client_models, optims, dataloaders)
         
         # 找到每个选中的工作机属于哪个group
         group_indexes = select_group(global_model, selected_dataloaders, criterion)
@@ -173,10 +194,18 @@ def main():
         print(f"Round {round + 1} average loss: {round_loss / len(group_indexes)}")
         all_loss.append(round_loss / len(group_indexes))
         aggregate_models(global_model, gradients, group_indexes, args.lr, len(group_indexes))
+        test_loss.append(test_models(loader, global_model, criterion, device))
+        print("------Test loss:", test_loss[-1])
     ## IFCA ep
     
     # for i, model in enumerate(global_model):
     #     print(f"Final global model parameters of group {i}:", model.state_dict())
+
+    # with open('IFCA.txt', 'w') as file:
+    #     for loss in all_loss:
+    #         file.write(str(loss) + '\n')
+    #     for loss in test_loss:
+    #         file.write(str(loss) + '\n')
 
 
 if __name__ == "__main__":
