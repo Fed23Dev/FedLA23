@@ -147,6 +147,8 @@ class FedLAMaster(FLMaster):
 
     def schedule_strategy(self):
         self.curt_selected.clear()
+        # todo: optim cnt
+        self.sync_matrix()
 
         # # TODO: Ablation
         # super(FedLAMaster, self).schedule_strategy()
@@ -163,8 +165,6 @@ class FedLAMaster(FLMaster):
 
         if self.pipeline_status == 0:
             self.clusters = self.adaptive_clusters()
-            # todo: optim cnt
-            self.sync_matrix()
 
             global_logger.info(f"======Round{self.curt_round+1} >> Clusters:{self.clusters}======")
             X = torch.stack(self.workers_matrix, dim=0).numpy()

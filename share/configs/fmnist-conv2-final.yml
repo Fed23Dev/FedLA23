@@ -21,7 +21,7 @@ min_lr: 0.0
 
 # federal config
 federal: True
-non_iid: shards
+non_iid: hetero
 workers: 100
 active_workers: 3
 federal_round: 15
