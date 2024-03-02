@@ -414,35 +414,40 @@ class IFCAMaster(FLMaster):
 
         workers_cells = [SingleCell(loader,  Wrapper=IFCAWrapper) for loader in list(workers_loaders.values())]
         self.workers_nodes = [IFCAWorker(index, cell) for index, cell in enumerate(workers_cells)]
-
         self.gradients = []
         self.global_lr = global_lr
         self.groups = groups
         self.group_indices = []
         self.global_models = [SingleCell(loader).access_model() for _ in range(groups)]
 
-    def select_group(self):
-        self.group_indices.clear()
-        for worker in self.workers_nodes:
-            losses = worker.get_group_loss(self.global_models)
-            self.group_indices.append(losses.index(min(losses)))
-
-    def info_aggregation(self):
-        for gradient, index in zip(self.gradients, self.group_indices):
-            for param, grad in zip(self.global_models[index].parameters(), gradient):
-                param.data.sub_(self.global_lr * grad / len(self.group_indices))
-        self.merge.union_dict = self.cell.max_model_performance(self.global_models).state_dict()
-        self.gradients.clear()
-
     def schedule_strategy(self):
         super().schedule_strategy()
         self.select_group()
 
+    def select_group(self):
+        self.group_indices.clear()
+        for index in self.curt_selected:
+            worker = self.workers_nodes[index]
+            losses = worker.get_group_loss(self.global_models)
+            self.group_indices.append(losses.index(min(losses)))
+
     def info_sync(self):
-        for worker, index in zip(self.workers_nodes, self.group_indices):
-            client_dict = self.global_models[index].state_dict()
+        for worker_index, group_index in zip(self.curt_selected, self.group_indices):
+            worker = self.workers_nodes[worker_index]
+            client_dict = deepcopy(self.global_models[group_index].state_dict())
             worker.cell.access_model().load_state_dict(client_dict)
 
     def drive_worker(self, index: int):
         self.workers_nodes[index].local_train()
-        self.gradients.append(self.workers_nodes[index].get_latest_grad())
+        self.gradients.append(deepcopy(self.workers_nodes[index].get_latest_grad()))
+        
+    def info_aggregation(self):
+        num = [0 for _ in self.global_models]
+        for index in self.group_indices:
+            num[index] += 1
+        for gradient, index in zip(self.gradients, self.group_indices):
+            for param, grad in zip(self.global_models[index].parameters(), gradient):
+                param.data -= self.global_lr * grad / num[index]
+        self.merge.union_dict = deepcopy(self.cell.max_model_performance(self.global_models).state_dict())
+        self.gradients.clear()
+        
