@@ -8,7 +8,7 @@ from scipy.spatial.distance import jensenshannon
 from sklearn.cluster import AgglomerativeClustering
 
 from dl.SingleCell import SingleCell
-from dl.wrapper.Wrapper import ProxWrapper, LAWrapper, ScaffoldWrapper, MoonWrapper, IFCAWrapper
+from dl.wrapper.Wrapper import ProxWrapper, LAWrapper, ScaffoldWrapper, MoonWrapper, IFCAWrapper, CFLWrapper
 from env.running_env import global_container, global_logger
 from federal.aggregation.FedLA import FedLA
 
@@ -65,7 +65,7 @@ class FedLAMaster(FLMaster):
     def __init__(self, workers: int, activists: int, local_epoch: int,
                  loader: tdata.dataloader, workers_loaders: dict,
                  num_classes: int, clusters: int, drag: int,
-                 threshold: float):
+                 threshold: float, cluster_step: int = 1):
 
         master_cell = SingleCell(loader, Wrapper=LAWrapper)
         super().__init__(workers, activists, local_epoch, master_cell)
@@ -85,6 +85,8 @@ class FedLAMaster(FLMaster):
         # self.num_clusters = 2*clusters
 
         self.drag = drag
+        self.cluster_step = cluster_step
+        self.curt_c_step = 0
 
         self.fix = clusters
         self.clusters = 0
@@ -105,7 +107,9 @@ class FedLAMaster(FLMaster):
         self.curt_selected = [js_dists.index(max(js_dists))]
 
     def adaptive_clusters(self):
-        self.num_clusters = self.num_clusters // 2 if self.num_clusters // 2 > 2 else 2
+        self.curt_c_step += 1
+        if self.curt_c_step % self.cluster_step == 0:
+            self.num_clusters = self.num_clusters // 2 if self.num_clusters // 2 > 2 else 2
         return self.num_clusters
 
         # self.delta_critical_period()
@@ -334,12 +338,12 @@ class MoonMaster(FLMaster):
 class CriticalFLMaster(FLMaster):
     def __init__(self, workers: int, activists: int, local_epoch: int,
                  loader: tdata.dataloader, workers_loaders: dict,
-                 gradient_fraction: float = 0.5, most_clients: int = 96,
-                 least_clients: int = 32, threshold: float = 0.01):
-        master_cell = SingleCell(loader)
+                 gradient_fraction: float = 0.5, most_clients: int = 32,
+                 least_clients: int = 2, threshold: float = 0.01):
+        master_cell = SingleCell(loader, Wrapper=CFLWrapper)
         super().__init__(workers, activists, local_epoch, master_cell)
 
-        workers_cells = [SingleCell(loader) for loader in list(workers_loaders.values())]
+        workers_cells = [SingleCell(loader, Wrapper=CFLWrapper) for loader in list(workers_loaders.values())]
         self.workers_nodes = [CriticalFLWorker(index, cell) for index, cell in enumerate(workers_cells)]
 
         self.gradient_fraction = gradient_fraction

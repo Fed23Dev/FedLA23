@@ -37,7 +37,7 @@ DEFAULT_ARGS = {
     "loss_func": 'cross_entropy',
 
     "batch_limit": 99999,
-    "test_batch_limit": 10,
+    "test_batch_limit": 9999,
     "logits_batch_limit": 50,
     "loss_back": 3,
     # "mu": 0.3,
@@ -53,6 +53,7 @@ DEFAULT_ARGS = {
     "clusters": 10,
     "drag": 0.5,
     "threshold": 0.2,
+    "cluster_step": 1,
 
     "mu": 0.7,
     "T": 0.5,

@@ -3,7 +3,7 @@ exp_name: fmnist-conv2
 
 # checkpoint config
 model: conv2
-alg: fedla
+alg: criticalfl
 gpu_ids: [0, 1]
 
 # dataset config
@@ -32,6 +32,7 @@ clusters: 12
 drag: 0.3
 # threshold: 0.05
 threshold: -0.01
+step_cluster: 1
 
 logits_batch_limit: 20
 

@@ -188,9 +188,6 @@ class VWrapper:
             self.optimizer.zero_grad()
             loss.backward()
             self.optimizer.step()
-            self.last_grad.clear()
-            for param in self.model.parameters():
-                self.last_grad.append(param.grad)
 
     # 学习率调度器步进过程
     def scheduler_step(self):
@@ -424,6 +421,18 @@ class MoonWrapper(VWrapper):
         return self.loss_func(pred, targets) + loss2
 
 
+class CFLWrapper(VWrapper):
+    def __init__(self, model: nn.Module, train_dataloader: tdata.dataloader, optimizer: VOptimizer,
+                 scheduler: VScheduler, loss: VLossFunc):
+        super().__init__(model, train_dataloader, optimizer, scheduler, loss)
+
+    def optim_step(self, loss: torch.Tensor, speedup: bool = False, **kwargs):
+        super().optim_step(loss, speedup, **kwargs)
+        self.last_grad.clear()
+        for param in self.model.parameters():
+            self.last_grad.append(param.grad)
+
+
 class IFCAWrapper(VWrapper):
     def __init__(self, model: nn.Module, train_dataloader: tdata.dataloader, optimizer: VOptimizer,
                  scheduler: VScheduler, loss: VLossFunc):
@@ -438,3 +447,9 @@ class IFCAWrapper(VWrapper):
                 pred = model(inputs)
                 losses[-1] += self.loss_compute(pred, labels).item()
         return losses
+
+    def optim_step(self, loss: torch.Tensor, speedup: bool = False, **kwargs):
+        super().optim_step(loss, speedup, **kwargs)
+        self.last_grad.clear()
+        for param in self.model.parameters():
+            self.last_grad.append(param.grad)
