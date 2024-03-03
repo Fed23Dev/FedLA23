@@ -339,7 +339,7 @@ class CriticalFLMaster(FLMaster):
     def __init__(self, workers: int, activists: int, local_epoch: int,
                  loader: tdata.dataloader, workers_loaders: dict,
                  gradient_fraction: float = 0.5, most_clients: int = 32,
-                 least_clients: int = 2, threshold: float = 0.05):
+                 least_clients: int = 2, threshold: float = 0.01):
         master_cell = SingleCell(loader, Wrapper=CFLWrapper)
         super().__init__(workers, activists, local_epoch, master_cell)
 
