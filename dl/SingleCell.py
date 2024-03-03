@@ -56,7 +56,7 @@ class SingleCell:
     def sync_model(self, model: nn.Module):
         # if model.state_dict() != self.wrapper.model.state_dict():
         #     self.wrapper.model.load_state_dict(model.state_dict())
-        self.wrapper.device.bind_model(model)
+        self.wrapper.model = self.wrapper.device.bind_model(model)
 
     # 获取模型对象
     def access_model(self) -> nn.Module:
