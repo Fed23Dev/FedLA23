@@ -151,6 +151,7 @@ class ArgRepo:
         self.drag = None
         self.threshold = None
         self.step_cluster = None
+        self.cons_alpha = None
 
         self.mu = None
         self.T = None
@@ -231,7 +232,10 @@ class ArgRepo:
                f"active_workers:{self.active_workers}\n"\
                f"federal_round:{self.federal_round}\n" \
                f"local epoch:{self.local_epoch}\n" \
-               f"drag:{self.drag}"
+               f"drag:{self.drag}"\
+               f"logit_batch:{self.logits_batch_limit}"\
+               f"step_cluster:{self.step_cluster}"\
+               f"cons_alpha:{self.cons_alpha}"
 
     @exp_name.setter
     def exp_name(self, value):
