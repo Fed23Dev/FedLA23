@@ -412,14 +412,12 @@ class CriticalFLMaster(FLMaster):
 class IFCAMaster(FLMaster):
     def __init__(self, workers: int, activists: int, local_epoch: int,
                  loader: tdata.dataloader, workers_loaders: dict,
-                 groups: int = 4, global_lr: float = 0.01):
+                 groups: int = 4):
         master_cell = SingleCell(loader, Wrapper=IFCAWrapper)
         super().__init__(workers, activists, local_epoch, master_cell)
-
-        workers_cells = [SingleCell(loader,  Wrapper=IFCAWrapper) for loader in list(workers_loaders.values())]
+        workers_cells = [SingleCell(loaderr,  Wrapper=IFCAWrapper) for loaderr in list(workers_loaders.values())]
         self.workers_nodes = [IFCAWorker(index, cell) for index, cell in enumerate(workers_cells)]
-        self.gradients = []
-        self.global_lr = global_lr
+        self.params = []
         self.groups = groups
         self.group_indices = []
         self.global_models = [SingleCell(loader).access_model() for _ in range(groups)]
@@ -443,15 +441,24 @@ class IFCAMaster(FLMaster):
 
     def drive_worker(self, index: int):
         self.workers_nodes[index].local_train()
-        self.gradients.append(deepcopy(self.workers_nodes[index].get_latest_grad()))
+        param = []
+        for para in self.workers_nodes[index].cell.access_model().parameters():
+            param.append(para.data.clone())
+        self.params.append(param)
         
     def info_aggregation(self):
         num = [0 for _ in self.global_models]
-        for index in self.group_indices:
-            num[index] += 1
-        for gradient, index in zip(self.gradients, self.group_indices):
-            for param, grad in zip(self.global_models[index].parameters(), gradient):
-                param.data -= self.global_lr * grad / num[index]
-        self.merge.union_dict = deepcopy(self.cell.max_model_performance(self.global_models).state_dict())
-        self.gradients.clear()
+        for weight, group_index in zip(self.agg_weights, self.group_indices):
+            num[group_index] += weight
+            if weight == 0:
+                continue
+            for para in self.global_models[group_index].parameters():
+                para.data.zero_()
+        for weight, param, index in zip(self.agg_weights, self.params, self.group_indices):
+            for para, delta_para in zip(self.global_models[index].parameters(), param):
+                para.data += delta_para *  weight / num[index]
+        model = self.cell.max_model_performance(self.global_models)
+        self.merge.union_dict = deepcopy(model.state_dict())
+
+        self.params.clear()
         
