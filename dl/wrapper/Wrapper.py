@@ -319,6 +319,7 @@ class LAWrapper(VWrapper):
         #                "loss_im": super().loss_compute(pred, constraint_matrix)}
         # loss = sum([ls.mean() for ls in losses_dict.values()])
 
+        global_logger.info(f"-=-AB Test-=-:{cons_alpha}")
         return ((1-cons_alpha)*super().loss_compute(pred, targets) +
                 cons_alpha*super().loss_compute(pred, constraint_matrix))
 
