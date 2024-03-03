@@ -282,6 +282,7 @@ class ProxWrapper(VWrapper):
 class LAWrapper(VWrapper):
     ERROR_MESS7 = "FedLA must provide teacher_model parameter."
     ERROR_MESS8 = "FedLA must provide info_matrix parameter."
+    ERROR_MESS9 = "FedDAS must provide cons_alpha parameter."
 
     def __init__(self, model: nn.Module, train_dataloader: tdata.dataloader, optimizer: VOptimizer,
                  scheduler: VScheduler, loss: VLossFunc):
@@ -300,7 +301,10 @@ class LAWrapper(VWrapper):
 
     def loss_compute(self, pred: torch.Tensor, targets: torch.Tensor, **kwargs) -> torch.Tensor:
         assert "info_matrix" in kwargs.keys(), self.ERROR_MESS8
+        assert "cons_alpha" in kwargs.keys(), self.ERROR_MESS9
         info_matrix = kwargs["info_matrix"]
+        cons_alpha = kwargs["cons_alpha"]
+
         # debug: to del local
         self_matrix = self.get_logits_matrix()
         mask = ~info_matrix.bool()
@@ -315,7 +319,8 @@ class LAWrapper(VWrapper):
         #                "loss_im": super().loss_compute(pred, constraint_matrix)}
         # loss = sum([ls.mean() for ls in losses_dict.values()])
 
-        return super().loss_compute(pred, targets) + super().loss_compute(pred, constraint_matrix)
+        return ((1-cons_alpha)*super().loss_compute(pred, targets) +
+                cons_alpha*super().loss_compute(pred, constraint_matrix))
 
         # # TODO: Ablation
         # return super().loss_compute(pred, targets, **kwargs)
@@ -410,9 +415,9 @@ class MoonWrapper(VWrapper):
         inputs = kwargs["inputs"]
         mu = torch.tensor(kwargs["mu"]).long()
         T = kwargs["T"]
-
-        rep_old = prev_model(inputs).detach()
-        rep_global = global_model(inputs).detach()
+        with torch.no_grad():
+            rep_old = prev_model(inputs)
+            rep_global = global_model(inputs)
         loss_con = - torch.log(torch.exp(F.cosine_similarity(pred, rep_global) / T) /
                                (torch.exp(F.cosine_similarity(pred, rep_global) / T) +
                                 torch.exp(F.cosine_similarity(pred, rep_old) / T)))

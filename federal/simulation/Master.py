@@ -65,7 +65,7 @@ class FedLAMaster(FLMaster):
     def __init__(self, workers: int, activists: int, local_epoch: int,
                  loader: tdata.dataloader, workers_loaders: dict,
                  num_classes: int, clusters: int, drag: int,
-                 threshold: float, cluster_step: int = 1):
+                 cons_alpha: float, cluster_step: int = 1):
 
         master_cell = SingleCell(loader, Wrapper=LAWrapper)
         super().__init__(workers, activists, local_epoch, master_cell)
@@ -97,7 +97,7 @@ class FedLAMaster(FLMaster):
 
         self.start_matrix = None
         self.cft = 0.3
-        self.threshold = threshold
+        self.cons_alpha = cons_alpha
 
     def single_select(self):
         js_dists = []
@@ -244,7 +244,7 @@ class FedLAMaster(FLMaster):
                 self.pipeline[group_idx].append(extended_indices[group_idx])
 
     def drive_worker(self, index: int):
-        self.workers_nodes[index].local_train(self.curt_matrix)
+        self.workers_nodes[index].local_train(self.curt_matrix, self.cons_alpha)
 
     def delta_critical_period(self):
         start_matrix = self.start_matrix.numpy()
@@ -331,7 +331,7 @@ class MoonMaster(FLMaster):
         self.T = T
 
     def drive_worker(self, index: int):
-        self.workers_nodes[index].local_train(deepcopy(self.cell.access_model()),
+        self.workers_nodes[index].local_train(self.cell.access_model(),
                                               self.mu, self.T)
 
 

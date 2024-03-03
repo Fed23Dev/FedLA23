@@ -37,9 +37,9 @@ class FedLAWorker(FLWorker):
     def __init__(self, worker_id: int, worker_cell: SingleCell):
         super().__init__(worker_id, worker_cell)
 
-    def local_train(self, info_matrix: torch.Tensor):
+    def local_train(self, info_matrix: torch.Tensor, alpha: float):
         global_logger.info(f'------Train from device: {self.id}------')
-        self.cell.run_model(train=True, info_matrix=info_matrix)
+        self.cell.run_model(train=True, info_matrix=info_matrix, cons_alpha=alpha)
         self.cell.latest_grad.clear()
 
     def local_distill(self, teacher_model: torch.nn.Module):
