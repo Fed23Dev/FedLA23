@@ -459,6 +459,5 @@ class IFCAMaster(FLMaster):
                 para.data += delta_para * weight / num[index]
         model = self.cell.max_model_performance(self.global_models)
         self.merge.union_dict = deepcopy(model.state_dict())
-
         self.params.clear()
         
