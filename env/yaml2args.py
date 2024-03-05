@@ -232,10 +232,10 @@ class ArgRepo:
                f"active_workers:{self.active_workers}\n"\
                f"federal_round:{self.federal_round}\n" \
                f"local epoch:{self.local_epoch}\n" \
-               f"drag:{self.drag}\n"\
-               f"logit_batch:{self.logits_batch_limit}\n"\
-               f"step_cluster:{self.step_cluster}\n"\
-               f"cons_alpha:{self.cons_alpha}\n"
+               f"drag:{self.drag}"\
+               f"logit_batch:{self.logits_batch_limit}"\
+               f"step_cluster:{self.step_cluster}"\
+               f"cons_alpha:{self.cons_alpha}"
 
     @exp_name.setter
     def exp_name(self, value):
