@@ -29,11 +29,11 @@ local_epoch: 5
 
 # fedla
 clusters: 12
-drag: 0.3
+drag: 0.0
 # threshold: 0.05
 threshold: -0.01
 step_cluster: 1
-cons_alpha: 0.9
+cons_alpha: 0.3
 
 logits_batch_limit: 20
 
