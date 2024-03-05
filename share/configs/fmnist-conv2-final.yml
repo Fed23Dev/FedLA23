@@ -33,6 +33,7 @@ drag: 0.3
 # threshold: 0.05
 threshold: -0.01
 step_cluster: 1
+cons_alpha: 0.4
 
 logits_batch_limit: 20
 
