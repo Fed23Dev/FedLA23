@@ -50,7 +50,7 @@ FMNIST_CLASSES = 10
 
 # Others
 MAX_HOOK_LAYER = 50
-valid_limit = 5
+valid_limit = 99
 rank_limit = 10
 
 # Default_config

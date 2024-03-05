@@ -126,6 +126,10 @@ class FedLAMaster(FLMaster):
 
         self.curt_matrix = torch.div(sum(self.workers_matrix), len(self.workers_matrix))
 
+        row_sums = self.curt_matrix.sum(dim=1, keepdim=True)
+
+        self.curt_matrix = self.curt_matrix / row_sums
+
         if self.start_matrix is None:
             self.start_matrix = deepcopy(self.curt_matrix)
         global_container.flash('avg_matrix', deepcopy(self.curt_matrix).numpy())

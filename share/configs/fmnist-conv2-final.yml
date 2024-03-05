@@ -23,13 +23,13 @@ min_lr: 0.0
 federal: True
 non_iid: hetero
 workers: 100
-active_workers: 10
+active_workers: 3
 federal_round: 15
 local_epoch: 5
 
 # fedla
 clusters: 12
-drag: 0.3
+drag: 0.0
 # threshold: 0.05
 threshold: -0.01
 step_cluster: 1
