@@ -103,14 +103,14 @@ class SingleCell:
         optim_model = models[0]
         min_loss = torch.tensor(1000000000)
         for model in models:
-            # self.sync_model(model)
-            self.wrapper.model = deepcopy(model)
+            self.sync_model(model)
+            # self.wrapper.model = deepcopy(model)
             _, _, loss = self.wrapper.step_run(batch_limit=10, train=False)
             if loss < min_loss:
                 min_loss = loss
                 optim_model = model
-        # self.sync_model(optim_model)
-        self.wrapper.model = deepcopy(optim_model)
+        self.sync_model(optim_model)
+        # self.wrapper.model = deepcopy(optim_model)
         return optim_model
 
     # 测试模型性能

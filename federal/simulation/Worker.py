@@ -33,7 +33,7 @@ class FedProxWorker(FLWorker):
         self.cell.latest_grad.clear()
 
 
-class FedLAWorker(FLWorker):
+class FedDASWorker(FLWorker):
     def __init__(self, worker_id: int, worker_cell: SingleCell):
         super().__init__(worker_id, worker_cell)
 

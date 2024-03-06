@@ -9,7 +9,7 @@ import torch.utils.data as tdata
 from federal.aggregation.FedAvg import FedAvg
 
 
-class FedLA(FedAvg):
+class FedDAS(FedAvg):
     ERROR_MESS2 = "clients_ids must be not null."
 
     def __init__(self, init_model: torch.nn.Module,

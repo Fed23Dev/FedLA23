@@ -3,7 +3,7 @@ exp_name: cifar10-vgg16
 
 # checkpoint config
 model: vgg16
-alg: fedla
+alg: feddas
 gpu_ids: [0, 1]
 # pre_train: True
 

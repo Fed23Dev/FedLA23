@@ -80,8 +80,8 @@ def alg_str2enum(value: str) -> VState:
         ret = VState.FedAvg
     elif value == 'fedprox':
         ret = VState.FedProx
-    elif value == 'fedla':
-        ret = VState.FedLA
+    elif value == 'feddas':
+        ret = VState.FedDAS
     elif value == 'scaffold':
         ret = VState.SCAFFOLD
     elif value == 'moon':

@@ -60,7 +60,7 @@ class VState(Enum):
     FedAvg = 1
     FedProx = 2
     SCAFFOLD = 3
-    FedLA = 4
+    FedDAS = 4
     MOON = 5
     CriticalFL = 6
     IFCA = 7

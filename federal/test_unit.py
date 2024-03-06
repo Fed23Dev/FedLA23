@@ -4,7 +4,7 @@ import torch.cuda
 from env.running_env import args, global_logger
 from env.support_config import VState
 from federal.federal_util import simulation_federal_process, get_data_ratio
-from federal.simulation.Master import FedAvgMaster, FedProxMaster, FedLAMaster, ScaffoldMaster, MoonMaster, \
+from federal.simulation.Master import FedAvgMaster, FedProxMaster, FedDASMaster, ScaffoldMaster, MoonMaster, \
     CriticalFLMaster, IFCAMaster
 from utils.MathTools import js_divergence
 
@@ -25,14 +25,14 @@ def test_fedprox():
     master_node.cell.exit_proc(one_key=f'{args.exp_name}-test_acc')
 
 
-def test_fedla():
+def test_feddas():
     loader, loaders, user_dict = simulation_federal_process()
     # global_dist, device_ratios = get_data_ratio(user_dict)
 
-    master_node = FedLAMaster(workers=args.workers, activists=args.active_workers, local_epoch=args.local_epoch,
-                              loader=loader, workers_loaders=loaders, num_classes=args.num_classes,
-                              clusters=args.clusters, drag=args.drag, cons_alpha=args.cons_alpha,
-                              cluster_step=args.step_cluster)
+    master_node = FedDASMaster(workers=args.workers, activists=args.active_workers, local_epoch=args.local_epoch,
+                               loader=loader, workers_loaders=loaders, num_classes=args.num_classes,
+                               clusters=args.clusters, drag=args.drag, cons_alpha=args.cons_alpha,
+                               cluster_step=args.step_cluster)
     master_node.union_run(args.federal_round)
     master_node.cell.exit_proc(one_key=f'{args.exp_name}-test_acc')
 
@@ -76,8 +76,8 @@ def main():
         test_fedavg()
     elif args.curt_mode == VState.FedProx:
         test_fedprox()
-    elif args.curt_mode == VState.FedLA:
-        test_fedla()
+    elif args.curt_mode == VState.FedDAS:
+        test_feddas()
     elif args.curt_mode == VState.SCAFFOLD:
         test_scaffold()
     elif args.curt_mode == VState.MOON:

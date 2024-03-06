@@ -279,7 +279,7 @@ class ProxWrapper(VWrapper):
         return loss
 
 
-class LAWrapper(VWrapper):
+class DASWrapper(VWrapper):
     ERROR_MESS7 = "FedLA must provide teacher_model parameter."
     ERROR_MESS8 = "FedLA must provide info_matrix parameter."
     ERROR_MESS9 = "FedDAS must provide cons_alpha parameter."
@@ -300,8 +300,8 @@ class LAWrapper(VWrapper):
         self.distillers = DKD(cfg)
 
     def loss_compute(self, pred: torch.Tensor, targets: torch.Tensor, **kwargs) -> torch.Tensor:
-        # TODO: Ablation
-        return super().loss_compute(pred, targets, **kwargs)
+        # # TODO: Ablation
+        # return super().loss_compute(pred, targets, **kwargs)
 
         assert "info_matrix" in kwargs.keys(), self.ERROR_MESS8
         assert "cons_alpha" in kwargs.keys(), self.ERROR_MESS9

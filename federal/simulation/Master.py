@@ -8,12 +8,12 @@ from scipy.spatial.distance import jensenshannon
 from sklearn.cluster import AgglomerativeClustering
 
 from dl.SingleCell import SingleCell
-from dl.wrapper.Wrapper import ProxWrapper, LAWrapper, ScaffoldWrapper, MoonWrapper, IFCAWrapper, CFLWrapper
+from dl.wrapper.Wrapper import ProxWrapper, DASWrapper, ScaffoldWrapper, MoonWrapper, IFCAWrapper, CFLWrapper
 from env.running_env import global_container, global_logger
-from federal.aggregation.FedLA import FedLA
+from federal.aggregation.FedDAS import FedDAS
 
 from federal.simulation.FLnodes import FLMaster, FLWorker
-from federal.simulation.Worker import FedAvgWorker, FedProxWorker, FedLAWorker, ScaffoldWorker, MoonWorker, IFCAWorker, \
+from federal.simulation.Worker import FedAvgWorker, FedProxWorker, FedDASWorker, ScaffoldWorker, MoonWorker, IFCAWorker, \
     CriticalFLWorker
 from utils.MathTools import js_divergence, remove_top_k_elements
 
@@ -61,20 +61,20 @@ class FedProxMaster(FLMaster):
         self.workers_nodes[index].local_train(self.cell.access_model().parameters())
 
 
-class FedLAMaster(FLMaster):
+class FedDASMaster(FLMaster):
     def __init__(self, workers: int, activists: int, local_epoch: int,
                  loader: tdata.dataloader, workers_loaders: dict,
                  num_classes: int, clusters: int, drag: int,
                  cons_alpha: float, cluster_step: int = 1):
 
-        master_cell = SingleCell(loader, Wrapper=LAWrapper)
+        master_cell = SingleCell(loader, Wrapper=DASWrapper)
         super().__init__(workers, activists, local_epoch, master_cell)
 
         specification = master_cell.wrapper.running_scale()
-        self.merge = FedLA(master_cell.access_model(), specification, num_classes)
+        self.merge = FedDAS(master_cell.access_model(), specification, num_classes)
 
-        workers_cells = [SingleCell(loader, Wrapper=LAWrapper) for loader in list(workers_loaders.values())]
-        self.workers_nodes = [FedLAWorker(index, cell) for index, cell in enumerate(workers_cells)]
+        workers_cells = [SingleCell(loader, Wrapper=DASWrapper) for loader in list(workers_loaders.values())]
+        self.workers_nodes = [FedDASWorker(index, cell) for index, cell in enumerate(workers_cells)]
 
         self.prev_workers_matrix = [torch.zeros(num_classes, num_classes) for _ in range(workers)]
         self.workers_matrix = [torch.zeros(num_classes, num_classes) for _ in range(workers)]
@@ -164,7 +164,7 @@ class FedLAMaster(FLMaster):
         self.sync_matrix()
 
         if self.curt_round == 0:
-            super(FedLAMaster, self).schedule_strategy()
+            super(FedDASMaster, self).schedule_strategy()
             return
 
         # # CLP shrink
