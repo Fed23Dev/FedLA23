@@ -1,6 +1,7 @@
 #!/usr/bin/env zsh
 
-config_path='share/configs/fmnist-conv2-final.yml'
+# config_path='share/configs/fmnist-conv2-final.yml'
+config_path='share/configs/fmnist-conv2-final@.yml'
 
 for alpha in 20
 do
