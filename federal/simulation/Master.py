@@ -155,12 +155,13 @@ class FedLAMaster(FLMaster):
 
     def schedule_strategy(self):
         self.curt_selected.clear()
-        # todo: optim cnt
-        self.sync_matrix()
 
         # # TODO: Ablation
         # super(FedLAMaster, self).schedule_strategy()
         # return
+
+        # todo: optim cnt
+        self.sync_matrix()
 
         if self.curt_round == 0:
             super(FedLAMaster, self).schedule_strategy()
