@@ -10,7 +10,7 @@ from torchvision import transforms
 
 from dl.data.transform import init_transform, init_target_transform, init_tiny_imagenet_transform
 from env.static_env import CIFAR10_MEAN, CIFAR10_STD, CIFAR10_CLASSES, \
-    CIFAR100_MEAN, CIFAR100_STD, CIFAR100_CLASSES, FMNIST_CLASSES, TinyImageNet_CLASSES
+    CIFAR100_MEAN, CIFAR100_STD, CIFAR100_CLASSES, FMNIST_CLASSES, TinyImageNet_CLASSES, EMNIST_CLASSES
 from env.support_config import VDataSet
 from env.running_env import global_file_repo
 
@@ -177,6 +177,17 @@ def get_data(dataset: VDataSet, data_type, transform=None, target_transform=None
                             train=data_type == "train",
                             transform=transform,
                             target_transform=target_transform)
+    elif dataset == VDataSet.EMNIST:
+        assert data_type in ["train", "test"]
+        if transform is None:
+            transform = transforms.Compose([
+                transforms.ToTensor(),
+                transforms.Normalize(mean=0.5, std=0.5)])
+        if target_transform is None:
+            target_transform = init_target_transform(EMNIST_CLASSES)
+        return torchvision.datasets.EMNIST(root=join(global_file_repo.dataset_path, "EMNIST"),
+                                           split='byclass', download=True, train=data_type == "train",
+                                           transform=transform, target_transform=target_transform)
     else:
         raise ValueError("{} dataset is not supported.".format(dataset))
 
@@ -188,6 +199,8 @@ def download_datasets():
                                       download=True)
     torchvision.datasets.CIFAR100(root="~/la/datasets/CIFAR100", train=True,
                                   download=True)
+    torchvision.datasets.EMNIST(root="~/la/datasets/EMNIST", train=True, split='byclass',
+                                download=True)
 
     # tiny imagenet
     # http://cs231n.stanford.edu/tiny-imagenet-200.zip
@@ -199,3 +212,10 @@ def download_datasets():
     extract_dir = "~/la/datasets"
     with zipfile.ZipFile(file_name, 'r') as zip_ref:
         zip_ref.extractall(extract_dir)
+
+
+def test_emnist():
+    emnist_data = torchvision.datasets.EMNIST(
+        root="~/la/datasets/EMNIST",
+        split='byclass',
+        train=True, download=True, transform=torchvision.transforms.ToTensor())

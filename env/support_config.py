@@ -9,6 +9,7 @@ class VDataSet(Enum):
     CIFAR100 = 2
     FMNIST = 3
     TinyImageNet = 4
+    EMNIST = 5
 
 
 # Model Type

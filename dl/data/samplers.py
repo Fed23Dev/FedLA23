@@ -8,8 +8,10 @@ import functools
 from dl.data.datasets import get_data
 from env.running_env import global_logger
 from env.support_config import VDataSet
+from utils.TimeCost import timeit
 
 dir_alpha = 0.3
+
 
 def iid(targets, num_clients: int) -> dict:
     client_dict = dict()
@@ -65,6 +67,13 @@ def dataset_user_indices(dataset_type: VDataSet, num_slices, non_iid: str, seed:
             else:
                 client_dict = _shards_non_iid(dataset.targets, 4000,
                                               num_slices, seed, 200)
+        elif dataset_type == VDataSet.EMNIST:
+            if non_iid == 'hetero':
+                client_dict = _hetero_non_iid(dataset.targets, 62,
+                                              num_slices, dir_alpha, seed=seed)
+            else:
+                client_dict = _shards_non_iid(dataset.targets, 124,
+                                              num_slices, seed, 62)
         else:
             global_logger.error("Not supported dataset type.")
             client_dict = None
@@ -78,7 +87,7 @@ def _shards_non_iid(targets: list, nums_shards: int, num_clients: int,
     assert nums_shards % num_classes == 0, "num_shards must be times of num_classes."
     assert nums_shards % num_clients == 0, "num_shards must be times of num_clients."
     groups = _distribute_indices(targets, num_groups=nums_shards)
-    client_dict = _random_group_pairs(groups, n=nums_shards//num_clients, seed=seed)
+    client_dict = _random_group_pairs(groups, n=nums_shards // num_clients, seed=seed)
     return client_dict
 
 
@@ -219,6 +228,7 @@ def _build_non_iid_by_dirichlet(seed, indices2targets, non_iid_alpha, num_classe
 
     return idx_batch
 
+
 def _distribute_indices(array, num_groups):
     unique_elements = np.unique(array)
     groups = [[] for _ in range(num_groups)]
@@ -232,6 +242,7 @@ def _distribute_indices(array, num_groups):
         groups[group_index].extend(indices[half:])
         group_index += 1
     return groups
+
 
 def _random_group_pairs(groups, n=2, seed=2024):
     np.random.seed(seed)  # 确保随机组合是可重现的

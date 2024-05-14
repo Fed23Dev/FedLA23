@@ -39,22 +39,6 @@ tiny-imagenet下载链接：http://cs231n.stanford.edu/tiny-imagenet-200.zip
 
 4. 修改main.py line:36 的当前年份，remain_days表示最多保存多少天前的数据文件
 
-## 开发上的规范
-
-1. test_unit.py可提供单元测试或是对外接口
-
-2. 每个包对外提供的接口只保留在test_unit.py中，所有外部包只调用该py包的接口获得服务
-
-
-## 怎样高效地进行扩展，针对其他优化器和学习率调度器
-1. env.support_config下提前声明要添加的优化器和调度器枚举成员
-2. yaml_args中optim_str2enum()和scheduler_str2enum()添加yaml配置值到枚举成员的映射
-3. dl.wrapper.Wrapper下init_optim()编写优化器的创建语句、init_scheduler_loss()下编写调度器的创建语句
-4. 如果是自定义的优化器或调度器编写相关类，然后提供初始化接口
-5. 数据集新增配置yaml2args.py line:209 也需要改
-6. 模型新增配置custom_path.py模型目录和rank路径、yaml2args.py line 228映射剪枝率和rank路径 running_env.py 映射模型路径。static_env.py配置剪枝率
-
-
 
 
 

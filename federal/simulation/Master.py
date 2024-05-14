@@ -16,6 +16,7 @@ from federal.simulation.FLnodes import FLMaster, FLWorker
 from federal.simulation.Worker import FedAvgWorker, FedProxWorker, FedDASWorker, ScaffoldWorker, MoonWorker, IFCAWorker, \
     CriticalFLWorker
 from utils.MathTools import js_divergence, remove_top_k_elements
+from utils.TimeCost import timeit
 
 
 class FedAvgMaster(FLMaster):
@@ -61,6 +62,7 @@ class FedProxMaster(FLMaster):
         self.workers_nodes[index].local_train(self.cell.access_model().parameters())
 
 
+@timeit
 class FedDASMaster(FLMaster):
     def __init__(self, workers: int, activists: int, local_epoch: int,
                  loader: tdata.dataloader, workers_loaders: dict,
@@ -175,7 +177,7 @@ class FedDASMaster(FLMaster):
         if self.pipeline_status == 0:
             self.clusters = self.adaptive_clusters()
 
-            global_logger.info(f"======Round{self.curt_round+1} >> Clusters:{self.clusters}======")
+            global_logger.info(f"======Round{self.curt_round + 1} >> Clusters:{self.clusters}======")
             X = torch.stack(self.workers_matrix, dim=0).numpy()
             n_samples, dim1, dim2 = X.shape
             flattened_X = X.reshape(n_samples, dim1 * dim2)
@@ -420,7 +422,7 @@ class IFCAMaster(FLMaster):
                  groups: int = 4):
         master_cell = SingleCell(loader, Wrapper=IFCAWrapper)
         super().__init__(workers, activists, local_epoch, master_cell)
-        workers_cells = [SingleCell(loaderr,  Wrapper=IFCAWrapper) for loaderr in list(workers_loaders.values())]
+        workers_cells = [SingleCell(loaderr, Wrapper=IFCAWrapper) for loaderr in list(workers_loaders.values())]
         self.workers_nodes = [IFCAWorker(index, cell) for index, cell in enumerate(workers_cells)]
         self.params = []
         self.groups = groups
@@ -450,7 +452,7 @@ class IFCAMaster(FLMaster):
         for para in self.workers_nodes[index].cell.access_model().parameters():
             param.append(para.data.clone())
         self.params.append(param)
-        
+
     def info_aggregation(self):
         num = [0 for _ in self.global_models]
         for weight, group_index in zip(self.agg_weights, self.group_indices):
@@ -465,4 +467,3 @@ class IFCAMaster(FLMaster):
         model = self.cell.max_model_performance(self.global_models)
         self.merge.union_dict = deepcopy(model.state_dict())
         self.params.clear()
-        

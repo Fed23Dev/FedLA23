@@ -46,6 +46,9 @@ ImageNet_STD = [0.229, 0.224, 0.225]
 # FMNIST const config
 FMNIST_CLASSES = 10
 
+# EMNIST const config
+EMNIST_CLASSES = 62
+
 # VGG const config
 
 # Others

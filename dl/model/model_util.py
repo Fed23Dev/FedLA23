@@ -45,7 +45,8 @@ def create_model(model: VModel, compress_rate=ORIGIN_CP_RATE,
         return initialize(ResNet(BasicBlock, 56, compress_rate=compress_rate, num_classes=num_classes,
                                  input_channel=in_channels))
     elif model == VModel.ResNet110:
-        return initialize(ResNet(BasicBlock, 110, compress_rate=compress_rate, num_classes=num_classes))
+        return initialize(ResNet(BasicBlock, 110, compress_rate=compress_rate, num_classes=num_classes,
+                                 input_channel=in_channels))
     elif model == VModel.MobileNetV2:
         return initialize(MobileNetV2(compress_rate=compress_rate, num_classes=num_classes))
     elif model == VModel.Conv2:

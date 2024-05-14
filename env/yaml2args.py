@@ -32,6 +32,8 @@ def dataset_str2enum(value: str) -> VDataSet:
         ret = VDataSet.TinyImageNet
     elif value == 'fmnist':
         ret = VDataSet.FMNIST
+    elif value == 'emnist':
+        ret = VDataSet.EMNIST
     else:
         ret = VDataSet.Init
     return ret
@@ -213,6 +215,9 @@ class ArgRepo:
             self.in_channels = 3
         elif self.dataset == VDataSet.FMNIST:
             self.num_classes = 10
+            self.in_channels = 1
+        elif self.dataset == VDataSet.EMNIST:
+            self.num_classes = 62
             self.in_channels = 1
         else:
             print("The dataset is not supported.")

@@ -1,6 +1,6 @@
 #!/usr/bin/env zsh
 
-config_path='share/configs/cifar100-resnet110-final.yml'
+config_path='share/configs/emnist-resnet110-final.yml'
 
 for alpha in 20
 do
