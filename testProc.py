@@ -5,6 +5,37 @@ from sklearn.cluster import DBSCAN, OPTICS, AgglomerativeClustering, BisectingKM
 from utils.Vlogger import VLogger
 
 
+def to_matrix(logits, targets) -> torch.Tensor:
+    # logits = logits.cpu()
+
+    label_dtype = torch.int64
+    sum_logits = torch.zeros(3, 3, dtype=logits.dtype)
+    sum_labels = torch.zeros(3, dtype=label_dtype)
+
+    labels = torch.argmax(targets, -1)
+    _labels, _cnt = torch.unique(labels, return_counts=True)
+    labels_cnt = torch.zeros(3, dtype=label_dtype).\
+        scatter_(dim=0, index=_labels, src=_cnt)
+
+    logits = torch.nn.functional.softmax(logits, dim=1)
+
+    # 扩展的标签索引 [0, 1] >> [[0, 0], [1, 1]]
+    logits_index = labels.unsqueeze(1).expand(logits.size())
+    # 自然数索引
+    labels_index = torch.tensor(list(range(3)))
+
+    sum_logits.scatter_add_(dim=0, index=logits_index, src=logits)
+    sum_labels.scatter_add_(dim=0, index=labels_index, src=labels_cnt)
+
+    # 消掉无穷和未定义，因为non-iid
+    zero = torch.zeros_like(sum_logits)
+    one = torch.ones_like(sum_logits)
+    div_labels = sum_labels.unsqueeze(1).expand(sum_logits.size())
+    sum_logits = torch.where(sum_logits == 0, one, sum_logits)
+    avg_logits = sum_logits / div_labels
+    avg_logits = torch.where(avg_logits == torch.inf, zero, avg_logits)
+    return avg_logits
+
 def tes():
     all = torch.tensor([[2, 2, 2], [3, 3, 3], [4, 4, 4]])
     zero = torch.tensor([[0, 0, 0], [1, 0.2, 1], [0, 0, 0]])
@@ -72,7 +103,8 @@ def test_lis():
 
 
 if __name__ == "__main__":
-    from utils.test_unit import main
-    main()
-    # test_lis()
+    t1 = torch.tensor([[1., 2., 3.], [2., 2., 2.], [1., 3., 5.]])
+    t2 = torch.tensor([[1, 0, 0], [0, 1, 0], [1, 0, 0]])
+    print(to_matrix(t1, t2))
+    print(torch.nn.functional.softmax(t1, dim=1))
     print("----------------------")

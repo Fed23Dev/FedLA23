@@ -62,7 +62,6 @@ class FedProxMaster(FLMaster):
         self.workers_nodes[index].local_train(self.cell.access_model().parameters())
 
 
-@timeit
 class FedDASMaster(FLMaster):
     def __init__(self, workers: int, activists: int, local_epoch: int,
                  loader: tdata.dataloader, workers_loaders: dict,
@@ -117,6 +116,7 @@ class FedDASMaster(FLMaster):
         # self.delta_critical_period()
         # return self.fix
 
+    @timeit
     def sync_matrix(self):
         self.prev_workers_matrix = deepcopy(self.workers_matrix)
         self.prev_matrix = deepcopy(self.curt_matrix)
@@ -181,6 +181,7 @@ class FedDASMaster(FLMaster):
             X = torch.stack(self.workers_matrix, dim=0).numpy()
             n_samples, dim1, dim2 = X.shape
             flattened_X = X.reshape(n_samples, dim1 * dim2)
+
             clustering = AgglomerativeClustering(n_clusters=self.clusters).fit(flattened_X)
             self.clusters_indices = clustering.labels_
 
@@ -216,6 +217,7 @@ class FedDASMaster(FLMaster):
         global_logger.info(f"======Round{self.curt_round + 1} >> Select Index:{self.curt_selected}======")
         global_container.flash('selected_workers', deepcopy(self.curt_selected))
 
+    @timeit
     def diff_cluster_lea_case(self):
         # 计算每个唯一元素的出现次数
         unique_elements, counts = np.unique(self.clusters_indices, return_counts=True)
