@@ -6,6 +6,7 @@ import torch
 import torch.utils.data as tdata
 from scipy.spatial.distance import jensenshannon
 from sklearn.cluster import AgglomerativeClustering
+import torch.nn.functional as F
 
 from dl.SingleCell import SingleCell
 from dl.wrapper.Wrapper import ProxWrapper, DASWrapper, ScaffoldWrapper, MoonWrapper, IFCAWrapper, CFLWrapper
@@ -126,10 +127,13 @@ class FedDASMaster(FLMaster):
         for i in range(self.workers):
             self.workers_matrix.append(self.workers_nodes[i].cell.wrapper.get_logits_matrix())
 
-        self.curt_matrix = torch.div(sum(self.workers_matrix), len(self.workers_matrix))
+        self.curt_matrix = self.aggregation_matrix()
 
+        import pdb
+        pdb.set_trace()
+
+        # why div row_sums
         row_sums = self.curt_matrix.sum(dim=1, keepdim=True)
-
         self.curt_matrix = self.curt_matrix / row_sums
 
         if self.start_matrix is None:
@@ -139,6 +143,16 @@ class FedDASMaster(FLMaster):
         # global_logger.info(f"======curt: {self.curt_matrix}======")
         # global_logger.info(f"======prev: {self.prev_matrix}======")
         # global_logger.info(f"======start: {self.start_matrix}======")
+
+    def aggregation_matrix(self) -> torch.Tensor:
+        # 计算每个方阵的秩
+        ranks = [torch.linalg.matrix_rank(matrix) for matrix in self.workers_matrix]
+        # 归一化得到权重
+        weights = F.softmax(torch.tensor(ranks, dtype=torch.float), dim=0)
+        # 计算加权和
+        weighted_sum = sum(weight * matrix for weight, matrix in zip(weights, self.workers_matrix))
+        # origin: torch.div(sum(self.workers_matrix), self.workers)
+        return weighted_sum
 
     def info_aggregation(self):
         workers_dict = []
