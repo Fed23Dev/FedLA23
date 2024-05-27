@@ -300,6 +300,34 @@ class DASWrapper(VWrapper):
         self.kd_curt_epoch = 0
         self.distillers = DKD(cfg)
 
+    # @timeit
+    # def loss_compute(self, pred: torch.Tensor, targets: torch.Tensor, **kwargs) -> torch.Tensor:
+    #     # # TODO: Ablation
+    #     # return super().loss_compute(pred, targets, **kwargs)
+    #
+    #     assert "info_matrix" in kwargs.keys(), self.ERROR_MESS8
+    #     assert "cons_alpha" in kwargs.keys(), self.ERROR_MESS9
+    #     info_matrix = kwargs["info_matrix"]
+    #     cons_alpha = kwargs["cons_alpha"]
+    #
+    #     # debug: to del local
+    #     self_matrix = self.get_logits_matrix()
+    #     mask = ~info_matrix.bool()
+    #     info_matrix = mask * self_matrix + info_matrix
+    #
+    #     # debug: to del global
+    #     info_matrix = next(self.device.on_tensor(info_matrix))
+    #     labels = torch.argmax(targets, -1)
+    #     constraint_matrix = self.get_optim_matrix(labels, info_matrix)
+    #
+    #     # losses_dict = {"loss_ce": super().loss_compute(pred, targets),
+    #     #                "loss_im": super().loss_compute(pred, constraint_matrix)}
+    #     # loss = sum([ls.mean() for ls in losses_dict.values()])
+    #
+    #     # global_logger.info(f"-=-AB Test-=-:{cons_alpha}")
+    #     return ((1-cons_alpha)*super().loss_compute(pred, targets) +
+    #             cons_alpha*super().loss_compute(pred, constraint_matrix))
+
     @timeit
     def loss_compute(self, pred: torch.Tensor, targets: torch.Tensor, **kwargs) -> torch.Tensor:
         # # TODO: Ablation
@@ -307,44 +335,13 @@ class DASWrapper(VWrapper):
 
         assert "info_matrix" in kwargs.keys(), self.ERROR_MESS8
         assert "cons_alpha" in kwargs.keys(), self.ERROR_MESS9
-        info_matrix = kwargs["info_matrix"]
+        info_matrix = self.sync_tensor(kwargs["info_matrix"])
         cons_alpha = kwargs["cons_alpha"]
 
         # debug: to del local
-        self_matrix = self.get_logits_matrix()
-        mask = ~info_matrix.bool()
+        self_matrix = self.to_matrix(pred, targets)
+        mask = self.sync_tensor(~info_matrix.bool())
         info_matrix = mask * self_matrix + info_matrix
-
-        # debug: to del global
-        info_matrix = next(self.device.on_tensor(info_matrix))
-        labels = torch.argmax(targets, -1)
-        constraint_matrix = self.get_optim_matrix(labels, info_matrix)
-
-        # losses_dict = {"loss_ce": super().loss_compute(pred, targets),
-        #                "loss_im": super().loss_compute(pred, constraint_matrix)}
-        # loss = sum([ls.mean() for ls in losses_dict.values()])
-
-        # global_logger.info(f"-=-AB Test-=-:{cons_alpha}")
-        return ((1-cons_alpha)*super().loss_compute(pred, targets) +
-                cons_alpha*super().loss_compute(pred, constraint_matrix))
-
-    def loss_compute_plus(self, pred: torch.Tensor, targets: torch.Tensor, **kwargs) -> torch.Tensor:
-        # # TODO: Ablation
-        # return super().loss_compute(pred, targets, **kwargs)
-
-        assert "info_matrix" in kwargs.keys(), self.ERROR_MESS8
-        assert "cons_alpha" in kwargs.keys(), self.ERROR_MESS9
-        info_matrix = kwargs["info_matrix"]
-        cons_alpha = kwargs["cons_alpha"]
-
-        # debug: to del local
-        labels = torch.argmax(targets, -1)
-        self_matrix = self.to_matrix(pred, labels)
-        mask = ~info_matrix.bool()
-        info_matrix = mask * self_matrix + info_matrix
-
-        # debug: to del global
-        info_matrix = next(self.device.on_tensor(info_matrix))
 
         return ((1-cons_alpha)*super().loss_compute(pred, targets) +
                 cons_alpha*super().loss_compute(self_matrix, info_matrix))
@@ -396,31 +393,31 @@ class DASWrapper(VWrapper):
         target = target.unsqueeze(1).expand(target.size()[0], info_matrix.size()[0])
         return torch.gather(input=info_matrix, dim=0, index=target)
 
-    def to_matrix(self, logits, targets) -> torch.Tensor:
+    def to_matrix(self, logits: torch.Tensor, targets: torch.Tensor) -> torch.Tensor:
         '''
         :param logits: 未归一化的模型输出
         :param targets: one-hot标签
         :return:
         '''
         # logits = logits.cpu()
-        import pdb
-        pdb.set_trace()
+        # import pdb
+        # pdb.set_trace()
 
         label_dtype = torch.int64
-        sum_logits = torch.zeros(args.num_classes, args.num_classes, dtype=logits.dtype)
-        sum_labels = torch.zeros(args.num_classes, dtype=label_dtype)
+        sum_logits = self.sync_tensor(torch.zeros(args.num_classes, args.num_classes, dtype=logits.dtype))
+        sum_labels = self.sync_tensor(torch.zeros(args.num_classes, dtype=label_dtype))
 
         labels = torch.argmax(targets, -1)
         _labels, _cnt = torch.unique(labels, return_counts=True)
-        labels_cnt = torch.zeros(args.num_classes, dtype=label_dtype) \
+        labels_cnt = self.sync_tensor(torch.zeros(args.num_classes, dtype=label_dtype)) \
             .scatter_(dim=0, index=_labels, src=_cnt)
 
         logits = torch.nn.functional.softmax(logits, dim=1)
 
         # 扩展的标签索引 [0, 1] >> [[0, 0], [1, 1]]
-        logits_index = labels.unsqueeze(1).expand(logits.size())
+        logits_index = self.sync_tensor(labels.unsqueeze(1).expand(logits.size()))
         # 自然数索引
-        labels_index = torch.tensor(list(range(args.num_classes)))
+        labels_index = self.sync_tensor(torch.tensor(list(range(args.num_classes))))
 
         sum_logits.scatter_add_(dim=0, index=logits_index, src=logits)
         sum_labels.scatter_add_(dim=0, index=labels_index, src=labels_cnt)
@@ -432,7 +429,7 @@ class DASWrapper(VWrapper):
         sum_logits = torch.where(sum_logits == 0, one, sum_logits)
         avg_logits = sum_logits / div_labels
         avg_logits = torch.where(avg_logits == torch.inf, zero, avg_logits)
-        return avg_logits
+        return torch.nn.functional.softmax(avg_logits, dim=1)
 
 
 class ScaffoldWrapper(VWrapper):

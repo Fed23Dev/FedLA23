@@ -129,12 +129,10 @@ class FedDASMaster(FLMaster):
 
         self.curt_matrix = self.aggregation_matrix()
 
-        import pdb
-        pdb.set_trace()
-
-        # why div row_sums
-        row_sums = self.curt_matrix.sum(dim=1, keepdim=True)
-        self.curt_matrix = self.curt_matrix / row_sums
+        # # why div row_sums
+        # answer: normalization
+        # row_sums = self.curt_matrix.sum(dim=1, keepdim=True)
+        # self.curt_matrix = self.curt_matrix / row_sums
 
         if self.start_matrix is None:
             self.start_matrix = deepcopy(self.curt_matrix)

@@ -5,8 +5,15 @@ from sklearn.cluster import DBSCAN, OPTICS, AgglomerativeClustering, BisectingKM
 from utils.Vlogger import VLogger
 
 
-def to_matrix(logits, targets) -> torch.Tensor:
+def to_matrix(logits: torch.Tensor, targets: torch.Tensor) -> torch.Tensor:
+    '''
+    :param logits: 未归一化的模型输出
+    :param targets: one-hot标签
+    :return:
+    '''
     # logits = logits.cpu()
+    # import pdb
+    # pdb.set_trace()
 
     label_dtype = torch.int64
     sum_logits = torch.zeros(3, 3, dtype=logits.dtype)
@@ -14,8 +21,8 @@ def to_matrix(logits, targets) -> torch.Tensor:
 
     labels = torch.argmax(targets, -1)
     _labels, _cnt = torch.unique(labels, return_counts=True)
-    labels_cnt = torch.zeros(3, dtype=label_dtype).\
-        scatter_(dim=0, index=_labels, src=_cnt)
+    labels_cnt = torch.zeros(3, dtype=label_dtype) \
+        .scatter_(dim=0, index=_labels, src=_cnt)
 
     logits = torch.nn.functional.softmax(logits, dim=1)
 
@@ -106,5 +113,5 @@ if __name__ == "__main__":
     t1 = torch.tensor([[1., 2., 3.], [2., 2., 2.], [1., 3., 5.]])
     t2 = torch.tensor([[1, 0, 0], [0, 1, 0], [1, 0, 0]])
     print(to_matrix(t1, t2))
-    print(torch.nn.functional.softmax(t1, dim=1))
+    print(torch.nn.functional.softmax(to_matrix(t1, t2), dim=1))
     print("----------------------")
