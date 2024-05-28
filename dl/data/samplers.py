@@ -19,7 +19,7 @@ def fetch_shards(dataset_type: VDataSet, num_slices: int) -> int:
         return 2 * num_slices
     elif dataset_type == VDataSet.CIFAR100:
         return 2000
-    elif dataset_type == VDataSet.FashionMNIST:
+    elif dataset_type == VDataSet.FMNIST:
         return 2
     elif dataset_type == VDataSet.TinyImageNet:
         return 4000
