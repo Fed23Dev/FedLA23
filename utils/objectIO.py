@@ -98,6 +98,9 @@ def seqs2csv(fs: List[str], out: str, cols: List[str] = None):
         df[col] = seq
     df.to_csv(out)
 
+def check_file_exists(file_path: str) -> bool:
+    return os.path.isfile(file_path)
+
 
 if __name__ == '__main__':
     print("Nothing.")

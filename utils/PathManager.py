@@ -3,6 +3,7 @@ import time
 from enum import Enum, unique
 from typing import Any
 
+from env.support_config import VNonIID
 from utils.objectIO import pickle_mkdir_save, pickle_load, touch_file, create_path
 
 # 待实现优化
@@ -24,6 +25,7 @@ class FileType(Enum):
     LOG_TYPE = '.log'
     EXP_TYPE = '.txt'
     SEQ_TYPE = '.seq'
+    PARTITION_TYPE = '.part'
     CHECKPOINT_TYPE = '.snap'
 
 
@@ -56,9 +58,10 @@ class PathManager:
     ERROR_MESS1 = "Given directory doesn't exists."
     ERROR_MESS2 = "Given key doesn't exists."
 
-    def __init__(self, model_path: str, dataset_path: str):
+    def __init__(self, model_path: str, dataset_path: str, non_iid_path: str):
         self.model_path: str = model_path
         self.dataset_path: str = dataset_path
+        self.non_iid_path: str = non_iid_path
 
         self.image_path = None
         self.mile_path = None
@@ -130,5 +133,11 @@ class PathManager:
 
     def new_seq(self, name: str = None) -> (str, int):
         new_file = os.path.join(self.mile_path, file_name(FileType.SEQ_TYPE, name))
+        file_id = self.sync_path(new_file)
+        return new_file, file_id
+
+    def new_non_iid(self, dataset_name: str, num_clients: int, part_name: str) -> (str, int):
+        name = f"{dataset_name}_{num_clients}_{part_name}"
+        new_file = os.path.join(self.non_iid_path, file_name(FileType.PARTITION_TYPE, name, ext_time=False))
         file_id = self.sync_path(new_file)
         return new_file, file_id

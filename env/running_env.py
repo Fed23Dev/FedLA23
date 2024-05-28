@@ -18,6 +18,7 @@ args.activate()
 milestone_base = r'res/milestone'
 image_base = r'res/images'
 exp_base = r'res/exp'
+non_iid_base = r'res/non_iid'
 log_base = r'logs'
 
 if args.model == VModel.VGG16:
@@ -42,7 +43,7 @@ else:
 ###
 
 # Path
-global_file_repo = PathManager(model_path, datasets_base)
+global_file_repo = PathManager(model_path, datasets_base, non_iid_base)
 global_file_repo.derive_path(exp_base, image_base, milestone_base, log_base)
 
 

@@ -6,12 +6,28 @@ import math
 import functools
 
 from dl.data.datasets import get_data
-from env.running_env import global_logger
-from env.support_config import VDataSet
+from env.running_env import global_logger, global_file_repo
+from env.support_config import VDataSet, VNonIID
 from utils.TimeCost import timeit
+from utils.objectIO import check_file_exists, pickle_load, pickle_mkdir_save
 
+# todo
 dir_alpha = 0.3
 
+def fetch_shards(dataset_type: VDataSet, num_slices: int) -> int:
+    if dataset_type == VDataSet.CIFAR10:
+        return 2 * num_slices
+    elif dataset_type == VDataSet.CIFAR100:
+        return 2000
+    elif dataset_type == VDataSet.FashionMNIST:
+        return 2
+    elif dataset_type == VDataSet.TinyImageNet:
+        return 4000
+    elif dataset_type == VDataSet.EMNIST:
+        return 124
+    else:
+        global_logger.error("Not supported dataset type.")
+        return 0
 
 def iid(targets, num_clients: int) -> dict:
     client_dict = dict()
@@ -26,13 +42,32 @@ def iid(targets, num_clients: int) -> dict:
         client_dict[client_index] = data_indices[start:end].copy()
     return client_dict
 
+def get_partition_name(part_type: str, num_shards: int, alpha: float) -> str:
+    if part_type == VNonIID.Hetero.value:
+        assert alpha is not None, "If hetero, alpha must be not None."
+        return f"hetero{alpha}"
+    elif part_type == VNonIID.Shards.value:
+        assert num_shards is not None, "If shards, num_shards must be not None."
+        return f"shards{num_shards}"
+    else:
+        global_logger.error("Not supported partition type, using iid.")
+        return f"iid"
 
-def dataset_user_indices(dataset_type: VDataSet, num_slices, non_iid: str, seed: int = 2022):
+def dataset_user_indices(dataset_type: VDataSet, num_slices, non_iid: str, seed: int = 2022) -> dict:
     dataset = get_data(dataset_type, data_type="train")
     if non_iid == 'iid':
         assert isinstance(dataset_type, VDataSet), "Not supported dataset type."
         client_dict = iid(dataset.targets, num_slices)
     else:
+        num_shards = fetch_shards(dataset_type, num_slices)
+        part_cache = global_file_repo.new_non_iid(dataset_type.value, num_slices,
+                                                  get_partition_name(non_iid,
+                                                                     num_shards,
+                                                                     dir_alpha))[0]
+        if check_file_exists(part_cache):
+            global_logger.info("Using non-iid partition cache...")
+            return pickle_load(part_cache)
+
         if dataset_type == VDataSet.CIFAR10:
             if non_iid == 'hetero':
                 client_dict = CIFAR10Partitioner(dataset.targets, num_slices,
@@ -41,7 +76,7 @@ def dataset_user_indices(dataset_type: VDataSet, num_slices, non_iid: str, seed:
             else:
                 client_dict = CIFAR10Partitioner(dataset.targets, num_slices,
                                                  balance=None, partition="shards",
-                                                 num_shards=2 * num_slices, seed=seed).client_dict
+                                                 num_shards=num_shards, seed=seed).client_dict
         elif dataset_type == VDataSet.CIFAR100:
             if non_iid == 'hetero':
                 client_dict = CIFAR100Partitioner(dataset.targets, num_slices,
@@ -50,7 +85,7 @@ def dataset_user_indices(dataset_type: VDataSet, num_slices, non_iid: str, seed:
             else:
                 client_dict = CIFAR100Partitioner(dataset.targets, num_slices,
                                                   balance=None, partition="shards",
-                                                  num_shards=2000, seed=seed).client_dict
+                                                  num_shards=num_shards, seed=seed).client_dict
         elif dataset_type == VDataSet.FMNIST:
             if non_iid == 'hetero':
                 client_dict = FMNISTPartitioner(dataset.targets, num_slices,
@@ -59,26 +94,30 @@ def dataset_user_indices(dataset_type: VDataSet, num_slices, non_iid: str, seed:
             else:
                 client_dict = FMNISTPartitioner(dataset.targets, num_slices,
                                                 partition="noniid-#label",
-                                                major_classes_num=2).client_dict
+                                                major_classes_num=num_shards).client_dict
         elif dataset_type == VDataSet.TinyImageNet:
             if non_iid == 'hetero':
                 client_dict = _hetero_non_iid(dataset.targets, 200,
                                               num_slices, dir_alpha, seed=seed)
             else:
-                client_dict = _shards_non_iid(dataset.targets, 4000,
+                client_dict = _shards_non_iid(dataset.targets, num_shards,
                                               num_slices, seed, 200)
         elif dataset_type == VDataSet.EMNIST:
             if non_iid == 'hetero':
                 client_dict = _hetero_non_iid(dataset.targets, 62,
                                               num_slices, dir_alpha, seed=seed)
             else:
-                client_dict = _shards_non_iid(dataset.targets, 124,
+                client_dict = _shards_non_iid(dataset.targets, num_shards,
                                               num_slices, seed, 62)
         else:
             global_logger.error("Not supported dataset type.")
             client_dict = None
             exit(1)
+        global_logger.info("Saving non-iid partition cache...")
+        pickle_mkdir_save(client_dict, part_cache)
     return client_dict
+
+
 
 
 # dict {int: ndarray[dtype(int64)]}

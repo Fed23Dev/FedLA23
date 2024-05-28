@@ -4,12 +4,11 @@ from enum import Enum, unique
 # dataset type
 @unique
 class VDataSet(Enum):
-    Init = 0
-    CIFAR10 = 1
-    CIFAR100 = 2
-    FMNIST = 3
-    TinyImageNet = 4
-    EMNIST = 5
+    CIFAR10 = "cifar10"
+    CIFAR100 = "cifar100"
+    FMNIST = "fmnist"
+    TinyImageNet = "tinyimagenet"
+    EMNIST = "emnist"
 
 
 # Model Type
@@ -66,3 +65,9 @@ class VState(Enum):
     CriticalFL = 6
     IFCA = 7
     Single = 8
+
+@unique
+class VNonIID(Enum):
+    IID = "iid"
+    Hetero = "hetero"
+    Shards = "shards"
