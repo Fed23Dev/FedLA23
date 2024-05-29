@@ -105,7 +105,7 @@ class SingleCell:
         for model in models:
             self.sync_model(model)
             # self.wrapper.model = deepcopy(model)
-            _, _, loss = self.wrapper.step_run(batch_limit=10, train=False)
+            _, _, loss = self.wrapper.step_run(batch_limit=args.test_batch_limit, train=False)
             if loss < min_loss:
                 min_loss = loss
                 optim_model = model
