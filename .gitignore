@@ -1,11 +1,11 @@
 .idea
 
-res
+res/*
+!res/non_iid
 logs/*
 !logs/exps
 !logs/super
 
 !.gitkeep
-
 DEV.md
 DEV.md.old
