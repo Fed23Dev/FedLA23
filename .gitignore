@@ -1,7 +1,6 @@
 .idea
 
-res/*
-!res/non_iid
+res
 logs/*
 !logs/exps
 !logs/super
