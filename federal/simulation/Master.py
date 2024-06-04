@@ -67,7 +67,7 @@ class FedDASMaster(FLMaster):
     def __init__(self, workers: int, activists: int, local_epoch: int,
                  loader: tdata.dataloader, workers_loaders: dict,
                  num_classes: int, clusters: int, drag: int,
-                 cons_alpha: float, cluster_step: int = 1):
+                 cons_alpha: float, cluster_step: int = 1, min_cluster: int = 3):
 
         master_cell = SingleCell(loader, Wrapper=DASWrapper)
         super().__init__(workers, activists, local_epoch, master_cell)
@@ -88,6 +88,7 @@ class FedDASMaster(FLMaster):
 
         self.drag = drag
         self.cluster_step = cluster_step
+        self.min_cluster = min_cluster
         self.curt_c_step = 0
 
         self.fix = clusters
@@ -112,6 +113,8 @@ class FedDASMaster(FLMaster):
         self.curt_c_step += 1
         if self.curt_c_step % self.cluster_step == 0:
             self.num_clusters = self.num_clusters // 2 if self.num_clusters // 2 > 2 else 2
+        if self.num_clusters < self.min_cluster:
+            return self.min_cluster
         return self.num_clusters
 
         # self.delta_critical_period()

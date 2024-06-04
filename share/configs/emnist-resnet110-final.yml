@@ -3,8 +3,8 @@ exp_name: emnist-resnet110
 
 # checkpoint config
 model: resnet110
-alg: fedavg
-gpu_ids: [0, 1]
+alg: fedprox
+gpu_ids: [0]
 # pre_train: True
 
 # dataset config
@@ -18,7 +18,7 @@ learning_rate: 0.01
 
 # scheduler config
 scheduler: warmup_cos_lr
-warm_steps: 20
+warm_steps: 5
 min_lr: 0.0
 
 # federal config
@@ -26,7 +26,7 @@ federal: True
 non_iid: hetero
 workers: 62
 active_workers: 6
-federal_round: 80
+federal_round: 30
 
 local_epoch: 5
 test_batch_limit: 5

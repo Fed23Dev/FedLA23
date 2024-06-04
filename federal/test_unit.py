@@ -32,7 +32,7 @@ def test_feddas():
     master_node = FedDASMaster(workers=args.workers, activists=args.active_workers, local_epoch=args.local_epoch,
                                loader=loader, workers_loaders=loaders, num_classes=args.num_classes,
                                clusters=args.clusters, drag=args.drag, cons_alpha=args.cons_alpha,
-                               cluster_step=args.step_cluster)
+                               cluster_step=args.step_cluster, min_cluster = args.min_cluster)
     master_node.union_run(args.federal_round)
     master_node.cell.exit_proc(one_key=f'{args.exp_name}-test_acc')
 

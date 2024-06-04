@@ -54,6 +54,7 @@ DEFAULT_ARGS = {
     "drag": 0.5,
     "threshold": 0.2,
     "step_cluster": 1,
+    "min_cluster": 3,
     "cons_alpha": 0.3,
 
     "mu": 0.7,

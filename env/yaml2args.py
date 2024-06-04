@@ -153,6 +153,7 @@ class ArgRepo:
         self.drag = None
         self.threshold = None
         self.step_cluster = None
+        self.min_cluster = None
         self.cons_alpha = None
 
         self.mu = None

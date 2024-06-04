@@ -14,6 +14,7 @@ from utils.objectIO import check_file_exists, pickle_load, pickle_mkdir_save
 # todo
 dir_alpha = 0.3
 
+
 def fetch_shards(dataset_type: VDataSet, num_slices: int) -> int:
     if dataset_type == VDataSet.CIFAR10:
         return 2 * num_slices
@@ -29,6 +30,7 @@ def fetch_shards(dataset_type: VDataSet, num_slices: int) -> int:
         global_logger.error("Not supported dataset type.")
         return 0
 
+
 def iid(targets, num_clients: int) -> dict:
     client_dict = dict()
     total_data_amount = len(targets)
@@ -42,6 +44,7 @@ def iid(targets, num_clients: int) -> dict:
         client_dict[client_index] = data_indices[start:end].copy()
     return client_dict
 
+
 def get_partition_name(part_type: str, num_shards: int, alpha: float) -> str:
     if part_type == VNonIID.Hetero.value:
         assert alpha is not None, "If hetero, alpha must be not None."
@@ -52,6 +55,7 @@ def get_partition_name(part_type: str, num_shards: int, alpha: float) -> str:
     else:
         global_logger.error("Not supported partition type, using iid.")
         return f"iid"
+
 
 def dataset_user_indices(dataset_type: VDataSet, num_slices, non_iid: str, seed: int = 2022) -> dict:
     dataset = get_data(dataset_type, data_type="train")
@@ -115,9 +119,8 @@ def dataset_user_indices(dataset_type: VDataSet, num_slices, non_iid: str, seed:
             exit(1)
         global_logger.info("Saving non-iid partition cache...")
         pickle_mkdir_save(client_dict, part_cache)
+        # pickle_mkdir_save(dataset.targets, f"{dataset_type.value}.targets")
     return client_dict
-
-
 
 
 # dict {int: ndarray[dtype(int64)]}
