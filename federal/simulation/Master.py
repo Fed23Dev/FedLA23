@@ -120,7 +120,7 @@ class FedDASMaster(FLMaster):
         # self.delta_critical_period()
         # return self.fix
 
-    @timeit
+    # @timeit
     def sync_matrix(self):
         self.prev_workers_matrix = deepcopy(self.workers_matrix)
         self.prev_matrix = deepcopy(self.curt_matrix)
@@ -232,7 +232,7 @@ class FedDASMaster(FLMaster):
         global_logger.info(f"======Round{self.curt_round + 1} >> Select Index:{self.curt_selected}======")
         global_container.flash('selected_workers', deepcopy(self.curt_selected))
 
-    @timeit
+    # @timeit
     def diff_cluster_lea_case(self):
         # 计算每个唯一元素的出现次数
         unique_elements, counts = np.unique(self.clusters_indices, return_counts=True)
@@ -362,7 +362,7 @@ class MoonMaster(FLMaster):
 class CriticalFLMaster(FLMaster):
     def __init__(self, workers: int, activists: int, local_epoch: int,
                  loader: tdata.dataloader, workers_loaders: dict,
-                 gradient_fraction: float = 0.5, most_clients: int = 32,
+                 gradient_fraction: float = 0.5, most_clients: int = 20,
                  least_clients: int = 2, threshold: float = 0.01):
         master_cell = SingleCell(loader, Wrapper=CFLWrapper)
         super().__init__(workers, activists, local_epoch, master_cell)

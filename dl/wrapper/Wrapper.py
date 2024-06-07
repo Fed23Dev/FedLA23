@@ -8,11 +8,11 @@ import torch.optim as optim
 import torch.utils.data as tdata
 from thop import profile
 from torch.cuda.amp import GradScaler
-from torch.nn.functional import binary_cross_entropy_with_logits
+from torch.nn.functional import cross_entropy
+import torch.nn.functional as F
 from torch.optim import lr_scheduler
 from torch.optim.lr_scheduler import ReduceLROnPlateau
 from yacs.config import CfgNode
-import torch.nn.functional as F
 
 from dl.compress.DKD import DKD
 from dl.wrapper import DeviceManager
@@ -109,7 +109,8 @@ class VWrapper:
             assert False, self.ERROR_MESS3
 
         if self.loss_type == VLossFunc.Cross_Entropy:
-            self.loss_func = binary_cross_entropy_with_logits
+            # self.loss_func = binary_cross_entropy_with_logits
+            self.loss_func = cross_entropy
         else:
             assert False, self.ERROR_MESS4
 
@@ -300,7 +301,7 @@ class DASWrapper(VWrapper):
         self.kd_curt_epoch = 0
         self.distillers = DKD(cfg)
 
-    # @timeit
+    # # @timeit
     # def loss_compute(self, pred: torch.Tensor, targets: torch.Tensor, **kwargs) -> torch.Tensor:
     #     # # TODO: Ablation
     #     # return super().loss_compute(pred, targets, **kwargs)
@@ -328,7 +329,7 @@ class DASWrapper(VWrapper):
     #     return ((1-cons_alpha)*super().loss_compute(pred, targets) +
     #             cons_alpha*super().loss_compute(pred, constraint_matrix))
 
-    @timeit
+    # @timeit
     def loss_compute(self, pred: torch.Tensor, targets: torch.Tensor, **kwargs) -> torch.Tensor:
         # # TODO: Ablation
         # return super().loss_compute(pred, targets, **kwargs)
@@ -343,10 +344,12 @@ class DASWrapper(VWrapper):
         mask = self.sync_tensor(~info_matrix.bool())
         info_matrix = mask * self_matrix + info_matrix
 
-        return ((1-cons_alpha)*super().loss_compute(pred, targets) +
-                cons_alpha*super().loss_compute(self_matrix, info_matrix))
+        # torch.norm(self_matrix - info_matrix, p=2)
+        # super().loss_compute(self_matrix, info_matrix))
+        return ((1 - cons_alpha) * super().loss_compute(pred, targets) +
+                cons_alpha * super().loss_compute(self_matrix, info_matrix))
 
-    @timeit
+    # @timeit
     # Tensor Size: classes * classes
     def get_logits_matrix(self, batch_limit: int = args.logits_batch_limit) -> torch.Tensor:
         label_dtype = torch.int64
@@ -387,7 +390,7 @@ class DASWrapper(VWrapper):
         avg_logits = torch.where(avg_logits == torch.inf, zero, avg_logits)
         return avg_logits
 
-    @timeit
+    # @timeit
     def get_optim_matrix(self, target: torch.Tensor,
                          info_matrix: torch.Tensor) -> torch.Tensor:
         target = target.unsqueeze(1).expand(target.size()[0], info_matrix.size()[0])
