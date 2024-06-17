@@ -436,7 +436,7 @@ class CriticalFLMaster(FLMaster):
 class IFCAMaster(FLMaster):
     def __init__(self, workers: int, activists: int, local_epoch: int,
                  loader: tdata.dataloader, workers_loaders: dict,
-                 groups: int = 6):
+                 groups: int = 15):
         master_cell = SingleCell(loader, Wrapper=IFCAWrapper)
         super().__init__(workers, activists, local_epoch, master_cell)
         workers_cells = [SingleCell(loaderr, Wrapper=IFCAWrapper) for loaderr in list(workers_loaders.values())]

@@ -3,7 +3,7 @@ exp_name: emnist-resnet110
 
 # checkpoint config
 model: resnet110
-alg: feddas
+alg: fedavg
 gpu_ids: [0]
 # pre_train: True
 
@@ -23,13 +23,13 @@ min_lr: 0.0
 
 # federal config
 federal: True
-non_iid: hetero
+non_iid: shards
 workers: 62
 active_workers: 6
 federal_round: 30
 
 local_epoch: 5
-test_batch_limit: 5
+test_batch_limit: 20
 
 clusters: 20
 step_cluster: 3

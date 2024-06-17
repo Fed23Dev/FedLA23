@@ -4,6 +4,7 @@ import numpy as np
 from fedlab.utils.dataset.partition import CIFAR10Partitioner, CIFAR100Partitioner, FMNISTPartitioner
 import math
 import functools
+from sklearn.utils import shuffle
 
 from dl.data.datasets import get_data
 from env.running_env import global_logger, global_file_repo
@@ -12,7 +13,7 @@ from utils.TimeCost import timeit
 from utils.objectIO import check_file_exists, pickle_load, pickle_mkdir_save
 
 # todo
-dir_alpha = 0.3
+dir_alpha = 0.2
 
 
 def fetch_shards(dataset_type: VDataSet, num_slices: int) -> int:
@@ -136,35 +137,36 @@ def _shards_non_iid(targets: list, nums_shards: int, num_clients: int,
 # from Wang Huan
 # [[1,2,3,411,534..],[]]
 def _hetero_non_iid(targets: list, num_classes: int, num_clients: int, non_iid_alpha: float, seed=None):
-    all_class_index = []
-    for i in range(num_classes):
-        curt_idx = []
-        for idx, label in enumerate(targets):
-            if label == i:
-                curt_idx.append(idx)
-        all_class_index.append(curt_idx)
-
-    index2label = []  # 每一个样本和对应的label
-    for label, label_index in enumerate(all_class_index):
-        for idx in label_index:
-            index2label.append((idx, label))
-
-    batch_indices = _build_non_iid_by_dirichlet(
-        seed=seed,
-        indices2targets=index2label,
-        non_iid_alpha=non_iid_alpha,
-        num_classes=num_classes,
-        num_indices=len(index2label),
-        n_workers=num_clients
-    )
-    # functools定义高阶函数或操作
-    index_dirichlet = functools.reduce(lambda x, y: x + y, batch_indices)
-    client2index = _partition_balance(index_dirichlet, num_clients)
-
-    client_dict = dict()
-    for i in range(num_clients):
-        client_dict[i] = client2index[i]
-    return client_dict
+    # all_class_index = []
+    # for i in range(num_classes):
+    #     curt_idx = []
+    #     for idx, label in enumerate(targets):
+    #         if label == i:
+    #             curt_idx.append(idx)
+    #     all_class_index.append(curt_idx)
+    #
+    # index2label = []  # 每一个样本和对应的label
+    # for label, label_index in enumerate(all_class_index):
+    #     for idx in label_index:
+    #         index2label.append((idx, label))
+    #
+    # batch_indices = _build_non_iid_by_dirichlet(
+    #     seed=seed,
+    #     indices2targets=index2label,
+    #     non_iid_alpha=non_iid_alpha,
+    #     num_classes=num_classes,
+    #     num_indices=len(index2label),
+    #     n_workers=num_clients
+    # )
+    # # functools定义高阶函数或操作
+    # index_dirichlet = functools.reduce(lambda x, y: x + y, batch_indices)
+    # client2index = _partition_balance(index_dirichlet, num_clients)
+    #
+    # client_dict = dict()
+    # for i in range(num_clients):
+    #     client_dict[i] = client2index[i]
+    # return client_dict
+    return _hetero_non_iid_la(targets, num_classes, num_clients, non_iid_alpha, seed)
 
 
 # from Wang Huan
@@ -184,6 +186,31 @@ def _partition_balance(idxs, num_split: int):
             i += num_per_part
 
     return parts
+
+
+def _hetero_non_iid_la(targets: list, num_classes: int, num_clients: int, non_iid_alpha: float, seed=None):
+    if seed is not None:
+        np.random.seed(seed)
+
+    targets = np.array(targets)
+    client_data = {i: [] for i in range(num_clients)}
+
+    # 对每个类别进行处理
+    for c in range(num_classes):
+        idx = np.where(targets == c)[0]
+        idx = shuffle(idx, random_state=seed)
+
+        # 使用Dirichlet分布来生成分布
+        proportions = np.random.dirichlet(np.repeat(non_iid_alpha, num_clients))
+
+        # 按照生成的比例将数据分配给每个客户端
+        proportions = (np.cumsum(proportions) * len(idx)).astype(int)[:-1]
+        client_idx_split = np.split(idx, proportions)
+
+        for client_idx, data in enumerate(client_idx_split):
+            client_data[client_idx] += data.tolist()
+
+    return client_data
 
 
 # from Wang Huan
