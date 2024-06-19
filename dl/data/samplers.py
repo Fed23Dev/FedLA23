@@ -26,7 +26,7 @@ def fetch_shards(dataset_type: VDataSet, num_slices: int) -> int:
     elif dataset_type == VDataSet.TinyImageNet:
         return 4000
     elif dataset_type == VDataSet.EMNIST:
-        return 124
+        return 496
     else:
         global_logger.error("Not supported dataset type.")
         return 0
@@ -129,9 +129,10 @@ def _shards_non_iid(targets: list, nums_shards: int, num_clients: int,
                     seed: int, num_classes: int) -> dict:
     assert nums_shards % num_classes == 0, "num_shards must be times of num_classes."
     assert nums_shards % num_clients == 0, "num_shards must be times of num_clients."
-    groups = _distribute_indices(targets, num_groups=nums_shards)
-    client_dict = _random_group_pairs(groups, n=nums_shards // num_clients, seed=seed)
-    return client_dict
+    # groups = _distribute_indices(targets, num_groups=nums_shards)
+    # client_dict = _random_group_pairs(groups, n=nums_shards // num_clients, seed=seed)
+    # return client_dict
+    return _shards_non_iid_la(targets, nums_shards, num_clients, seed, num_classes)
 
 
 # from Wang Huan
@@ -212,6 +213,47 @@ def _hetero_non_iid_la(targets: list, num_classes: int, num_clients: int, non_ii
 
     return client_data
 
+
+def _shards_non_iid_la(targets: list, nums_shards: int, num_clients: int, seed: int, num_classes: int) -> dict:
+    """
+    将目标数据按碎片（shards）方式进行非独立同分布（non-IID）划分。
+
+    Args:
+        targets (list): 数据的目标标签列表。
+        nums_shards (int): 将数据集划分成的碎片数。
+        num_clients (int): 客户端数量。
+        seed (int): 随机种子。
+        num_classes (int): 数据集分类数。
+
+    Returns:
+        client_data (dict): 每个客户端的数据索引字典，键为客户端ID，值为数据索引列表。
+    """
+    np.random.seed(seed)
+
+    targets = np.array(targets)
+    indices = np.arange(len(targets))
+
+    # 每个类别分成的碎片数
+    shards_per_class = nums_shards // num_classes
+    # 每个客户端分到的碎片数
+    shards_per_client = nums_shards // num_clients
+
+    class_indices = [indices[targets == i] for i in range(num_classes)]
+
+    shards = []
+    for class_idx in class_indices:
+        class_idx = shuffle(class_idx, random_state=seed)
+        shard_size = len(class_idx) // shards_per_class
+        shards += [class_idx[i * shard_size: (i + 1) * shard_size] for i in range(shards_per_class)]
+
+    shards = shuffle(shards, random_state=seed)
+    client_data = {i: [] for i in range(num_clients)}
+
+    for i in range(num_clients):
+        client_shards = shards[i * shards_per_client: (i + 1) * shards_per_client]
+        client_data[i] = np.concatenate(client_shards).tolist()
+
+    return client_data
 
 # from Wang Huan
 def _build_non_iid_by_dirichlet(seed, indices2targets, non_iid_alpha, num_classes, num_indices, n_workers):
