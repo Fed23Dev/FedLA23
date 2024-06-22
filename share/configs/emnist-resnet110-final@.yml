@@ -3,7 +3,7 @@ exp_name: emnist-resnet110
 
 # checkpoint config
 model: resnet110
-alg: fedavg
+alg: feddas
 gpu_ids: [0]
 # pre_train: True
 
@@ -32,5 +32,5 @@ local_epoch: 1
 batch_limit: 100
 test_batch_limit: 30
 
-clusters: 20
-step_cluster: 3
+clusters: 31
+step_cluster: 10
