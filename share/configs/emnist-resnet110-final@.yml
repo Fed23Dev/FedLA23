@@ -32,5 +32,5 @@ local_epoch: 1
 batch_limit: 100
 test_batch_limit: 30
 
-clusters: 31
-step_cluster: 10
+clusters: 15
+step_cluster: 25
