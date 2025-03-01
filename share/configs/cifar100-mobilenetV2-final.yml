@@ -16,15 +16,15 @@ learning_rate: 0.05
 
 # scheduler config
 scheduler: warmup_cos_lr
-warm_steps: 50
+warm_steps: 20
 min_lr: 0.0
 
 # federal config
 non_iid: hetero
 workers: 100
 active_workers: 10
-federal_round: 800
+federal_round: 2000
 
 ## center train
-local_epoch: 5
+local_epoch: 2
 test_batch_limit: 5
