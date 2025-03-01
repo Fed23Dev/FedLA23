@@ -4,29 +4,29 @@ exp_name: tinyimagenet-shufflenet
 # checkpoint config
 model: shufflenetV2
 alg: fedavg
-gpu_ids: [0, 1]
+gpu_ids: [0]
 # pre_train: True
 
 # dataset config
 dataset: tinyimagenet
-batch_size: 64
+batch_size: 128
 
 # optimizer config
 # optim: sgd
-optim: rmsprop
+optim: sgd
 learning_rate: 0.01
 
 # scheduler config
-scheduler: step_lr
-warm_steps: 20
+scheduler: warmup_cos_lr
+warm_steps: 200
 min_lr: 0.0
 
 # federal config
 federal: True
 non_iid: hetero
-workers: 5
-active_workers: 3
-federal_round: 100
+workers: 10
+active_workers: 5
+federal_round: 1000
 
-local_epoch: 10
+local_epoch: 2
 test_batch_limit: 5

@@ -23,6 +23,7 @@ DEFAULT_ARGS = {
     "use_gpu": True,
     "gpu_ids": [0],
     "pre_train": False,
+    "dir_alpha": 0.3,
 
     "learning_rate": 0.1,
     "min_lr": 1e-9,

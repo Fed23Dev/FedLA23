@@ -13,7 +13,7 @@ from utils.TimeCost import timeit
 from utils.objectIO import check_file_exists, pickle_load, pickle_mkdir_save
 
 # todo
-dir_alpha = 0.2
+# dir_alpha = 0.9
 
 
 def fetch_shards(dataset_type: VDataSet, num_slices: int) -> int:
@@ -58,7 +58,7 @@ def get_partition_name(part_type: str, num_shards: int, alpha: float) -> str:
         return f"iid"
 
 
-def dataset_user_indices(dataset_type: VDataSet, num_slices, non_iid: str, seed: int = 2022) -> dict:
+def dataset_user_indices(dataset_type: VDataSet, num_slices, non_iid: str, dir_alpha: float, seed: int = 2022) -> dict:
     dataset = get_data(dataset_type, data_type="train")
     if non_iid == 'iid':
         assert isinstance(dataset_type, VDataSet), "Not supported dataset type."
