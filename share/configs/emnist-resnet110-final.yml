@@ -3,7 +3,7 @@ exp_name: emnist-resnet110
 
 # checkpoint config
 model: resnet110
-alg: fedavg
+alg: feddas
 gpu_ids: [0]
 # pre_train: True
 

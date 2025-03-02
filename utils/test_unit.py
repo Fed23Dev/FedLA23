@@ -1,3 +1,4 @@
+import time
 from random import random
 
 import torch
@@ -6,6 +7,8 @@ from utils.Cleaner import FileCleaner
 from env.running_env import args, global_file_repo, global_container
 from utils.MathTools import kl_divergence, js_divergence, _kl_divergence
 from utils.AccExtractor import AccExtractor
+from utils.OverheadCounter import OverheadCounter
+
 
 def random_list(length=100):
     random_int_list = []
@@ -68,6 +71,24 @@ def extract():
     extractor.extract_acc_data()
     extractor.show_detail_rets()
     extractor.show_avg_rets()
+
+def OverheadCounterTest():
+    counter = OverheadCounter(interval=1, duration=10)
+    counter.start()  # 启动显存监控
+    time.sleep(10)  # 主线程等待，监控持续 10 秒
+    counter.stop()  # 停止显存监控
+
+    # 创建一个示例 Tensor
+    tensor_data = torch.randn(100, 100)  # 100x100 的随机张量
+
+    # 计算 tensor 数据的内存占用
+    tensor_memory_size = counter.calculate_memory_size(tensor_data, unit='MB')
+    print(f"Tensor memory size: {tensor_memory_size:.4f} MB")
+
+    # 计算一个 Python 字符串的内存占用
+    string_data = "This is a sample string."
+    string_memory_size = counter.calculate_memory_size(string_data, unit='KB')
+    print(f"String memory size: {string_memory_size:.4f} KB")
 
 def main():
     extract()

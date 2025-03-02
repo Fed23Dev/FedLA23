@@ -1,5 +1,5 @@
 # resource :config
-exp_name: emnist-resnet110
+exp_name: emnist-resnet110-shards
 
 # checkpoint config
 model: resnet110

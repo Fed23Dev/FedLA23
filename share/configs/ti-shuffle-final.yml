@@ -14,11 +14,12 @@ batch_size: 128
 # optimizer config
 # optim: sgd
 optim: sgd
-learning_rate: 0.01
+learning_rate: 0.1
 
 # scheduler config
 scheduler: warmup_cos_lr
-warm_steps: 200
+warm_steps: 30
+
 min_lr: 0.0
 
 # federal config
