@@ -10,7 +10,7 @@ import dl.compress.compress_util as com_util
 from env.running_env import args, global_logger
 from federal.aggregation.FedAvg import FedAvg
 from utils.objectIO import pickle_mkdir_save
-
+from utils.OverheadCounter import OverheadCounter
 
 class FLMaster(ABC):
     def __init__(self, workers_num: int, schedule_num: int, local_epoch: int,
@@ -33,6 +33,9 @@ class FLMaster(ABC):
         self.pre_loss = 9999
         self.curt_loss = 0
         self.curt_round = 0
+
+        self.overheadCounter = OverheadCounter(1, 999999)
+        self.first_overhead = True
 
     def schedule_strategy(self):
         self.curt_selected = random.sample(range(0, self.workers), self.plan)
@@ -71,10 +74,19 @@ class FLMaster(ABC):
         for i in range(rounds):
             time_start = timer()
             global_logger.info(f"======Federal Round: {i + 1}======")
+
+            # downlink
             self.schedule_strategy()
+
+            # downlink
             self.info_sync()
+
+            # downlink
             self.notify_workers()
+
+            # uplink
             self.info_aggregation()
+
             self.weight_redo()
             self.curt_round = self.curt_round + 1
 
@@ -87,7 +99,14 @@ class FLMaster(ABC):
     def notify_workers(self):
         self.agg_weights.clear()
         for index in self.curt_selected:
-            self.drive_worker(index)
+            if self.first_overhead:
+                self.overheadCounter.start()
+                self.drive_worker(index)
+                self.overheadCounter.stop()
+                self.first_overhead = False
+            else:
+                self.drive_worker(index)
+
             self.agg_weights.append(self.workers_nodes[index].cell.latest_feed_amount)
         global_logger.info(f"======Selected Workers Weights: {self.agg_weights}======")
 

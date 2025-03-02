@@ -13,8 +13,7 @@ from utils.TimeCost import timeit
 from utils.objectIO import check_file_exists, pickle_load, pickle_mkdir_save
 
 # todo
-dir_alpha = 0.2
-
+dir_alpha = 0.3
 
 def fetch_shards(dataset_type: VDataSet, num_slices: int) -> int:
     if dataset_type == VDataSet.CIFAR10:
