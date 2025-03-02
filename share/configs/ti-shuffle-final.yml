@@ -9,7 +9,7 @@ gpu_ids: [0]
 
 # dataset config
 dataset: tinyimagenet
-batch_size: 64
+batch_size: 128
 
 # optimizer config
 # optim: sgd
@@ -19,14 +19,15 @@ learning_rate: 0.1
 # scheduler config
 scheduler: warmup_cos_lr
 warm_steps: 30
+
 min_lr: 0.0
 
 # federal config
 federal: True
 non_iid: hetero
-workers: 100
-active_workers: 10
-federal_round: 500
+workers: 10
+active_workers: 5
+federal_round: 1000
 
-local_epoch: 20
+local_epoch: 2
 test_batch_limit: 5

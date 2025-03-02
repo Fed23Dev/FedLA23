@@ -139,6 +139,7 @@ class ArgRepo:
         self.test_batch_limit = None
 
         self.alg = None
+        self.dir_alpha = None
 
         # Temporarily deprecated
         self.CE_WEIGHT = None
@@ -234,13 +235,14 @@ class ArgRepo:
                f"scheduler:{scheduler}\n" \
                f"warm steps:{self.warm_steps}\n" \
                f"non_iid:{self.non_iid}\n" \
+               f"dir_alpha:{self.dir_alpha}\n" \
                f"workers:{self.workers}\n" \
                f"active_workers:{self.active_workers}\n"\
                f"federal_round:{self.federal_round}\n" \
                f"local epoch:{self.local_epoch}\n" \
-               f"drag:{self.drag}"\
-               f"logit_batch:{self.logits_batch_limit}"\
-               f"step_cluster:{self.step_cluster}"\
+               f"drag:{self.drag}\n"\
+               f"logit_batch:{self.logits_batch_limit}\n"\
+               f"step_cluster:{self.step_cluster}\n"\
                f"cons_alpha:{self.cons_alpha}"
 
     @exp_name.setter

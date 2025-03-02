@@ -53,7 +53,7 @@ def max_class(client_cnt: Counter) -> int:
 
 
 def simulation_federal_process():
-    user_dict = dataset_user_indices(args.dataset, args.workers, args.non_iid)
+    user_dict = dataset_user_indices(args.dataset, args.workers, args.non_iid, args.dir_alpha)
     workers_loaders = get_data_loaders(args.dataset, data_type="train", batch_size=args.batch_size,
                                        users_indices=user_dict, num_workers=0, pin_memory=False)
     test_loader = get_data_loader(args.dataset, data_type="test", batch_size=args.batch_size,

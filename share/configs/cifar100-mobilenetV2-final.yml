@@ -11,13 +11,14 @@ dataset: cifar100
 batch_size: 128
 dir_alpha: 0.3
 
+
 # optimizer config
 optim: sgd
-learning_rate: 0.01
+learning_rate: 0.05
 
 # scheduler config
 scheduler: warmup_cos_lr
-warm_steps: 5
+warm_steps: 20
 min_lr: 0.0
 
 # federal config
