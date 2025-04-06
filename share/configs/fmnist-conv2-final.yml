@@ -4,7 +4,8 @@ exp_name: fmnist-conv2
 # checkpoint config
 model: conv2
 alg: fedavg
-gpu_ids: [0, 1]
+gpu_ids: [0]
+dir_alpha: 0.3
 
 # dataset config
 dataset: fmnist
@@ -16,7 +17,7 @@ learning_rate: 0.01
 
 # scheduler config
 scheduler: warmup_cos_lr
-warm_steps: 100
+warm_steps: 10
 min_lr: 0.0
 
 # federal config
@@ -25,13 +26,13 @@ non_iid: hetero
 workers: 100
 active_workers: 3
 #workers: 1
-#active_workers: 1
-federal_round: 300
+#active_work:qers: 1
+federal_round: 15
 local_epoch: 5
 
 # feddas
-clusters: 20
-step_cluster: 3
+clusters: 12
+step_cluster: 1
 #clusters: 12
 #step_cluster: 1
 drag: 0.0

@@ -344,6 +344,8 @@ class DASWrapper(VWrapper):
         mask = self.sync_tensor(~info_matrix.bool())
         info_matrix = mask * self_matrix + info_matrix
 
+        # global_logger.error(info_matrix.dtype)
+
         # torch.norm(self_matrix - info_matrix, p=2)
         # super().loss_compute(self_matrix, info_matrix))
         return ((1 - cons_alpha) * super().loss_compute(pred, targets) +

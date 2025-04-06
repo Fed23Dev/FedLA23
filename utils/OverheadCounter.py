@@ -38,7 +38,7 @@ class OverheadCounter:
         self.stop_event.set()
         self.monitor_thread.join()
 
-    def calculate_memory_size(self, data, unit='bytes', downlink=False):
+    def calculate_memory_size(self, data, unit='bytes', downlink=False) -> int:
         """
         根据数据类型和单位计算内存占用
         :param downlink:
@@ -73,6 +73,8 @@ class OverheadCounter:
             global_container.flash('DownObject@'+unit, memory_size)
         else:
             global_container.flash('UpObject@'+unit, memory_size)
+
+        return memory_size
 
     def get_system_gpu_memory(self):
         """
