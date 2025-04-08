@@ -24,9 +24,13 @@ min_lr: 0.0
 # federal config
 non_iid: hetero
 workers: 50
-active_workers: 10
-federal_round: 1000
+active_workers: 5
+federal_round: 200
 
 ## center train
-local_epoch: 2
+local_epoch: 5
 test_batch_limit: 5
+
+## feddas
+clusters: 20
+step_cluster: 10
