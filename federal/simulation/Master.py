@@ -67,7 +67,7 @@ class FedDASMaster(FLMaster):
     def __init__(self, workers: int, activists: int, local_epoch: int,
                  loader: tdata.dataloader, workers_loaders: dict,
                  num_classes: int, clusters: int, drag: int,
-                 cons_alpha: float, cluster_step: int = 1, min_cluster: int = 3):
+                 cons_alpha: float, cluster_step: int = 1, min_cluster: int = 5):
 
         master_cell = SingleCell(loader, Wrapper=DASWrapper)
         super().__init__(workers, activists, local_epoch, master_cell)
@@ -210,8 +210,8 @@ class FedDASMaster(FLMaster):
 
             # TODO: CFL-diff
 
-            # self.diff_cluster_most_case()
-            self.diff_cluster_lea_case()
+            self.diff_cluster_most_case()
+            # self.diff_cluster_lea_case()
             global_logger.info(f"======Round{self.curt_round + 1} >> Rounds:{self.max_round}======")
 
         # # CFL - sim

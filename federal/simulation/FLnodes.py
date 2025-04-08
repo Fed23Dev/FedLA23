@@ -33,8 +33,10 @@ class FLMaster(ABC):
         self.pre_loss = 9999
         self.curt_loss = 0
         self.curt_round = 0
+        self.curt_client = 0
+        self.curt_time = timer()
 
-        self.overheadCounter = OverheadCounter(1, 999999)
+        self.overheadCounter = OverheadCounter(1, ((1 << 31) - 1))
         self.first_overhead = True
 
     def schedule_strategy(self):
@@ -71,6 +73,7 @@ class FLMaster(ABC):
         self.merge.all_sync(workers_cells, 0)
 
     def union_run(self, rounds: int):
+        self.curt_time = timer()
         for i in range(rounds):
             time_start = timer()
             global_logger.info(f"======Federal Round: {i + 1}======")
@@ -93,11 +96,14 @@ class FLMaster(ABC):
             time_cost = timer() - time_start
             global_logger.info(f"======Time Cost: {time_cost}s======")
 
+        global_logger.info(f"Total Client Local Train: {self.curt_client}======>")
+        global_logger.info(f"Total Time: {timer() - self.curt_time}s======>")
         global_logger.info(f"Federal train finished======>")
         self.global_performance_detail()
 
     def notify_workers(self):
         self.agg_weights.clear()
+        self.curt_client += len(self.curt_selected)
         for index in self.curt_selected:
             if self.first_overhead:
                 self.overheadCounter.start()

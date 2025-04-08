@@ -3,14 +3,13 @@ exp_name: cifar100-mobilenetV2
 
 # checkpoint config
 model: mobilenetV2
-alg: fedavg
+alg: feddas
 gpu_ids: [0]
+dir_alpha: 0.3
 
 # dataset config
 dataset: cifar100
 batch_size: 128
-dir_alpha: 0.3
-
 
 # optimizer config
 optim: sgd
@@ -31,6 +30,6 @@ federal_round: 200
 local_epoch: 5
 test_batch_limit: 5
 
-## feddas
 clusters: 20
+cons_alpha: 0.6
 step_cluster: 10
